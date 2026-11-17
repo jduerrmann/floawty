@@ -40,3 +40,7 @@ Thumbs.db
 # Obsidian per-user state
 knowledge-base/.obsidian/workspace*.json
 knowledge-base/.obsidian/cache
+
+# Spike measurement output
+spikes/measure/results/*
+!spikes/measure/results/sample.csv

@@ -30,8 +30,10 @@ Breaking one needs a new decision and the maintainer's explicit OK first.
 1. **Free and open source, forever.** GPL-3.0, no paid tier, no closed parts.
 2. **No ads, no monetization in the app.** A donation link may live in the README only.
 3. **No server.** No backend, API, database or proxy. The app talks only to the
-   services the user opens and to GitHub Releases for an update check the user
-   triggers or turns on (off by default).
+   services the user opens, to GitHub Releases for an update check the user
+   triggers or turns on (off by default), and – after a notice, when a DRM service is
+   first opened – to the host of the Widevine module
+   ([widevine-on-demand-with-notice](knowledge-base/decisions/widevine-on-demand-with-notice.md)).
 4. **No tracking.** Never telemetry, analytics, crash reporting, fingerprinting or
    unique IDs – not even opt-in.
 5. **No accounts, no API keys.** Users sign in on the official sites.

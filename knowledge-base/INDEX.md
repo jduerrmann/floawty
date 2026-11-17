@@ -18,7 +18,10 @@ Vault conventions and budgets: `CLAUDE.md` in this folder.
 | Any code change | [[engineering-standards]] (§1 test first, §3–5 code, §7 resources) |
 | Multi-session work, resuming | [[active-plans]], [[planning]] |
 | A product or scope question | [[overview]], [[core-principles]], [[open-questions]] |
-| Stack, DRM, the spike | [[stack-by-spike]], [[drm-in-desktop-webviews]] |
+| Stack, DRM, the spike | [[plan-stack-spike]], [[stack-by-spike]], [[drm-in-desktop-webviews]] |
+| Overlay UI, hotkeys, Shorts behavior | [[overlay-controls]] |
+| Logins, DRM download, network | [[google-login-honest-user-agent-first]], [[widevine-on-demand-with-notice]] |
+| Releases, signing | [[unsigned-first-then-signpath]] |
 | Writing a note | `CLAUDE.md` in this folder, `templates/` |
 
 ## Product

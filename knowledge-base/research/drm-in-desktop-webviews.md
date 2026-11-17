@@ -34,6 +34,6 @@ source: model knowledge, unverified
 
 - Electron (castlabs) is the likely path for Netflix/Prime, at the cost of size and
   RAM; the spike must quantify that cost.
-- The Widevine CDM download contacts a Google host on its own – a conflict with
-  [[core-principles]] #3 that needs a decision ([[open-questions]] #4).
+- The Widevine CDM download contacts a Google host – allowed on demand after a notice
+  ([[widevine-on-demand-with-notice]]).
 - Opacity < 100 % with DRM content is a must-test, not an assumption.

@@ -25,8 +25,9 @@ else, and can even let your mouse click right through it.
 - **Free forever**, licensed under GPL-3.0
 - **No ads**, no affiliate links, no sponsored anything
 - **No server, no account, no tracking.** floawty only talks to the streaming sites
-  you open, and to GitHub only when you ask it to check for updates.
-  See [PRIVACY.md](PRIVACY.md).
+  you open, and to GitHub only when you ask it to check for updates. Netflix,
+  Prime Video and Disney+ need Google's Widevine module; floawty asks before it
+  downloads it. See [PRIVACY.md](PRIVACY.md).
 - **Light on resources.** Made to run next to your work on an ordinary PC.
 - **Fair to the services.** You sign in on the official websites; floawty does not
   touch DRM, does not download content and does not block ads.
