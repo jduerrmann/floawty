@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+out/
+release/
+target/
+*.tsbuildinfo
+
+# Spike build output
+spikes/**/node_modules/
+spikes/**/dist/
+spikes/**/out/
+spikes/**/target/
+
+# Environment & secrets (signing certificates, tokens)
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Local Claude settings
+.claude/settings.local.json
+
+# Obsidian per-user state
+knowledge-base/.obsidian/workspace*.json
+knowledge-base/.obsidian/cache
