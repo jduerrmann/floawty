@@ -4,6 +4,7 @@ import { t, type Language } from './i18n';
 const HINT_SECONDS = 4;
 
 export interface OverlayState {
+  mode: 'floaty' | 'window';
   opacity: number;
   clickThrough: boolean;
   clickThroughHotkey: string;

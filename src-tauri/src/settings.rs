@@ -2,6 +2,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::geometry::Rect;
+use crate::mode::Mode;
 
 pub const CURRENT_VERSION: u32 = 1;
 const MIN_OPACITY: f64 = 0.1;
@@ -13,6 +14,7 @@ pub struct Hotkeys {
     pub click_through: String,
     pub opacity_up: String,
     pub opacity_down: String,
+    pub window_mode: String,
 }
 
 impl Default for Hotkeys {
@@ -22,6 +24,7 @@ impl Default for Hotkeys {
             click_through: "Ctrl+Alt+Shift+D".into(),
             opacity_up: "Ctrl+Alt+Shift+Up".into(),
             opacity_down: "Ctrl+Alt+Shift+Down".into(),
+            window_mode: "Ctrl+Alt+Shift+F".into(),
         }
     }
 }
@@ -31,7 +34,9 @@ impl Default for Hotkeys {
 pub struct Settings {
     pub version: u32,
     pub opacity: f64,
+    pub mode: Mode,
     pub floaty: Option<Rect>,
+    pub window: Option<Rect>,
     pub hotkeys: Hotkeys,
 }
 
@@ -40,7 +45,9 @@ impl Default for Settings {
         Self {
             version: CURRENT_VERSION,
             opacity: 1.0,
+            mode: Mode::Floaty,
             floaty: None,
+            window: None,
             hotkeys: Hotkeys::default(),
         }
     }
@@ -94,6 +101,16 @@ mod tests {
         let settings = parse(r#"{ "opacity": 0.5 }"#);
         assert_eq!(settings.version, CURRENT_VERSION);
         assert_eq!(settings.opacity, 0.5);
+    }
+
+    #[test]
+    fn a_file_from_before_window_mode_starts_floaty() {
+        let settings = parse(
+            r#"{ "version": 1, "floaty": { "x": 16, "y": 16, "width": 480, "height": 270 } }"#,
+        );
+        assert_eq!(settings.mode, Mode::Floaty);
+        assert_eq!(settings.window, None);
+        assert_eq!(settings.hotkeys.window_mode, "Ctrl+Alt+Shift+F");
     }
 
     #[test]

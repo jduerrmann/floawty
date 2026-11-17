@@ -8,7 +8,7 @@ updated: 2026-11-17
 source: mvp-02 implementation
 ---
 
-# Overlay window, settings, hotkeys, log
+# Main window (floaty view and window mode), settings, hotkeys, log
 
 The Rust shell in `src-tauri/src/` owns the window. Pure logic is unit-tested; the
 wiring talks to Tauri and Win32.
@@ -23,17 +23,22 @@ wiring talks to Tauri and Win32.
 - A broken settings file is copied to `settings.json.broken` before defaults are used
   (AGENTS.md rule 5: settings are never disposable).
 - A hotkey another app holds is logged, never fatal.
+- **Floaty view** = frameless, always on top, stored opacity, click-through allowed,
+  snapping and 16:9. **Window mode** = title bar, not on top, fully opaque,
+  click-through off and ignored, no snapping. Each mode keeps its own geometry
+  ([[mvp-scope-and-controls]]).
 - Logs stay local ([[core-principles]] #4).
 
 ## Structure
 
 | File | Role | Tests |
 |---|---|---|
-| `geometry.rs` | first placement (bottom right, 480 × 270, 16 px gap, scaled), per-axis snapping within 32 px, 16:9 / 9:16, restore on the monitor with the largest overlap | unit |
+| `geometry.rs` | first placement (floaty: bottom right, 480 × 270, 16 px gap; window: centred 1280 × 720 or smaller to fit; scaled), per-axis snapping within 32 px, 16:9 / 9:16, restore on the monitor with the largest overlap | unit |
 | `settings.rs` | `Settings` v1 (opacity, floaty geometry, hotkeys), tolerant `parse`, opacity clamp 10–100 % and 10 % steps | unit |
 | `persistence.rs` | `%APPDATA%\floawty\settings.json`, atomic write (temp + rename), keeps broken files | unit (temp dir) |
-| `overlay.rs` | place and show, layered-window opacity, click-through, hide/show, settle 250 ms after the last move/resize (snap, aspect, save) | Win32 check script |
-| `hotkeys.rs` | registers the hotkeys from the settings (default Ctrl+Alt+Shift + O / D / ↑ / ↓) | manual |
+| `mode.rs` | `Mode` (floaty / window), switch and remember geometry per mode | unit |
+| `overlay.rs` | place and show in the saved mode, mode style (decorations, on top), layered-window opacity, click-through, hide/show, settle 250 ms after the last move/resize (floaty: snap, aspect; both: save) | Win32 check scripts |
+| `hotkeys.rs` | registers the hotkeys from the settings (default Ctrl+Alt+Shift + O / D / ↑ / ↓ / F) | Win32 check scripts |
 | `logbook.rs` | `%APPDATA%\floawty\logs\floawty.log`, UTC timestamps | unit |
 | `src/click-through.ts`, `src/i18n.ts` | corner dot and 4 s hint, EN/DE texts | Vitest (i18n) |
 
@@ -43,18 +48,21 @@ Settings file (v1):
 {
   "version": 1,
   "opacity": 0.8,
+  "mode": "floaty",
   "floaty": { "x": 16, "y": 16, "width": 624, "height": 351 },
+  "window": { "x": 208, "y": 181, "width": 984, "height": 561 },
   "hotkeys": {
     "toggleVisible": "Ctrl+Alt+Shift+O",
     "clickThrough": "Ctrl+Alt+Shift+D",
     "opacityUp": "Ctrl+Alt+Shift+Up",
-    "opacityDown": "Ctrl+Alt+Shift+Down"
+    "opacityDown": "Ctrl+Alt+Shift+Down",
+    "windowMode": "Ctrl+Alt+Shift+F"
   }
 }
 ```
 
-Commands for the UI: `overlay_state`, `set_opacity`, `webview_version`; event
-`overlay-state` on every change.
+Commands for the UI: `overlay_state`, `set_opacity`, `toggle_mode`, `webview_version`;
+event `overlay-state` (mode, opacity, click-through, its hotkey) on every change.
 
 ## Working on X → read Y
 

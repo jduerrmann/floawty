@@ -14,14 +14,16 @@ enum Action {
     ClickThrough,
     OpacityUp,
     OpacityDown,
+    WindowMode,
 }
 
-fn bindings(hotkeys: &Hotkeys) -> [(Action, &str); 4] {
+fn bindings(hotkeys: &Hotkeys) -> [(Action, &str); 5] {
     [
         (Action::ToggleVisible, &hotkeys.toggle_visible),
         (Action::ClickThrough, &hotkeys.click_through),
         (Action::OpacityUp, &hotkeys.opacity_up),
         (Action::OpacityDown, &hotkeys.opacity_down),
+        (Action::WindowMode, &hotkeys.window_mode),
     ]
 }
 
@@ -31,6 +33,7 @@ fn run(app: &AppHandle, action: Action) -> tauri::Result<()> {
         Action::ClickThrough => overlay::toggle_click_through(app),
         Action::OpacityUp => overlay::step_opacity(app, 1),
         Action::OpacityDown => overlay::step_opacity(app, -1),
+        Action::WindowMode => overlay::toggle_mode(app),
     }
 }
 

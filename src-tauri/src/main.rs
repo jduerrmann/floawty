@@ -4,6 +4,7 @@
 mod geometry;
 mod hotkeys;
 mod logbook;
+mod mode;
 mod overlay;
 mod persistence;
 mod settings;
@@ -20,6 +21,11 @@ fn webview_version() -> Option<String> {
 #[tauri::command]
 fn overlay_state(app: AppHandle) -> OverlayState {
     app.state::<Overlay>().state()
+}
+
+#[tauri::command]
+fn toggle_mode(app: AppHandle) -> Result<(), String> {
+    overlay::toggle_mode(&app).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -52,7 +58,8 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             webview_version,
             overlay_state,
-            set_opacity
+            set_opacity,
+            toggle_mode
         ])
         .setup(|app| Ok(setup(app.handle())?))
         .run(tauri::generate_context!())

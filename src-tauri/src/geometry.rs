@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 
 const OVERLAY_WIDTH: f64 = 480.0;
 const OVERLAY_HEIGHT: f64 = 270.0;
+const WINDOW_WIDTH: f64 = 1280.0;
+const WINDOW_HEIGHT: f64 = 720.0;
 /// Gap between a snapped window and the edge of the work area, in logical pixels.
 const SNAP_GAP: f64 = 16.0;
 /// How close an edge must come before it snaps, in logical pixels.
@@ -58,6 +60,25 @@ pub fn default_placement(work_area: Rect, scale: f64) -> Rect {
         y: work_area.bottom() - height - gap,
         width: width as u32,
         height: height as u32,
+    }
+}
+
+/// First window-mode geometry: 1280 x 720, smaller on small screens, centred.
+pub fn default_window_placement(work_area: Rect, scale: f64) -> Rect {
+    let gap = to_pixels(SNAP_GAP, scale);
+    let wanted_width = f64::from(to_pixels(WINDOW_WIDTH, scale));
+    let wanted_height = f64::from(to_pixels(WINDOW_HEIGHT, scale));
+    let room_width = f64::from(work_area.width as i32 - 2 * gap);
+    let room_height = f64::from(work_area.height as i32 - 2 * gap);
+    let shrink = (room_width / wanted_width)
+        .min(room_height / wanted_height)
+        .min(1.0);
+    let (width, height) = fit_aspect((wanted_width * shrink).floor() as u32, Aspect::Landscape);
+    Rect {
+        x: work_area.x + (work_area.width - width) as i32 / 2,
+        y: work_area.y + (work_area.height - height) as i32 / 2,
+        width,
+        height,
     }
 }
 
@@ -170,6 +191,23 @@ mod tests {
         assert_eq!(
             snap(near_top_left, LEFT_MONITOR, 1.0),
             rect(-1264, 16, 480, 270)
+        );
+    }
+
+    #[test]
+    fn window_mode_starts_centred_at_1280_by_720() {
+        assert_eq!(
+            default_window_placement(FULL_HD, 1.0),
+            rect(320, 160, 1280, 720)
+        );
+    }
+
+    #[test]
+    fn window_mode_shrinks_to_fit_a_small_screen() {
+        let laptop = rect(0, 0, 1366, 728);
+        assert_eq!(
+            default_window_placement(laptop, 1.0),
+            rect(64, 16, 1237, 696)
         );
     }
 
