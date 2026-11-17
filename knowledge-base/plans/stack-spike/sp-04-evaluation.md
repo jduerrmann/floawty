@@ -29,6 +29,8 @@ The maintainer decides the stack on a planning page with the measured numbers;
 - [ ] Planning page (visual plan) shows both stacks side by side: playback table,
       bars for size, cold start, RAM idle/playing, CPU playing/hidden.
 - [ ] The agreed rule is applied visibly: DRM + Google login as gate, then lighter wins.
+- [ ] The maintainer decides which candidates (Apple TV+, Crunchyroll, RTL+) get
+      tiles; [[drm-services-in-first-release]] and AGENTS.md rule 9 updated.
 - [ ] Budgets set from the winner's numbers with headroom, written into
       [[stack-by-spike]] and [[engineering-standards]] §7.
 - [ ] [[drm-in-desktop-webviews]] updated from "unverified" to the observed facts.

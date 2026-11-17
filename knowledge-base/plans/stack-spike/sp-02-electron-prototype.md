@@ -30,9 +30,11 @@ measured numbers.
 
 ## Acceptance criteria
 
-- [ ] Playback recorded for YouTube, Twitch, Netflix, Prime Video, Disney+:
-      plays yes/no, max resolution seen. Without accounts: a public Widevine demo
-      stream proves DRM works at all.
+- [ ] Playback recorded for YouTube, Twitch, Netflix, Prime Video, Disney+ and the
+      candidates Apple TV+, Crunchyroll, RTL+: plays yes/no, max resolution seen.
+      A public Widevine demo stream is the cross-check.
+- [ ] Ads: YouTube Shorts checked logged out (ads between Shorts), RTL+ checked
+      with its ad breaks; the overlay keeps working and never skips an ad.
 - [ ] DRM video stays visible at 50 % opacity and in click-through mode.
 - [ ] VMP: difference between unsigned dev build and EVS-signed build recorded.
 - [ ] Google login: honest user agent tried first; result and, if needed, the Chrome

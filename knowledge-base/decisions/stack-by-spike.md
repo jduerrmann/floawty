@@ -4,7 +4,7 @@ area: process
 tags: [stack, drm, performance]
 status: draft
 created: 2026-11-16
-updated: 2026-11-16
+updated: 2026-11-17
 source: conversation
 ---
 
@@ -34,7 +34,8 @@ Both prototypes are built and measured completely, so the decision rests on numb
 slider, click-through hotkey, loads a service URL in a persistent session. On
 Windows 11:
 
-1. **Playback:** YouTube, Netflix, Prime Video, Disney+, Twitch – plays? resolution?
+1. **Playback:** YouTube, Netflix, Prime Video, Disney+, Twitch and the candidates
+   Apple TV+, Crunchyroll, RTL+ – plays? resolution? Ads handled?
 2. **Opacity + DRM:** protected video stays visible (not black) below 100 % opacity
    and in click-through mode?
 3. **VMP** (Electron): unsigned dev build vs. signed build.

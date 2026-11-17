@@ -30,8 +30,10 @@ numbers, comparable to sp-02.
 
 ## Acceptance criteria
 
-- [ ] Playback recorded for YouTube, Twitch, Netflix, Prime Video, Disney+ and the
-      public Widevine demo stream: plays yes/no, max resolution seen.
+- [ ] Playback recorded for YouTube, Twitch, Netflix, Prime Video, Disney+, the
+      candidates Apple TV+, Crunchyroll, RTL+ and the public Widevine demo stream:
+      plays yes/no, max resolution seen.
+- [ ] Ads: same checks as sp-02 (YouTube Shorts logged out, RTL+ ad breaks).
 - [ ] DRM video (if it plays) stays visible at 50 % opacity and in click-through mode.
 - [ ] Google login: honest user agent first, then Chrome user agent if blocked.
 - [ ] Logins survive a restart.

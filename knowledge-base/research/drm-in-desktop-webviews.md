@@ -3,7 +3,7 @@ type: research
 tags: [drm, electron, tauri, webview2]
 status: active
 created: 2026-11-16
-updated: 2026-11-16
+updated: 2026-11-17
 source: model knowledge, unverified
 ---
 

@@ -22,6 +22,10 @@ The first release supports YouTube, Twitch, Netflix, Prime Video, Disney+ and cu
 URLs. A stack that cannot play Netflix and Prime Video reliably is not eligible
 ([[stack-by-spike]]).
 
+Apple TV+, Crunchyroll and RTL+ are candidates (added 2026-11-17): the spike tests
+them too. If they play on the chosen stack, they get their own tiles in the first
+release; otherwise they stay reachable through the custom URL.
+
 ## Alternatives
 
 - YouTube and Twitch first, DRM later – rejected: a later stack change is expensive.
