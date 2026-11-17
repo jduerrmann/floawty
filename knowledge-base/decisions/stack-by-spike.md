@@ -1,61 +1,69 @@
 ---
 type: decision
 area: process
-tags: [stack, drm, performance]
-status: draft
+tags: [stack, drm, performance, tauri]
+status: active
 created: 2026-11-16
 updated: 2026-11-17
-source: conversation
+source: conversation; spike results in [[stack-spike-results]]; visual plan "Auswertung Testprototyp"
 ---
 
-# The tech stack is decided by a spike
+# floawty is built with Tauri 2 on WebView2, Windows first
 
 ## Context
 
-Netflix, Prime Video and Disney+ only play where a working DRM module exists
-(Widevine, on Windows possibly PlayReady). That decides the stack more than size or
-speed – but floawty must also stay light ([[core-principles]] #8). Background:
-[[drm-in-desktop-webviews]].
-
-| | Electron (castlabs ECS) | Tauri (WebView2 on Windows) |
-|---|---|---|
-| DRM | Widevine via castlabs' fork; production needs VMP signing | unclear, must be tested |
-| Download size | ~100 MB | ~5–15 MB |
-| RAM | higher | lower |
-| Always-on-top, opacity, click-through | built in | built in / plugins |
-| Playwright | `_electron` | via WebDriver |
-| Maintainer experience | – | used in other projects |
-
-## Spike
-
-Both prototypes are built and measured completely, so the decision rests on numbers
-(plan: [[plan-stack-spike]]). Throw-away code in `spikes/electron/` and
-`spikes/tauri/`, never merged as app code: one frameless always-on-top window, opacity
-slider, click-through hotkey, loads a service URL in a persistent session. On
-Windows 11:
-
-1. **Playback:** YouTube, Netflix, Prime Video, Disney+, Twitch and the candidates
-   Apple TV+, Crunchyroll, RTL+ – plays? resolution? Ads handled?
-2. **Opacity + DRM:** protected video stays visible (not black) below 100 % opacity
-   and in click-through mode?
-3. **VMP** (Electron): unsigned dev build vs. signed build.
-4. **Google login** ([[google-login-honest-user-agent-first]]): honest user agent,
-   then Chrome user agent if blocked. Must work.
-5. **Login persistence** across restarts.
-6. **Widevine on demand** ([[widevine-on-demand-with-notice]]): can the CDM download
-   wait until a DRM service is opened?
-7. **Resources**, measured the same way for both: download size, cold start, RAM and
-   CPU idle, RAM and CPU while playing 1080p YouTube, CPU while hidden.
-8. **Testability:** one Playwright smoke test opens the window and loads a service.
-9. **Network:** which hosts does the app contact on its own?
+Netflix, Prime Video and Disney+ must play in the first release
+([[drm-services-in-first-release]]), Google sign-in must work
+([[google-login-honest-user-agent-first]]) and floawty must stay light
+([[core-principles]] #8). Two prototypes – Electron (castlabs ECS v45.2.1) and
+Tauri 2.12 (WebView2 157) – were built and measured the same way
+([[plan-stack-spike]]). Agreed rule: a stack that cannot play Netflix and Prime
+Video below 100 % opacity, or cannot sign in to Google, is out; otherwise the
+lighter one wins.
 
 ## Decision
 
-_Open until the spike is done._ Agreed rule: a stack that cannot play Netflix **and**
-Prime Video reliably below 100 % opacity, or cannot sign in to Google, is out
-([[drm-services-in-first-release]]). If both qualify, the lighter one wins. The
-concrete resource budgets are recorded here together with the decision.
+- **Tauri 2 with the system WebView2 runtime**, Rust for the shell, TypeScript for
+  the UI. **Windows 10/11 only** for now.
+- Why: Tauri passed every gate (Netflix 1080p with PlayReady SL3000 hardware DRM,
+  Prime Video, Disney+, RTL+, YouTube 1080p60, Google sign-in, picture visible at
+  reduced opacity and with click-through). Electron failed Netflix (E100) without a
+  castlabs EVS signature. Tauri is also far lighter:
+
+| Metric | Tauri (shared profile) | Electron |
+|---|---|---|
+| Download | 4.2 MiB | 105 MiB |
+| Start → window | 46 ms | 110 ms |
+| RAM idle | 188 MB | 214 MB |
+| RAM YouTube 1080p60 | 682 MB | 794 MB |
+| CPU YouTube 1080p60 | ~0.5 % of 32 cores | ~0.5 % |
+
+- **Resource budgets** (with headroom over the measured values, checked with
+  `spikes/measure`): download ≤ 10 MiB; start to visible window ≤ 200 ms; RAM idle
+  ≤ 250 MB; RAM playing YouTube 1080p ≤ 850 MB; CPU idle and hidden ≈ 0 %.
+- WebView2 always starts with `--disable-background-networking` (plus Tauri's
+  default arguments).
+- Testing: Playwright over WebView2's debug port.
+
+## Alternatives
+
+- Electron with castlabs ECS – rejected: Netflix fails without EVS signing (needs a
+  castlabs account), software Widevine only, 25× the download, a Widevine download
+  flow with a restart on v45. Its one advantage – no third-party connection at all –
+  is handled by disclosure instead ([[webview2-diagnostics-disclosed]]).
 
 ## Consequences
 
-_Filled in with the decision._ Until then no application code goes into `main`.
+- WebView2 opens one connection to Microsoft per start that cannot be switched off:
+  disclosed, see [[webview2-diagnostics-disclosed]]. Widevine comes with the runtime;
+  [[widevine-on-demand-with-notice]] is superseded.
+- One shared WebView2 profile in the MVP: [[shared-webview2-profile-in-mvp]].
+- **Risk: several webviews per window need Tauri's `unstable` feature.** Pin Tauri to
+  one minor version; every Tauri upgrade is its own task with the smoke test and the
+  live checks.
+- **Risk: Microsoft updates WebView2, not floawty.** Log the runtime version at
+  start, run the smoke test and the live service checks before every release, and
+  document the minimum tested runtime version.
+- macOS and Linux are out of scope for now (Linux WebKitGTK has no Widevine).
+- Prototype code stays on the branches `spike/sp-02-electron` and `spike/sp-03-tauri`;
+  only the measurement script lives in `main`.

@@ -39,7 +39,7 @@ Scope and out-of-scope list: root `AGENTS.md` rule 9. Principles that never chan
 | Phase | Content | Status |
 |---|---|---|
 | 0 | Repository, license, rules, knowledge base | done |
-| 1 | Stack spike: Electron (castlabs) vs. Tauri → [[plan-stack-spike]] | next |
+| 1 | Stack spike: Electron (castlabs) vs. Tauri → Tauri ([[stack-by-spike]]) | done |
 | 2 | Overlay MVP: window, hover bar, settings, hotkeys, click-through, tiles, YouTube, EN/DE | |
 | 3 | YouTube Shorts auto mode, "video only" view | |
 | 4 | DRM services: Netflix, Prime Video, Disney+, Twitch | |

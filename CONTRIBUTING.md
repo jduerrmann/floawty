@@ -33,5 +33,6 @@ By contributing you agree that your contribution is licensed under GPL-3.0.
 
 ## Development setup
 
-Will be documented once the tech stack is decided
-(see [stack-by-spike](knowledge-base/decisions/stack-by-spike.md)).
+floawty is built with Tauri 2 (Rust + TypeScript) on WebView2, Windows 10/11 only
+([stack-by-spike](knowledge-base/decisions/stack-by-spike.md)). The exact setup is
+documented with the first app scaffold.

@@ -26,6 +26,10 @@ Apple TV+, Crunchyroll and RTL+ are candidates (added 2026-11-17): the spike tes
 them too. If they play on the chosen stack, they get their own tiles in the first
 release; otherwise they stay reachable through the custom URL.
 
+Result (2026-11-17, [[stack-by-spike]]): every service that plays in a maintainer
+test gets a tile. **RTL+ plays** (with its ad breaks) and gets a tile. Apple TV+ and
+Crunchyroll are tested during the MVP and get tiles once they pass.
+
 ## Alternatives
 
 - YouTube and Twitch first, DRM later – rejected: a later stack change is expensive.

@@ -2,7 +2,7 @@
 type: decision
 area: services
 tags: [drm, privacy, network]
-status: active
+status: archived
 created: 2026-11-17
 updated: 2026-11-17
 source: conversation (visual plan "floawty – Projektplanung", rounds 1–2)
@@ -11,6 +11,9 @@ source: conversation (visual plan "floawty – Projektplanung", rounds 1–2)
 # The Widevine module is downloaded on demand, after a notice
 
 Amends [[core-principles]] #3 (no other network traffic).
+
+**Superseded by [[webview2-diagnostics-disclosed]]** (2026-11-17): with Tauri on WebView2
+the Widevine module comes with the runtime and floawty downloads nothing.
 
 ## Context
 

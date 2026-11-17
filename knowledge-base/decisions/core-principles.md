@@ -22,7 +22,7 @@ services, which brings legal and ethical constraints.
 2. **No ads, no monetization** inside the app.
 3. **No server** operated by the project. Outgoing connections only to the services
    the user opens and to GitHub Releases for an update check the user triggers or
-   turns on (off by default). Amended by [[widevine-on-demand-with-notice]].
+   turns on (off by default). Amended by [[webview2-diagnostics-disclosed]].
 4. **No telemetry or tracking**, not even opt-in.
 5. **No accounts and no API keys.**
 6. Distribution only via **GitHub Releases**, built by GitHub Actions; portable build

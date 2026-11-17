@@ -1,7 +1,7 @@
 ---
 type: plan
 tags: [plan-map, spike, stack]
-status: active
+status: done
 created: 2026-11-17
 updated: 2026-11-17
 source: conversation (visual plan "floawty – Projektplanung", approved 2026-11-17)
@@ -33,4 +33,4 @@ budgets are set, Google login and on-demand Widevine are proven or ruled out.
 | 03 | [[sp-03-tauri-prototype]] | Tauri overlay with the same features, measured | 01 |
 | 04 | [[sp-04-evaluation]] | Results page, decision accepted, budgets set, MVP plan started | 02, 03 |
 
-02 and 03 are independent and can run in either order. Next candidate: 01.
+All packages done on 2026-11-17; Tauri chosen ([[stack-by-spike]]). Plan archived.

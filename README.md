@@ -7,8 +7,8 @@ and other streaming services in a floating window. You choose how big it is, how
 transparent it is and where on the screen it sits. It stays on top of everything
 else, and can even let your mouse click right through it.
 
-> **Status:** early planning. There is no download yet. See the
-> [phases in the overview](knowledge-base/overview.md#phases).
+> **Status:** planning the first version (Tauri, Windows). There is no download yet.
+> See the [phases in the overview](knowledge-base/overview.md#phases).
 
 ## Planned features
 
@@ -16,7 +16,7 @@ else, and can even let your mouse click right through it.
 - Adjustable size, opacity and position (snap to corners, multi-monitor)
 - Click-through mode – the overlay stays visible, your clicks go to the app behind it
 - Global hotkeys (show/hide, opacity, click-through, play/pause)
-- Services: YouTube, Netflix, Prime Video, Disney+, Twitch, or any custom URL
+- Services: YouTube, Netflix, Prime Video, Disney+, Twitch, RTL+, or any custom URL
 - **YouTube Shorts auto mode** – automatically moves on to the next Short
 - English and German interface
 
@@ -25,10 +25,12 @@ else, and can even let your mouse click right through it.
 - **Free forever**, licensed under GPL-3.0
 - **No ads**, no affiliate links, no sponsored anything
 - **No server, no account, no tracking.** floawty only talks to the streaming sites
-  you open, and to GitHub only when you ask it to check for updates. Netflix,
-  Prime Video and Disney+ need Google's Widevine module; floawty asks before it
-  downloads it. See [PRIVACY.md](PRIVACY.md).
-- **Light on resources.** Made to run next to your work on an ordinary PC.
+  you open, and to GitHub only when you ask it to check for updates. Honest
+  footnote: floawty uses Windows' WebView2 component, which sends diagnostic data to
+  Microsoft and cannot be stopped from doing so – floawty tells you at the first
+  start. See [PRIVACY.md](PRIVACY.md).
+- **Light on resources.** Made to run next to your work on an ordinary PC: a 4 MB
+  download, under 200 MB of memory when idle.
 - **Fair to the services.** You sign in on the official websites; floawty does not
   touch DRM, does not download content and does not block ads.
 
@@ -36,7 +38,7 @@ else, and can even let your mouse click right through it.
 
 Once released: download the latest version from the
 [Releases](../../releases) page – portable build or installer, no admin rights needed.
-Windows first, macOS and Linux to follow.
+Windows 10 and 11 only for now.
 
 ## Contributing
 

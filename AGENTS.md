@@ -29,11 +29,12 @@ Breaking one needs a new decision and the maintainer's explicit OK first.
 
 1. **Free and open source, forever.** GPL-3.0, no paid tier, no closed parts.
 2. **No ads, no monetization in the app.** A donation link may live in the README only.
-3. **No server.** No backend, API, database or proxy. The app talks only to the
-   services the user opens, to GitHub Releases for an update check the user
-   triggers or turns on (off by default), and – after a notice, when a DRM service is
-   first opened – to the host of the Widevine module
-   ([widevine-on-demand-with-notice](knowledge-base/decisions/widevine-on-demand-with-notice.md)).
+3. **No server.** No backend, API, database or proxy. floawty's own code talks only
+   to the services the user opens and to GitHub Releases for an update check the
+   user triggers or turns on (off by default). The Windows component WebView2 also
+   sends diagnostic data to Microsoft; this is disclosed at first start, in
+   PRIVACY.md and in the README, never hidden or denied
+   ([webview2-diagnostics-disclosed](knowledge-base/decisions/webview2-diagnostics-disclosed.md)).
 4. **No tracking.** Never telemetry, analytics, crash reporting, fingerprinting or
    unique IDs – not even opt-in.
 5. **No accounts, no API keys.** Users sign in on the official sites.
@@ -79,13 +80,15 @@ Details and limits: `knowledge-base/engineering-standards.md`.
   size limits (§5), enforced by ESLint.
 - A comment is one short sentence explaining a non-obvious **why**. Never restate the
   code, never multi-line essays or banners, never commented-out code.
-- UI and end-to-end behavior is tested with Playwright where the stack allows it.
+- UI and end-to-end behavior is tested with Playwright over WebView2's debug port.
 
 ## 7. Architecture
 
-The stack is decided by a spike ([stack-by-spike](knowledge-base/decisions/stack-by-spike.md)).
-Until that decision is accepted, **no application code** goes into `main`; spikes
-live in `spikes/`.
+**Stack:** Tauri 2 on the system WebView2 runtime, Rust for the shell, TypeScript for
+the UI, Windows 10/11 only ([stack-by-spike](knowledge-base/decisions/stack-by-spike.md)).
+Tauri is pinned to one minor version; an upgrade is its own task with smoke test and
+live checks. WebView2 always starts with `--disable-background-networking`.
+Prototype code stays on the `spike/*` branches; `spikes/measure` is the measuring tool.
 
 - **Pure logic is separate:** geometry, snapping, opacity, settings and migration,
   hotkey mapping and the Shorts state machine have no window or DOM access.
@@ -100,8 +103,10 @@ live in `spikes/`.
 ## 8. Privacy and local data
 
 - Settings: one human-readable JSON file in the OS user-data directory.
-- One persistent session per service; cookies and storage never leave the machine
-  and are never read by floawty's code. "Reset all data" wipes both.
+- One shared persistent WebView2 profile in the MVP, one per service once Tauri
+  exposes profiles ([shared-webview2-profile-in-mvp](knowledge-base/decisions/shared-webview2-profile-in-mvp.md)).
+  Cookies and storage never leave the machine and are never read by floawty's code.
+  "Reset all data" wipes settings and the profile.
 - Logs stay local and contain no watched URLs, titles or account data.
 
 ## 9. Product scope
@@ -109,7 +114,9 @@ live in `spikes/`.
 **In scope:** overlay window (frameless, always on top, opacity 10–100 %, resize,
 drag, corner/edge snapping, multi-monitor, remembered geometry); click-through with a
 hotkey to leave it; global hotkeys; service picker + custom URL; best-effort "video
-only" view; YouTube Shorts auto mode; UI in English and German.
+only" view; YouTube Shorts auto mode; UI in English and German; first-start notice
+about WebView2. Service tiles: YouTube, Twitch, Netflix, Prime Video, Disney+, RTL+;
+further services once they pass a maintainer test. Windows 10/11 only.
 
 **Out of scope** (decision first): downloading, recording or screenshots of protected
 content; ad blocking or sponsor skipping; own library, recommendations, social

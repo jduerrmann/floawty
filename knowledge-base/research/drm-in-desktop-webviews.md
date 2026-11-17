@@ -4,36 +4,37 @@ tags: [drm, electron, tauri, webview2]
 status: active
 created: 2026-11-16
 updated: 2026-11-17
-source: model knowledge, unverified
+source: castlabs docs (github.com/castlabs/electron-releases, read 2026-11-17); spike tests 2026-11-17
 ---
 
 # DRM in desktop webviews
 
-**Verification:** unverified – from model knowledge as of 2026-11-16. The spike in
-[[stack-by-spike]] checks every point before anything relies on it.
+**Verification:** the points marked *observed* were checked in the stack spike on
+Windows 11 ([[stack-spike-results]]); *documented* ones come from castlabs' docs;
+the rest is unverified.
 
 ## Findings
 
-- **Stock Electron** ships no Widevine CDM; DRM services do not play.
-- **castlabs Electron for Content Security (ECS)** is an Electron fork that installs
-  the Widevine CDM at runtime (a download on first start, via Google's component
-  updater). Open source, used by several desktop players.
-- **VMP (Verified Media Path):** some services only allow full playback or higher
-  resolutions in VMP-signed apps. castlabs offers a signing service (EVS) with a free
-  tier, used at build time.
-- **WebView2 (Tauri on Windows)** is Edge-based, but DRM support inside WebView2 is
-  limited compared to Edge itself; Netflix and Prime Video in WebView2 are reported
-  as unreliable.
+- **Stock Electron** ships no Widevine CDM; DRM services do not play. *(documented)*
+- **castlabs ECS v45** downloads the Widevine CDM from Google within ~30 s of every
+  start unless `components.updatesEnabled = false`; the flag is read only at
+  startup, so consent needs one restart. ECS v46 (alpha in 11/2026) installs nothing
+  until `components.start()`/`whenReady()`. *(observed / documented)*
+- **VMP:** castlabs' dev signature gets UAT licenses
+  (`PLATFORM_SECURE_STORAGE_SOFTWARE_VERIFIED`), but **Netflix rejects it (E100)**;
+  production needs castlabs EVS signing (free, account required). Packaging renames
+  and patches the exe, so the shipped signature no longer matches. *(observed)*
+- **WebView2 (Tauri on Windows)** has Widevine (CDM 4.10.3050.0 from the runtime)
+  **and PlayReady**: Netflix uses `com.microsoft.playready.recommendation.3000`
+  (SL3000, hardware) and plays 1080p. Prime Video, Disney+ and RTL+ play too.
+  *(observed)*
+- **Opacity:** protected Netflix video stays visible in a layered (semi-transparent)
+  WebView2 window and with click-through. *(observed)*
 - **Tauri on macOS** uses WKWebView, on **Linux** WebKitGTK – the latter has no
-  Widevine, so DRM services are unlikely to play there.
-- **Transparency and hardware DRM:** protected video with hardware-backed DRM may
-  render black in layered or transparent windows; software Widevine (L3) usually does
-  not.
+  Widevine, so DRM services are unlikely to play there. *(unverified)*
 
 ## Consequences for floawty
 
-- Electron (castlabs) is the likely path for Netflix/Prime, at the cost of size and
-  RAM; the spike must quantify that cost.
-- The Widevine CDM download contacts a Google host – allowed on demand after a notice
-  ([[widevine-on-demand-with-notice]]).
-- Opacity < 100 % with DRM content is a must-test, not an assumption.
+- Tauri on WebView2 is the chosen stack ([[stack-by-spike]]); floawty downloads no
+  DRM module ([[webview2-diagnostics-disclosed]]).
+- Linux support would need a different answer for DRM.

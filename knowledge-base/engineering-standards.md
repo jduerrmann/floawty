@@ -90,12 +90,22 @@ floawty runs next to other work on an ordinary PC.
 - Event-driven, not polling. Unavoidable polling uses the slowest interval that
   works and stops while the overlay is hidden or the video is paused.
 - Idle (no video playing) means ~0 % CPU.
-- Concrete budgets (download size, cold start, RAM idle, RAM while playing) are set
-  in [[stack-by-spike]] after the spike. Changes to window handling, page scripts or
-  startup are measured before and after; a regression beyond budget blocks a merge.
+- Budgets ([[stack-by-spike]]), measured with `spikes/measure`:
+
+  | Metric | Budget | Spike value |
+  |---|---|---|
+  | Download | ≤ 10 MiB | 4.2 MiB |
+  | Start → visible window | ≤ 200 ms | 46 ms |
+  | RAM idle | ≤ 250 MB | 188 MB |
+  | RAM YouTube 1080p | ≤ 850 MB | 682 MB |
+  | CPU idle and hidden | ≈ 0 % | 0.00 % |
+
+- Changes to window handling, page scripts or startup are measured before and
+  after; a regression beyond budget blocks a merge.
 
 ## 8. Security baseline for web content
 
-Context isolation on, Node integration off, sandbox on, a minimal typed bridge,
-navigation restricted to the service's allowed domains, external links in the default
-browser, no `eval`, no remote code, strict CSP for floawty's own UI.
+Tauri capabilities grant commands only to floawty's own UI; service pages get no
+IPC access at all. Navigation restricted to the service's allowed domains, external
+links in the default browser, no `eval` in floawty's UI, no remote code, strict CSP
+for floawty's own UI. WebView2 starts with `--disable-background-networking`.

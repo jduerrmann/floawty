@@ -14,8 +14,8 @@ note or decision. Numbers are not reused.
 
 | # | Question | Answered by | Blocks |
 |---|---|---|---|
-| 1 | Tech stack: Electron (castlabs) or Tauri? | spike + maintainer, [[stack-by-spike]] | all app code |
-| 2 | Concrete resource budgets (startup, idle RAM, RAM while playing, download size) | spike, [[stack-by-spike]] | [[engineering-standards]] §7 |
+| – | No open question. | | |
 
-Answered: #3 UI scope → [[overlay-controls]]; #4 Widevine download →
-[[widevine-on-demand-with-notice]].
+Answered: #1 stack and #2 budgets → [[stack-by-spike]]; #3 UI scope →
+[[overlay-controls]]; #4 Widevine download → [[widevine-on-demand-with-notice]],
+superseded by [[webview2-diagnostics-disclosed]].

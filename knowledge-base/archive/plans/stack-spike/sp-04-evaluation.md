@@ -1,7 +1,7 @@
 ---
 type: plan
 tags: [package, spike, decision]
-status: planned
+status: done
 created: 2026-11-17
 updated: 2026-11-17
 source: conversation
@@ -41,6 +41,19 @@ The maintainer decides the stack on a planning page with the measured numbers;
 
 - Links and index reachability of all touched notes.
 
+## Evidence (2026-11-17)
+
+- Planning page "Auswertung Testprototyp" (`.claude/plans/stack-auswertung.md`),
+  answered by the maintainer: Tauri confirmed, WebView2's Microsoft connection
+  disclosed with a first-start notice, one shared profile in the MVP, every tested
+  service gets a tile, budgets accepted, Windows only.
+- Recorded in [[stack-by-spike]], [[webview2-diagnostics-disclosed]],
+  [[shared-webview2-profile-in-mvp]], [[drm-services-in-first-release]],
+  [[engineering-standards]] §7–8, AGENTS.md rules 2, 6–9, PRIVACY.md, README;
+  results in [[stack-spike-results]]; [[drm-in-desktop-webviews]] updated.
+- Not done here: the MVP plan map. It gets its own planning page (follow-up in
+  [[active-plans]]).
+
 ## Resume here
 
-Not started. Blocked by sp-02 and sp-03.
+Done.

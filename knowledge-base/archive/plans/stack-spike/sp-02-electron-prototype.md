@@ -1,7 +1,7 @@
 ---
 type: plan
 tags: [package, spike, electron, drm]
-status: planned
+status: done
 created: 2026-11-17
 updated: 2026-11-17
 source: conversation
@@ -52,4 +52,20 @@ measured numbers.
 
 ## Resume here
 
-Not started. Blocked by sp-01 and the OK for the dependencies.
+**Done 2026-11-17 – rejected in [[stack-by-spike]].** Code stays on branch `spike/sp-02-electron`,
+stacked on `spike/sp-01-measurement`). Details: `spikes/electron/RESULTS.md`.
+
+- Done: prototype (castlabs v45.2.1), portable build 105 MiB, Playwright smoke test
+  green, sp-01 scenarios measured (idle 214 MB / ~0 % CPU; YouTube 1080p60 794 MB /
+  0.53 % of 32 cores; hidden 622 MB / ~0 %), start 110 ms, Widevine on demand works
+  with one restart, VMP Lab: Widevine available, UAT license
+  `PLATFORM_SECURE_STORAGE_SOFTWARE_VERIFIED` (dev signature).
+- Maintainer, 2026-11-17: **Netflix fails with E100** with both user agents (dev
+  signature). Tauri plays Netflix, so EVS signing is only worth it if sp-04 still
+  needs Electron.
+- Open, needs the maintainer: logged-in playback of the other DRM services and
+  candidates, DRM at 50 % opacity and click-through, Google login (honest UA, then
+  Chrome UA), login persistence, RTL+ ads, the Widevine consent + restart flow.
+- Open, needs a decision: EVS account for VMP signing of the packaged build.
+- Fixed: idle traffic to `update.googleapis.com` (component updater) – the app now
+  starts with `--disable-component-update` until Widevine consent is given.
