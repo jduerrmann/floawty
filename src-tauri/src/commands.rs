@@ -2,9 +2,13 @@
 use serde::Serialize;
 use tauri::{AppHandle, Manager};
 
+use crate::hotkeys::{self, Action};
+use crate::logbook;
 use crate::overlay::{self, Overlay, OverlayState};
+use crate::paths;
+use crate::reset;
 use crate::service;
-use crate::settings::{CustomTile, OpenService};
+use crate::settings::{self, CustomTile, OpenService, Preferences};
 
 type CommandResult = Result<(), String>;
 
@@ -17,7 +21,6 @@ fn report(result: tauri::Result<()>) -> CommandResult {
 pub struct TilesState {
     notice_accepted: bool,
     custom_tiles: Vec<CustomTile>,
-    open_service_id: Option<String>,
 }
 
 #[tauri::command]
@@ -46,7 +49,6 @@ pub fn tiles_state(app: AppHandle) -> TilesState {
     TilesState {
         notice_accepted: settings.notice_accepted,
         custom_tiles: settings.custom_tiles,
-        open_service_id: settings.last_service.map(|s| s.id),
     }
 }
 
@@ -71,4 +73,68 @@ pub async fn open_service(app: AppHandle, service: OpenService) -> CommandResult
 #[tauri::command]
 pub async fn close_service(app: AppHandle) -> CommandResult {
     report(service::close(&app))
+}
+
+#[tauri::command]
+pub fn toggle_click_through(app: AppHandle) -> CommandResult {
+    report(overlay::toggle_click_through(&app))
+}
+
+/// The settings lie over the service, which pauses and hides meanwhile.
+#[tauri::command]
+pub fn set_settings_open(app: AppHandle, open: bool) -> CommandResult {
+    app.state::<Overlay>().set_settings_open(open);
+    let result = service::cover(&app, open);
+    overlay::emit_state(&app);
+    report(result.and_then(|()| focus(&app, false)))
+}
+
+#[tauri::command]
+pub fn set_preferences(app: AppHandle, preferences: Preferences) {
+    app.state::<Overlay>()
+        .update(&app, |s| settings::apply_preferences(s, preferences));
+    overlay::emit_state(&app);
+}
+
+#[tauri::command]
+pub fn set_hotkey(app: AppHandle, action: Action, hotkey: String) -> CommandResult {
+    hotkeys::change(&app, action, hotkey).map_err(|error| error.code().to_string())
+}
+
+#[tauri::command]
+pub fn set_hotkeys_paused(app: AppHandle, paused: bool) {
+    hotkeys::set_paused(&app, paused);
+}
+
+/// Keyboard users reach the bar with F6; F6 there goes back to the page below.
+#[tauri::command]
+pub fn move_focus(app: AppHandle, to_bar: bool) -> CommandResult {
+    report(focus(&app, to_bar))
+}
+
+fn focus(app: &AppHandle, to_bar: bool) -> tauri::Result<()> {
+    let state = app.state::<Overlay>().state();
+    let label = match (to_bar, state.service_id.is_some() && !state.settings_open) {
+        (true, _) => "bar",
+        (false, true) => "service",
+        (false, false) => "main",
+    };
+    match app.get_webview(label) {
+        Some(webview) => webview.set_focus(),
+        None => Ok(()),
+    }
+}
+
+/// Deletes settings and the profile at the restart; the profile is in use until then.
+#[tauri::command]
+pub fn reset_all_data(app: AppHandle) -> CommandResult {
+    let dir = paths::floawty_dir(&app).map_err(|e| e.to_string())?;
+    reset::request(&dir).map_err(|e| e.to_string())?;
+    logbook::write(&app, "reset of all data requested, restarting");
+    app.restart()
+}
+
+#[tauri::command]
+pub fn quit(app: AppHandle) {
+    app.exit(0);
 }

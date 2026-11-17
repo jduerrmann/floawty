@@ -8,4 +8,5 @@ export const youtube: ServiceManifest = {
   allowedDomains: ['youtube.com', 'google.com', 'google.de'],
   brandColor: '#ff0000',
   symbol: 'youtube.svg',
+  shortsAutoMode: true,
 };

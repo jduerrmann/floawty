@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <main class="home" data-tauri-drag-region>
+    <main id="home" class="home" data-tauri-drag-region>
       <section id="notice" class="notice" hidden>
         <p id="notice-text"></p>
         <button id="notice-ok" type="button"></button>
@@ -23,8 +23,48 @@
       </form>
       <p id="about" class="about" data-tauri-drag-region>floawty</p>
     </main>
-    <div id="click-through-dot" class="click-through-dot" hidden></div>
-    <p id="click-through-hint" class="click-through-hint" hidden></p>
+    <section id="settings-panel" class="settings" aria-labelledby="settings-title" hidden>
+      <header class="settings-header" data-tauri-drag-region>
+        <h1 id="settings-title" data-tauri-drag-region></h1>
+        <button id="settings-done" type="button"></button>
+      </header>
+      <label class="setting">
+        <span id="language-label"></span>
+        <select id="language">
+          <option value="system"></option>
+          <option value="en"></option>
+          <option value="de"></option>
+        </select>
+      </label>
+      <fieldset class="setting-group">
+        <legend id="hotkeys-title"></legend>
+        <div id="hotkey-list" class="hotkey-list"></div>
+        <p id="hotkey-error" class="setting-error" role="alert"></p>
+      </fieldset>
+      <fieldset class="setting-group">
+        <legend id="shorts-title"></legend>
+        <label class="setting">
+          <span id="shorts-pause-label"></span>
+          <input id="shorts-pause" type="number" min="0" max="10" step="0.5" />
+        </label>
+      </fieldset>
+      <div class="setting-group">
+        <label class="setting-check">
+          <input id="update-check" type="checkbox" aria-describedby="update-check-note" />
+          <span id="update-check-label"></span>
+        </label>
+        <p id="update-check-note" class="setting-note"></p>
+      </div>
+      <fieldset class="setting-group">
+        <legend id="reset-title"></legend>
+        <p id="reset-explain" class="setting-note"></p>
+        <button id="reset" type="button"></button>
+        <div id="reset-confirm" class="setting-actions" hidden>
+          <button id="reset-yes" type="button" class="danger"></button>
+          <button id="reset-no" type="button"></button>
+        </div>
+      </fieldset>
+    </section>
     <script type="module" src="./main.ts"></script>
   </body>
 </html>

@@ -13,6 +13,7 @@
     "windows": [
       {
         "label": "main",
+        "create": false,
         "title": "floawty",
         "width": 480,
         "height": 270,

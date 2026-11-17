@@ -1,5 +1,6 @@
 // All visible text in English and German (AGENTS.md rule 13).
 export type Language = 'en' | 'de';
+export type LanguageChoice = 'system' | Language;
 
 const en = {
   clickThroughHint: 'Click-through is on – {hotkey} turns it off',
@@ -20,6 +21,45 @@ const en = {
   nameTooLong: 'The name is too long.',
   urlInvalid: 'This is not a web address.',
   urlDuplicate: 'This page already has a tile.',
+  barLabel: 'floawty controls',
+  backToTiles: 'Back to the services',
+  opacity: 'Opacity',
+  clickThroughOn: 'Turn on click-through',
+  shortsAuto: 'Shorts auto mode',
+  toWindowMode: 'Switch to window mode',
+  toFloatyView: 'Switch to floaty view',
+  settings: 'Settings',
+  quit: 'Close floawty',
+  settingsTitle: 'Settings',
+  done: 'Done',
+  language: 'Language',
+  languageSystem: 'Like Windows',
+  languageEn: 'English',
+  languageDe: 'Deutsch',
+  hotkeysTitle: 'Hotkeys',
+  hotkeyToggleVisible: 'Show or hide floawty',
+  hotkeyClickThrough: 'Click-through on or off',
+  hotkeyOpacityUp: 'More opaque',
+  hotkeyOpacityDown: 'More transparent',
+  hotkeyWindowMode: 'Window mode or floaty view',
+  hotkeyPlayPause: 'Play or pause',
+  hotkeyChange: 'Change the hotkey for “{action}”',
+  hotkeyRecording: 'Press the new keys … (Esc cancels)',
+  hotkeyNeedsModifier: 'Use Ctrl, Alt or Win with the key.',
+  hotkeyUnsupported: 'This key cannot be a hotkey.',
+  hotkeyInUse: 'Already used for “{action}”.',
+  hotkeyTaken: 'Another app already uses this combination.',
+  shortsTitle: 'YouTube Shorts',
+  shortsPause: 'Pause before the next Short (seconds)',
+  updateCheck: 'Check GitHub for new versions',
+  updateCheckLater: 'Not available yet – floawty keeps the choice for a later version.',
+  resetTitle: 'Reset all data',
+  resetExplain: 'Deletes the settings, your own tiles and all sign-ins. floawty then restarts.',
+  resetConfirm: 'Delete everything',
+  keyCtrl: 'Ctrl',
+  keyShift: 'Shift',
+  keyWin: 'Win',
+  keySpace: 'Space',
 };
 
 export type MessageKey = keyof typeof en;
@@ -43,6 +83,46 @@ const de: Record<MessageKey, string> = {
   nameTooLong: 'Der Name ist zu lang.',
   urlInvalid: 'Das ist keine Webadresse.',
   urlDuplicate: 'Für diese Seite gibt es schon eine Kachel.',
+  barLabel: 'floawty-Steuerung',
+  backToTiles: 'Zurück zu den Diensten',
+  opacity: 'Deckkraft',
+  clickThroughOn: 'Durchklicken einschalten',
+  shortsAuto: 'Shorts-Automodus',
+  toWindowMode: 'In den Fenstermodus wechseln',
+  toFloatyView: 'In die Floaty View wechseln',
+  settings: 'Einstellungen',
+  quit: 'floawty schließen',
+  settingsTitle: 'Einstellungen',
+  done: 'Fertig',
+  language: 'Sprache',
+  languageSystem: 'Wie Windows',
+  languageEn: 'English',
+  languageDe: 'Deutsch',
+  hotkeysTitle: 'Tastenkürzel',
+  hotkeyToggleVisible: 'floawty zeigen oder verstecken',
+  hotkeyClickThrough: 'Durchklicken an oder aus',
+  hotkeyOpacityUp: 'Mehr Deckkraft',
+  hotkeyOpacityDown: 'Weniger Deckkraft',
+  hotkeyWindowMode: 'Fenstermodus oder Floaty View',
+  hotkeyPlayPause: 'Abspielen oder pausieren',
+  hotkeyChange: 'Tastenkürzel für „{action}“ ändern',
+  hotkeyRecording: 'Drücke die neuen Tasten … (Esc bricht ab)',
+  hotkeyNeedsModifier: 'Nimm Strg, Alt oder Win zur Taste dazu.',
+  hotkeyUnsupported: 'Diese Taste geht nicht als Tastenkürzel.',
+  hotkeyInUse: 'Schon belegt für „{action}“.',
+  hotkeyTaken: 'Eine andere App nutzt diese Kombination schon.',
+  shortsTitle: 'YouTube Shorts',
+  shortsPause: 'Pause vor dem nächsten Short (Sekunden)',
+  updateCheck: 'Auf GitHub nach neuen Versionen suchen',
+  updateCheckLater: 'Noch nicht verfügbar – floawty merkt sich die Wahl für eine spätere Version.',
+  resetTitle: 'Alle Daten zurücksetzen',
+  resetExplain:
+    'Löscht die Einstellungen, deine eigenen Kacheln und alle Anmeldungen. Danach startet floawty neu.',
+  resetConfirm: 'Alles löschen',
+  keyCtrl: 'Strg',
+  keyShift: 'Umschalt',
+  keyWin: 'Win',
+  keySpace: 'Leertaste',
 };
 
 export const messages: Record<Language, Record<MessageKey, string>> = { en, de };
@@ -50,6 +130,11 @@ export const messages: Record<Language, Record<MessageKey, string>> = { en, de }
 export function pickLanguage(preferred: readonly string[]): Language {
   const first = preferred[0]?.toLowerCase() ?? '';
   return first.startsWith('de') ? 'de' : 'en';
+}
+
+/** The language to show: the user's choice, or the system's for "Like Windows". */
+export function resolveLanguage(choice: LanguageChoice, preferred: readonly string[]): Language {
+  return choice === 'system' ? pickLanguage(preferred) : choice;
 }
 
 export function t(

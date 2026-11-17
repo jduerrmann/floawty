@@ -47,4 +47,6 @@ configurable pause; hovering pauses the automatic.
 
 ## Resume here
 
-Not started.
+Not started. Already there from mvp-05: settings `shorts.auto` (bar toggle ▶, only for
+manifests with `shortsAutoMode`) and `shorts.pauseSeconds` (0–10 s, settings panel), both in
+`OverlayState` ([[tech-bar-and-settings]]). Hover state lives in `bar.rs` / `hover.rs`.

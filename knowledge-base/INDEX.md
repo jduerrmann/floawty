@@ -18,6 +18,7 @@ Vault conventions and budgets: `CLAUDE.md` in this folder.
 | Any code change | [[engineering-standards]] (§1 test first, §3–5 code, §7 resources) |
 | Window, settings, hotkeys | [[tech-window]] |
 | Services, tiles, navigation | [[tech-services]] |
+| Bar, settings panel, languages, reset | [[tech-bar-and-settings]], [[bar-hover-by-cursor-look]] |
 | Multi-session work, resuming | [[active-plans]], [[planning]] |
 | A product or scope question | [[overview]], [[core-principles]], [[open-questions]] |
 | Stack, DRM, budgets | [[stack-by-spike]], [[stack-spike-results]], [[drm-in-desktop-webviews]] |
@@ -48,3 +49,4 @@ Vault conventions and budgets: `CLAUDE.md` in this folder.
 
 - [[tech-window]] – overlay window, geometry, settings file, hotkeys, local log
 - [[tech-services]] – tiles, own pages, service webview, navigation guard, no IPC for services
+- [[tech-bar-and-settings]] – hover bar over the service, settings panel, hotkey changes, EN/DE, reset all data

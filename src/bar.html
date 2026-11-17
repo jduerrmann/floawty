@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>floawty bar</title>
+    <link rel="stylesheet" href="./bar.css" />
+  </head>
+  <body data-tauri-drag-region>
+    <div id="controls" class="controls" role="toolbar" data-tauri-drag-region>
+      <button id="back" type="button">◀</button>
+      <input id="opacity" type="range" min="10" max="100" step="10" />
+      <button id="click-through" type="button">⇄</button>
+      <button id="shorts" type="button" aria-pressed="false">▶</button>
+      <button id="mode" type="button">⧉</button>
+      <button id="settings" type="button" aria-pressed="false">⚙</button>
+      <button id="quit" type="button">✕</button>
+    </div>
+    <div id="click-through-dot" class="click-through-dot" hidden></div>
+    <p id="click-through-hint" class="click-through-hint" hidden></p>
+    <script type="module" src="./bar.ts"></script>
+  </body>
+</html>

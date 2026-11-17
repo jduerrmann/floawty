@@ -1,14 +1,9 @@
 // Shows that click-through is on: a corner dot, plus a hint for the first seconds.
+import { formatHotkey } from './hotkeys';
 import { t, type Language } from './i18n';
+import type { OverlayState } from './state';
 
 const HINT_SECONDS = 4;
-
-export interface OverlayState {
-  mode: 'floaty' | 'window';
-  opacity: number;
-  clickThrough: boolean;
-  clickThroughHotkey: string;
-}
 
 export function createClickThroughIndicator(language: Language): (state: OverlayState) => void {
   const dot = document.getElementById('click-through-dot') as HTMLElement;
@@ -20,7 +15,8 @@ export function createClickThroughIndicator(language: Language): (state: Overlay
   return (state) => {
     dot.hidden = !state.clickThrough;
     if (state.clickThrough && !wasOn) {
-      hint.textContent = t(language, 'clickThroughHint', { hotkey: state.clickThroughHotkey });
+      const hotkey = formatHotkey(state.hotkeys.clickThrough, language);
+      hint.textContent = t(language, 'clickThroughHint', { hotkey });
       hint.hidden = false;
       window.clearTimeout(hideHint);
       hideHint = window.setTimeout(() => (hint.hidden = true), HINT_SECONDS * 1000);

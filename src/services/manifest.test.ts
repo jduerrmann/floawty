@@ -52,6 +52,7 @@ describe('service manifests', () => {
       expect(manifestProblems(service), service.id).toEqual([]);
       expect(existsSync(path.join(SYMBOLS, service.symbol)), service.symbol).toBe(true);
     }
+    expect(services.filter((s) => s.shortsAutoMode).map((s) => s.id)).toEqual(['youtube']);
   });
 });
 

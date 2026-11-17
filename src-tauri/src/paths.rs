@@ -14,3 +14,13 @@ pub fn floawty_dir(app: &AppHandle) -> io::Result<PathBuf> {
         .map_err(|e| io::Error::other(e.to_string()))?;
     Ok(data_dir.join("floawty"))
 }
+
+/// floawty's WebView2 profile: `WEBVIEW2_USER_DATA_FOLDER` (tests) or Tauri's default folder.
+pub fn profile_dir(app: &AppHandle) -> io::Result<PathBuf> {
+    if let Some(dir) = std::env::var_os("WEBVIEW2_USER_DATA_FOLDER") {
+        return Ok(PathBuf::from(dir));
+    }
+    app.path()
+        .app_local_data_dir()
+        .map_err(|e| io::Error::other(e.to_string()))
+}

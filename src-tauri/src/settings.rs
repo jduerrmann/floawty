@@ -6,6 +6,8 @@ use crate::mode::Mode;
 
 pub const CURRENT_VERSION: u32 = 1;
 const MIN_OPACITY: f64 = 0.1;
+const DEFAULT_SHORTS_PAUSE: f64 = 1.0;
+const MAX_SHORTS_PAUSE: f64 = 10.0;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
@@ -49,6 +51,42 @@ pub struct OpenService {
     pub allowed_domains: Vec<String>,
 }
 
+/// The language of floawty's own UI; `System` follows Windows.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Language {
+    En,
+    De,
+    #[default]
+    #[serde(other)]
+    System,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default, rename_all = "camelCase")]
+pub struct Shorts {
+    pub auto: bool,
+    pub pause_seconds: f64,
+}
+
+impl Default for Shorts {
+    fn default() -> Self {
+        Self {
+            auto: false,
+            pause_seconds: DEFAULT_SHORTS_PAUSE,
+        }
+    }
+}
+
+/// What the settings panel changes besides the hotkeys.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Preferences {
+    pub language: Language,
+    pub shorts: Shorts,
+    pub update_check: bool,
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 pub struct Settings {
@@ -61,6 +99,10 @@ pub struct Settings {
     pub notice_accepted: bool,
     pub custom_tiles: Vec<CustomTile>,
     pub last_service: Option<OpenService>,
+    pub language: Language,
+    pub shorts: Shorts,
+    /// Off by default; floawty only talks to GitHub once the user turns it on.
+    pub update_check: bool,
 }
 
 impl Default for Settings {
@@ -75,6 +117,9 @@ impl Default for Settings {
             notice_accepted: false,
             custom_tiles: Vec::new(),
             last_service: None,
+            language: Language::System,
+            shorts: Shorts::default(),
+            update_check: false,
         }
     }
 }
@@ -85,7 +130,18 @@ pub fn parse(text: &str) -> Settings {
     // Version 1 is the first format; files without a version are read as version 1.
     settings.version = CURRENT_VERSION;
     settings.opacity = clamp_opacity(settings.opacity);
+    settings.shorts.pause_seconds = clamp_shorts_pause(settings.shorts.pause_seconds);
     settings
+}
+
+/// Takes the panel's choices, kept within their ranges.
+pub fn apply_preferences(settings: &mut Settings, preferences: Preferences) {
+    settings.language = preferences.language;
+    settings.shorts = Shorts {
+        pause_seconds: clamp_shorts_pause(preferences.shorts.pause_seconds),
+        ..preferences.shorts
+    };
+    settings.update_check = preferences.update_check;
 }
 
 pub fn to_json(settings: &Settings) -> String {
@@ -97,6 +153,13 @@ pub fn clamp_opacity(value: f64) -> f64 {
         return 1.0;
     }
     value.clamp(MIN_OPACITY, 1.0)
+}
+
+fn clamp_shorts_pause(seconds: f64) -> f64 {
+    if seconds.is_nan() {
+        return DEFAULT_SHORTS_PAUSE;
+    }
+    seconds.clamp(0.0, MAX_SHORTS_PAUSE)
 }
 
 /// Moves opacity by whole 10 % steps and keeps it on the step grid.
@@ -165,6 +228,75 @@ mod tests {
         assert!(settings.custom_tiles.is_empty());
         assert_eq!(settings.last_service, None);
         assert_eq!(settings.hotkeys.play_pause, "Ctrl+Alt+Shift+Space");
+    }
+
+    #[test]
+    fn a_file_from_before_the_settings_panel_gets_default_preferences() {
+        let settings = parse(r#"{ "version": 1, "opacity": 0.5 }"#);
+        assert_eq!(settings.language, Language::System);
+        assert_eq!(
+            settings.shorts,
+            Shorts {
+                auto: false,
+                pause_seconds: 1.0
+            }
+        );
+        assert!(!settings.update_check);
+    }
+
+    #[test]
+    fn an_unknown_language_follows_windows_and_keeps_the_rest() {
+        let settings = parse(r#"{ "opacity": 0.5, "language": "klingon" }"#);
+        assert_eq!(settings.language, Language::System);
+        assert_eq!(settings.opacity, 0.5);
+    }
+
+    #[test]
+    fn preferences_survive_a_round_trip() {
+        let mut settings = Settings::default();
+        apply_preferences(
+            &mut settings,
+            Preferences {
+                language: Language::De,
+                shorts: Shorts {
+                    auto: true,
+                    pause_seconds: 2.5,
+                },
+                update_check: true,
+            },
+        );
+        let text = to_json(&settings);
+        assert!(text.contains(r#""language": "de""#), "{text}");
+        assert_eq!(parse(&text), settings);
+    }
+
+    #[test]
+    fn the_shorts_pause_stays_between_0_and_10_seconds() {
+        let pause_after = |seconds: f64| {
+            let mut settings = Settings::default();
+            let shorts = Shorts {
+                auto: true,
+                pause_seconds: seconds,
+            };
+            apply_preferences(
+                &mut settings,
+                Preferences {
+                    language: Language::En,
+                    shorts,
+                    update_check: false,
+                },
+            );
+            settings.shorts.pause_seconds
+        };
+        assert_eq!(pause_after(99.0), 10.0);
+        assert_eq!(pause_after(-1.0), 0.0);
+        assert_eq!(pause_after(f64::NAN), 1.0);
+        assert_eq!(
+            parse(r#"{ "shorts": { "pauseSeconds": 60 } }"#)
+                .shorts
+                .pause_seconds,
+            10.0
+        );
     }
 
     #[test]

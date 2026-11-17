@@ -20,7 +20,8 @@ Windows' WebView2 component sends diagnostic data to Microsoft (see below).
   [WebView2 data and privacy](https://learn.microsoft.com/microsoft-edge/webview2/concepts/data-privacy).
 - Protected video (Netflix, Prime Video, Disney+, …) uses the DRM modules that come
   with WebView2; floawty downloads nothing for it.
-- "Reset all data" in the settings deletes your settings and all stored logins.
+- "Reset all data" in the settings deletes your settings, your own tiles, the local
+  log and all stored logins, then restarts floawty.
 
 The streaming services you open have their own privacy policies, exactly as when
 you use them in a browser.

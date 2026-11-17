@@ -4,6 +4,9 @@
   --text: #e6e6e6;
   --text-muted: #9a9a9a;
   --accent: #00bcd4;
+  --control: #2a2a2a;
+  /* The bar webview lies over the top of this page. */
+  --bar-height: 40px;
 }
 
 [hidden] {
@@ -27,7 +30,7 @@ body {
   gap: 8px;
   height: 100%;
   box-sizing: border-box;
-  padding: 10px;
+  padding: var(--bar-height) 10px 10px;
   overflow-y: auto;
 }
 
@@ -91,7 +94,8 @@ body {
 }
 
 .tile:focus-visible,
-.tile-more:focus-visible {
+.tile-more:focus-visible,
+.settings :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
@@ -165,26 +169,94 @@ body {
   font-size: 11px;
 }
 
-.click-through-dot {
-  position: fixed;
-  top: 8px;
-  right: 8px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 0 2px rgb(0 0 0 / 50%);
+.settings {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  height: 100%;
+  box-sizing: border-box;
+  padding: var(--bar-height) 12px 12px;
+  overflow-y: auto;
 }
 
-.click-through-hint {
-  position: fixed;
-  top: 4px;
-  right: 24px;
-  left: 8px;
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.settings h1 {
   margin: 0;
-  padding: 4px 8px;
-  border-radius: 4px;
-  background: rgb(0 0 0 / 70%);
+  font-size: 15px;
+}
+
+.setting,
+.hotkey-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.setting-group {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid #2c2c2c;
+  border-radius: 6px;
+}
+
+.setting-group legend {
+  padding: 0 4px;
+  color: var(--text-muted);
+}
+
+.setting-check {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.setting-note {
+  margin: 0;
+  color: var(--text-muted);
   font-size: 12px;
-  text-align: right;
+}
+
+.setting-error {
+  min-height: 1em;
+  margin: 0;
+  color: #ff8a80;
+  font-size: 12px;
+}
+
+.setting-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.settings button,
+.settings select,
+.settings input[type='number'] {
+  padding: 4px 10px;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  background: var(--control);
+  color: var(--text);
+  font: inherit;
+}
+
+.settings input[type='number'] {
+  width: 5em;
+}
+
+.settings .hotkey {
+  min-width: 11em;
+  text-align: center;
+}
+
+.settings .danger {
+  border-color: #b3261e;
+  background: #5c1410;
 }

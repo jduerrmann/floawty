@@ -5,7 +5,7 @@ tags: [tiles, services, webview, navigation, privacy]
 status: active
 created: 2026-11-17
 updated: 2026-11-17
-source: mvp-04 implementation
+source: mvp-04 implementation, mvp-05
 ---
 
 # Services and tiles
@@ -31,17 +31,20 @@ page inside the main window.
 - The last service is reopened **after** setup (async task): adding the webview
   during setup crashes WebView2.
 - Tiles never use the services' logos ([[own-service-symbols]]).
+- The bar webview lies above the service; opening a service raises it again
+  ([[tech-bar-and-settings]]). While the settings are open the service is paused and
+  hidden (`service::cover`).
 
 ## Structure
 
 | File | Role | Tests |
 |---|---|---|
-| `src/services/<id>/manifest.ts` | id, name, start URL, allowed domains (incl. sign-in), brand colour, symbol | Vitest |
+| `src/services/<id>/manifest.ts` | id, name, start URL, allowed domains (incl. sign-in), brand colour, symbol, `shortsAutoMode` (YouTube) | Vitest |
 | `src/services/manifest.ts` | manifest validation, `hostAllowed` | Vitest |
 | `src/custom-tiles.ts` | own pages: name and URL rules, https added, duplicates, allowed domain = host without `www.` | Vitest |
 | `src/tiles.ts`, `src/home.ts` | tiles, options menu (rename, remove), add/rename form, first-start notice | Playwright |
 | `src/assets/symbols/*.svg` | floawty's own symbols; Vite emits them as files (`assetsInlineLimit: 0`) so the CSP needs no `data:` | Vitest (files exist) |
-| `src-tauri/src/service.rs` | open/close the service webview, navigation guard, pause on hide, play/pause | Playwright, check scripts |
+| `src-tauri/src/service.rs` | open/close the service webview, navigation guard, pause on hide, play/pause, cover for the settings, focus | Playwright, check scripts |
 | `src-tauri/src/navigation.rs` | stay or open in the browser | unit |
 | `src-tauri/src/commands.rs` | `tiles_state`, `accept_notice`, `set_custom_tiles`, `open_service` / `close_service` (async) | Playwright |
 
@@ -53,8 +56,5 @@ set to fresh temporary folders (`tests/app.ts`), so they never touch the user's 
 
 ## Known gaps
 
-- The click-through dot lives on the home page and is hidden while a service is open;
-  it moves into the bar layer in mvp-05.
-- There is no way back to the tiles without the bar yet (mvp-05: "◀ services").
 - Sign-in flows of the real services and `window.open` pop-ups are not yet checked
   live (mvp-08).

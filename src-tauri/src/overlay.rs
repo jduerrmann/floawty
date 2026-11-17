@@ -8,12 +8,13 @@ use std::time::Duration;
 
 use tauri::{AppHandle, Emitter, Manager, PhysicalPosition, PhysicalSize, Window};
 
+use crate::bar;
 use crate::geometry::{self, Aspect, Rect};
 use crate::logbook;
 use crate::mode::{self, Mode};
 use crate::persistence;
 use crate::service;
-use crate::settings::{self, Settings};
+use crate::settings::{self, Hotkeys, Language, Settings, Shorts};
 
 /// Waiting this long after the last move or resize counts as "the user let go".
 const SETTLE_TIME: Duration = Duration::from_millis(250);
@@ -22,6 +23,7 @@ pub struct Overlay {
     settings: Mutex<Settings>,
     settings_path: PathBuf,
     click_through: Mutex<bool>,
+    settings_open: Mutex<bool>,
     settle_generation: AtomicU64,
 }
 
@@ -31,7 +33,12 @@ pub struct OverlayState {
     pub mode: Mode,
     pub opacity: f64,
     pub click_through: bool,
-    pub click_through_hotkey: String,
+    pub service_id: Option<String>,
+    pub settings_open: bool,
+    pub hotkeys: Hotkeys,
+    pub language: Language,
+    pub shorts: Shorts,
+    pub update_check: bool,
 }
 
 impl Overlay {
@@ -40,6 +47,7 @@ impl Overlay {
             settings: Mutex::new(persistence::load(&settings_path)),
             settings_path,
             click_through: Mutex::new(false),
+            settings_open: Mutex::new(false),
             settle_generation: AtomicU64::new(0),
         }
     }
@@ -56,13 +64,22 @@ impl Overlay {
         }
     }
 
+    pub fn set_settings_open(&self, open: bool) {
+        *self.settings_open.lock().unwrap() = open;
+    }
+
     pub fn state(&self) -> OverlayState {
         let settings = self.settings.lock().unwrap();
         OverlayState {
             mode: settings.mode,
             opacity: settings.opacity,
             click_through: *self.click_through.lock().unwrap(),
-            click_through_hotkey: settings.hotkeys.click_through.clone(),
+            service_id: settings.last_service.as_ref().map(|s| s.id.clone()),
+            settings_open: *self.settings_open.lock().unwrap(),
+            hotkeys: settings.hotkeys.clone(),
+            language: settings.language,
+            shorts: settings.shorts.clone(),
+            update_check: settings.update_check,
         }
     }
 }
@@ -187,7 +204,9 @@ fn apply_opacity(window: &Window, opacity: f64) -> tauri::Result<()> {
     Ok(())
 }
 
-fn emit_state(app: &AppHandle) {
+/// Tells both of floawty's pages about a change and lets the bar follow it.
+pub fn emit_state(app: &AppHandle) {
+    bar::refresh(app);
     let _ = app.emit("overlay-state", overlay(app).state());
 }
 
@@ -233,10 +252,13 @@ pub fn toggle_visible(app: &AppHandle) -> tauri::Result<()> {
     let window = main_window(app);
     if window.is_visible()? {
         service::pause(app);
-        return window.hide();
+        window.hide()?;
+    } else {
+        window.show()?;
+        apply_opacity(&window, effective_opacity(&overlay(app).settings()))?;
     }
-    window.show()?;
-    apply_opacity(&window, effective_opacity(&overlay(app).settings()))
+    emit_state(app);
+    Ok(())
 }
 
 /// Saves the geometry once the user stops moving or resizing; the floaty view also

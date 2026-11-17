@@ -15,3 +15,11 @@ User-facing changes, in plain language. Format based on
   pages; floawty reopens the last service on start.
 - Hiding pauses the video; Ctrl+Alt+Shift+Space plays and pauses.
 - A one-time notice explains that Windows' WebView2 sends diagnostic data to Microsoft.
+- A bar appears over the video when you rest the mouse on floawty: back to the
+  services, transparency, click-through, Shorts auto mode, window mode, settings and
+  close. Drag the window by the bar.
+- Settings inside floawty (the video pauses meanwhile): language, your own hotkeys
+  (press the new keys, conflicts are shown), pause between Shorts, update check (off,
+  not available yet) and "Reset all data".
+- English and German everywhere; German shows hotkeys as Strg+Alt+Umschalt.
+- The click-through dot is now visible over a service too.

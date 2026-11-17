@@ -1,13 +1,10 @@
-// Entry of floawty's own UI: home page with tiles, versions, click-through indicator.
+// Entry of floawty's own page: home with tiles, versions and the settings panel.
 import { getVersion } from '@tauri-apps/api/app';
 import { invoke } from '@tauri-apps/api/core';
-import { listen } from '@tauri-apps/api/event';
 import { aboutText } from './about';
-import { createClickThroughIndicator, type OverlayState } from './click-through';
 import { startHome } from './home';
-import { pickLanguage } from './i18n';
-
-const language = pickLanguage(navigator.languages);
+import { startSettingsPanel } from './settings-panel';
+import { startWithState } from './state';
 
 async function showAbout(): Promise<void> {
   const element = document.getElementById('about');
@@ -19,13 +16,15 @@ async function showAbout(): Promise<void> {
   element.textContent = aboutText({ appVersion, webviewVersion });
 }
 
-async function followOverlayState(): Promise<void> {
-  const showClickThrough = createClickThroughIndicator(language);
-  showClickThrough(await invoke<OverlayState>('overlay_state'));
-  await listen<OverlayState>('overlay-state', (event) => showClickThrough(event.payload));
-}
+// The bar is its own webview; F6 is the usual key to move between such parts.
+document.addEventListener('keydown', (event) => {
+  if (event.key !== 'F6') return;
+  event.preventDefault();
+  void invoke('move_focus', { toBar: true });
+});
 
-document.documentElement.lang = language;
-void startHome(language);
 void showAbout();
-void followOverlayState();
+void startWithState((state, language) => {
+  void startHome(language);
+  return startSettingsPanel(state, language);
+});

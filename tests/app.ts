@@ -22,6 +22,8 @@ export interface Profile {
 export interface RunningApp {
   browser: Browser;
   home: Page;
+  bar: Page;
+  pid: number;
   pages: () => Page[];
   stop: () => Promise<void>;
 }
@@ -59,12 +61,16 @@ export async function launch(profile: Profile): Promise<RunningApp> {
   });
   const browser = await connect();
   const pages = () => browser.contexts().flatMap((context) => context.pages());
-  const findHome = () => pages().find((page) => page.url().includes('tauri.localhost'));
-  await expect.poll(() => Boolean(findHome())).toBe(true);
+  const find = (file: string) =>
+    pages().find(
+      (page) => new URL(page.url()).pathname === file && page.url().includes('tauri.localhost'),
+    );
+  await expect.poll(() => Boolean(find('/') && find('/bar.html'))).toBe(true);
   const stop = async () => {
     await browser.close();
     app.kill();
     await exited(app);
   };
-  return { browser, home: findHome() as Page, pages, stop };
+  const [home, bar] = [find('/'), find('/bar.html')] as [Page, Page];
+  return { browser, home, bar, pid: app.pid ?? 0, pages, stop };
 }

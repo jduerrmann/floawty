@@ -9,6 +9,8 @@ export interface ServiceManifest {
   brandColor: string;
   /** floawty's own SVG in src/assets/symbols/; never an imitation of the service's logo. */
   symbol: string;
+  /** Offers the Shorts auto mode toggle in the bar. */
+  shortsAutoMode?: true;
 }
 
 /** Returns the problems of a manifest; an empty list means it is valid. */

@@ -38,4 +38,4 @@ Decisions: [[mvp-scope-and-controls]], [[bundled-service-logos]],
 | 07 | [[mvp-07-video-only]] | "Video only" for YouTube and Netflix, then the others | 05 |
 | 08 | [[mvp-08-measure-and-check]] | Budgets met, all services checked by the maintainer | 06, 07 |
 
-01–04 done and archived. Next candidate: 05.
+01–05 done and archived. Next candidate: 06.
