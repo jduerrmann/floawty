@@ -16,6 +16,7 @@ One line per decision record in `decisions/`. Template: `templates/t-decision.md
 - [[stack-by-spike]] – Tauri 2 on WebView2, Windows only; resource budgets; Electron rejected
 - [[webview2-diagnostics-disclosed]] – WebView2's Microsoft connection is disclosed at first start, in PRIVACY and README
 - [[rules-and-knowledge-base]] – AGENTS.md as single rule source, knowledge base for everything else
+- [[advisor-and-coder-subagents]] – main session leads, coder implements bounded slices, advisor reviews every package
 
 ## services
 

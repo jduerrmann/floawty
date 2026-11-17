@@ -27,6 +27,7 @@ Vault conventions and budgets: `CLAUDE.md` in this folder.
 | Overlay UI, hotkeys, tiles, Shorts behavior | [[mvp-scope-and-controls]], [[own-service-symbols]], [[overlay-controls]] |
 | Logins, DRM download, network | [[google-login-honest-user-agent-first]], [[widevine-on-demand-with-notice]] |
 | Releases, signing | [[unsigned-first-then-signpath]] |
+| Delegating work, independent review | root `CLAUDE.md`, [[advisor-and-coder-subagents]] |
 | Writing a note | `CLAUDE.md` in this folder, `templates/` |
 
 ## Product

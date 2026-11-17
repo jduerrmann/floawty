@@ -144,7 +144,7 @@ delay, pause on hover). It never likes, subscribes, comments or skips ads.
 - Report what was verified and what was not; never call an unrun check passed.
 
 Completion order: checks (10) → tech notes and CHANGELOG (11) → decisions and open
-questions (11, 3) → final diff review → commit proposal (12).
+questions (11, 3) → final diff review → independent review (14) → commit proposal (12).
 
 ## 11. Keep the knowledge current
 
@@ -177,7 +177,19 @@ one i18n file; no visible text is hard-coded in components.
 
 ## 14. Agents and tools
 
-The main session works by default. Subagents only for concrete, independent subtasks
-with a clear advantage, at most two at a time; the main session checks their results
-itself. Use MCP servers only when the maintainer asks for them; built-in client tools
-(browser pane, desktop control) are not MCP servers in this sense.
+- The main session leads: scope, questions, briefs, integration, diff review,
+  verification and the report stay with it. It delegates only bounded work with a
+  clear advantage, at most two subagents at a time, a reviewer included. Parallel
+  writers own disjoint files; a shared file (e.g. `src/i18n.ts`) has one owner.
+  Workers never delegate further, commit or push; their success report is not
+  acceptance – the main session reads the diff and runs the checks itself.
+- Every work package and every other change to code, tests, build configuration or
+  these rules gets an independent read-only review of its diff by a second agent
+  before the commit proposal. Pure execution (rename, typo, one obvious fix) and
+  changes only to notes or the CHANGELOG need none. Resolve each material finding –
+  fix and re-check, or reject it with evidence – and record reviewer and resolution
+  in the package's evidence, or for work outside a package in the report and the
+  commit message. If no reviewer is available, say so and record your own review.
+- Runtime-specific roles and models: `CLAUDE.md` for Claude.
+- Use MCP servers only when the maintainer asks for them; built-in client tools
+  (browser pane, desktop control) are not MCP servers in this sense.

@@ -4,7 +4,7 @@ area: process
 tags: [rules, planning]
 status: active
 created: 2026-11-16
-updated: 2026-11-16
+updated: 2026-11-17
 source: conversation; adapted from the varchy and configuratorCore planning policies
 ---
 
@@ -33,12 +33,12 @@ history. Simple fixes need no plan.
 - A **Resume here** section (~1 KB): state, branch, last check results, next action.
 
 The package is the only progress record. Update it at phase boundaries and before a
-session ends with work unfinished. `done` needs every acceptance item, the checks and
-the doc updates.
+session ends with work unfinished. `done` needs every acceptance item, the checks, the doc
+updates and the independent review with its findings resolved (AGENTS.md rule 14).
 
 ## Complete and archive
 
-Record the evidence in the package, move lasting knowledge to tech notes and
+Record the evidence in the package (checks, measurements, review and its resolution), move lasting knowledge to tech notes and
 decisions, set `done`, then move the package to `archive/plans/<plan-id>/`. When all
 packages are done, archive the map and remove it from [[active-plans]].
 
