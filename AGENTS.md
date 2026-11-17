@@ -92,8 +92,11 @@ Prototype code stays on the `spike/*` branches; `spikes/measure` is the measurin
 
 - **Pure logic is separate:** geometry, snapping, opacity, settings and migration,
   hotkey mapping and the Shorts state machine have no window or DOM access.
+- **Layout:** `src-tauri/` Rust shell (window, settings, hotkeys), `src/` TypeScript UI
+  (Vite), `src/services/<id>/` adapters, `assets/third-party/` logos with their
+  NOTICE (not GPL).
 - **Service adapters** are isolated modules `src/services/<id>/` with a manifest (id,
-  name, start URL, allowed domains, needs DRM) and an optional page script. Core code
+  name, start URL, allowed domains, logo) and an optional page script. Core code
   never contains service-specific `if`s. DOM selectors live in one `selectors.ts` per
   adapter.
 - **Adapters fail soft:** a broken selector leaves a normal page, never a crash or
@@ -111,12 +114,16 @@ Prototype code stays on the `spike/*` branches; `spikes/measure` is the measurin
 
 ## 9. Product scope
 
-**In scope:** overlay window (frameless, always on top, opacity 10–100 %, resize,
-drag, corner/edge snapping, multi-monitor, remembered geometry); click-through with a
-hotkey to leave it; global hotkeys; service picker + custom URL; best-effort "video
-only" view; YouTube Shorts auto mode; UI in English and German; first-start notice
-about WebView2. Service tiles: YouTube, Twitch, Netflix, Prime Video, Disney+, RTL+;
-further services once they pass a maintainer test. Windows 10/11 only.
+**In scope** ([mvp-scope-and-controls](knowledge-base/decisions/mvp-scope-and-controls.md)):
+overlay window (frameless, always on top, opacity 10–100 %, resize, drag, corner/edge
+snapping, multi-monitor, remembered geometry) and a window mode (normal window) with
+its own geometry; hover bar over the video; click-through with a corner dot and a
+hotkey to leave it; configurable global hotkeys (default Ctrl+Alt+Shift); app tiles
+with official logos ([bundled-service-logos](knowledge-base/decisions/bundled-service-logos.md))
+and custom URL tiles; first-start notice about WebView2; best-effort "video only"
+view; YouTube Shorts auto mode; UI in English and German. Service tiles: YouTube,
+Twitch, Netflix, Prime Video, Disney+, RTL+; further services once they pass a
+maintainer test. Windows 10/11 only.
 
 **Out of scope** (decision first): downloading, recording or screenshots of protected
 content; ad blocking or sponsor skipping; own library, recommendations, social
@@ -128,8 +135,8 @@ delay, pause on hover). It never likes, subscribes, comments or skips ads.
 
 ## 10. Verify before reporting completion
 
-- The verify command (defined with the stack, e.g. `pnpm verify`) must pass: types,
-  lint, format, unit tests, Playwright, build.
+- `npm run verify` must pass: types, lint, format, unit tests (Vitest and
+  `cargo test`), `cargo clippy`, Playwright smoke test, build.
 - Verify yourself – run the app, drive it with Playwright or the built-in browser –
   instead of handing the maintainer a checklist. Leave only what needs their eyes or
   accounts (e.g. a logged-in Netflix check), and name it.

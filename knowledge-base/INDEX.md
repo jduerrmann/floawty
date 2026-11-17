@@ -20,7 +20,8 @@ Vault conventions and budgets: `CLAUDE.md` in this folder.
 | A product or scope question | [[overview]], [[core-principles]], [[open-questions]] |
 | Stack, DRM, budgets | [[stack-by-spike]], [[stack-spike-results]], [[drm-in-desktop-webviews]] |
 | Privacy, network, WebView2 | [[webview2-diagnostics-disclosed]], [[shared-webview2-profile-in-mvp]] |
-| Overlay UI, hotkeys, Shorts behavior | [[overlay-controls]] |
+| MVP work, next package | [[plan-mvp]], [[active-plans]] |
+| Overlay UI, hotkeys, tiles, Shorts behavior | [[mvp-scope-and-controls]], [[bundled-service-logos]], [[overlay-controls]] |
 | Logins, DRM download, network | [[google-login-honest-user-agent-first]], [[widevine-on-demand-with-notice]] |
 | Releases, signing | [[unsigned-first-then-signpath]] |
 | Writing a note | `CLAUDE.md` in this folder, `templates/` |

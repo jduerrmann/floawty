@@ -13,14 +13,6 @@ Single resume entry for multi-session work. Rules: [[planning]].
 
 | Plan | Outcome | Map |
 |---|---|---|
-| – | No active plan. | – |
-
-## Follow-ups
-
-- **MVP plan** (phase 2): plan map and packages via a visual plan – window and hover
-  bar, hotkeys, service tiles, settings, first-start WebView2 notice, YouTube, EN/DE,
-  on Tauri ([[stack-by-spike]]).
-- Maintainer tests on Tauri: Twitch, Apple TV+, Crunchyroll (tiles once they pass,
-  [[drm-services-in-first-release]]).
+| mvp | floawty in daily use: overlay, window mode, tiles, bar, settings, Shorts, "video only" | [[plan-mvp]] |
 
 Archived: stack spike ([[plan-stack-spike]]), done 2026-11-17.

@@ -10,6 +10,9 @@ source: conversation (visual plan "floawty – Projektplanung", rounds 1–2)
 
 # The overlay is controlled by a hover bar and hotkeys
 
+**Partly superseded by [[mvp-scope-and-controls]]** (2026-11-17): hotkeys now use
+Ctrl+Alt+Shift and are configurable; the bar lies over the video.
+
 ## Context
 
 The overlay must stay small and out of the way, yet size, opacity, service and

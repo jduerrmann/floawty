@@ -26,7 +26,9 @@ One line per decision record in `decisions/`. Template: `templates/t-decision.md
 
 ## ui
 
-- [[overlay-controls]] – hover bar, tiles picker, small settings, Ctrl+Shift hotkeys, hide pauses, Shorts after one run
+- [[mvp-scope-and-controls]] – MVP scope, bar over the video, window mode ↔ floaty view, Ctrl+Alt+Shift hotkeys, click-through dot
+- [[bundled-service-logos]] – app tiles with official logos, kept apart from the GPL code
+- [[overlay-controls]] – hover bar, tiles, settings, hide pauses, Shorts after one run (partly superseded)
 
 ## dist
 
