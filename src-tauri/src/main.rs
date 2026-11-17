@@ -1,49 +1,60 @@
 //! floawty: streaming services in a small always-on-top overlay.
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-mod startup_log;
+mod geometry;
+mod hotkeys;
+mod logbook;
+mod overlay;
+mod persistence;
+mod settings;
 
-use std::fs::{self, OpenOptions};
-use std::io::{self, Write};
-use std::time::{SystemTime, UNIX_EPOCH};
+use tauri::{AppHandle, Manager, WindowEvent};
 
-use tauri::{AppHandle, Manager};
+use overlay::{Overlay, OverlayState};
 
 #[tauri::command]
 fn webview_version() -> Option<String> {
     tauri::webview_version().ok()
 }
 
-// Logs stay local (AGENTS.md rule 8): %APPDATA%\floawty\logs\floawty.log.
-fn write_startup_line(app: &AppHandle) -> io::Result<()> {
-    let data_dir = app
-        .path()
-        .data_dir()
-        .map_err(|e| io::Error::other(e.to_string()))?;
-    let log_dir = data_dir.join("floawty").join("logs");
-    fs::create_dir_all(&log_dir)?;
-    let now = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map_or(0, |d| d.as_secs());
+#[tauri::command]
+fn overlay_state(app: AppHandle) -> OverlayState {
+    app.state::<Overlay>().state()
+}
+
+#[tauri::command]
+fn set_opacity(app: AppHandle, value: f64) -> Result<(), String> {
+    overlay::set_opacity(&app, value).map_err(|e| e.to_string())
+}
+
+fn setup(app: &AppHandle) -> tauri::Result<()> {
     let version = app.package_info().version.to_string();
-    let line = startup_log::startup_line(now, &version, tauri::webview_version().ok().as_deref());
-    let mut file = OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(log_dir.join("floawty.log"))?;
-    writeln!(file, "{line}")
+    let webview = tauri::webview_version().ok();
+    logbook::write(app, &logbook::startup_message(&version, webview.as_deref()));
+
+    let settings_path = app.path().data_dir()?.join("floawty").join("settings.json");
+    app.manage(Overlay::load(settings_path));
+    overlay::place_and_show(app)?;
+    hotkeys::register(app, &app.state::<Overlay>().settings().hotkeys);
+
+    let handle = app.clone();
+    overlay::main_window(app).on_window_event(move |event| {
+        if matches!(event, WindowEvent::Moved(_) | WindowEvent::Resized(_)) {
+            overlay::settle_later(&handle);
+        }
+    });
+    Ok(())
 }
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![webview_version])
-        .setup(|app| {
-            // A missing log must never stop floawty from starting.
-            if let Err(error) = write_startup_line(app.handle()) {
-                eprintln!("floawty: could not write the startup log: {error}");
-            }
-            Ok(())
-        })
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+        .invoke_handler(tauri::generate_handler![
+            webview_version,
+            overlay_state,
+            set_opacity
+        ])
+        .setup(|app| Ok(setup(app.handle())?))
         .run(tauri::generate_context!())
         .expect("error while running floawty");
 }

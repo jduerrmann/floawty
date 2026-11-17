@@ -3,5 +3,5 @@
   "identifier": "main",
   "description": "floawty's own UI in the main window. Service pages get no capability.",
   "windows": ["main"],
-  "permissions": ["core:default"]
+  "permissions": ["core:default", "core:window:allow-start-dragging"]
 }

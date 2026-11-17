@@ -1,14 +1,47 @@
-//! The startup line written to the local log: time, app version and WebView2 version.
+//! The local log (AGENTS.md rule 8): `%APPDATA%\floawty\logs\floawty.log`, never sent anywhere.
+use std::fs::{self, OpenOptions};
+use std::io::{self, Write};
+use std::path::PathBuf;
+use std::time::{SystemTime, UNIX_EPOCH};
+
+use tauri::{AppHandle, Manager};
 
 const SECONDS_PER_DAY: u64 = 86_400;
 
-/// Formats one log line; `unix_seconds` is UTC.
-pub fn startup_line(unix_seconds: u64, app_version: &str, webview_version: Option<&str>) -> String {
+pub fn startup_message(app_version: &str, webview_version: Option<&str>) -> String {
     let webview = webview_version.unwrap_or("unknown");
-    format!(
-        "{} floawty {app_version} started, WebView2 {webview}",
-        iso_utc(unix_seconds)
-    )
+    format!("floawty {app_version} started, WebView2 {webview}")
+}
+
+/// Prefixes a message with its UTC time; `unix_seconds` is UTC.
+pub fn stamped(unix_seconds: u64, message: &str) -> String {
+    format!("{} {message}", iso_utc(unix_seconds))
+}
+
+/// Appends one line; a log that cannot be written must never stop floawty.
+pub fn write(app: &AppHandle, message: &str) {
+    let now = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_or(0, |d| d.as_secs());
+    let _ = append(app, &stamped(now, message));
+}
+
+fn append(app: &AppHandle, line: &str) -> io::Result<()> {
+    let folder = log_folder(app)?;
+    fs::create_dir_all(&folder)?;
+    let mut file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(folder.join("floawty.log"))?;
+    writeln!(file, "{line}")
+}
+
+fn log_folder(app: &AppHandle) -> io::Result<PathBuf> {
+    let data_dir = app
+        .path()
+        .data_dir()
+        .map_err(|e| io::Error::other(e.to_string()))?;
+    Ok(data_dir.join("floawty").join("logs"))
 }
 
 fn iso_utc(unix_seconds: u64) -> String {
@@ -39,11 +72,14 @@ fn civil_date(days_since_epoch: u64) -> (u64, u64, u64) {
 
 #[cfg(test)]
 mod tests {
-    use super::startup_line;
+    use super::{stamped, startup_message};
 
     #[test]
     fn names_time_app_and_webview_versions() {
-        let line = startup_line(1_794_934_800, "0.1.0", Some("157.0.4341.46"));
+        let line = stamped(
+            1_794_934_800,
+            &startup_message("0.1.0", Some("157.0.4341.46")),
+        );
         assert_eq!(
             line,
             "2026-11-17T17:00:00Z floawty 0.1.0 started, WebView2 157.0.4341.46"
@@ -52,7 +88,7 @@ mod tests {
 
     #[test]
     fn says_so_when_webview_version_is_unknown() {
-        let line = startup_line(0, "0.1.0", None);
+        let line = stamped(0, &startup_message("0.1.0", None));
         assert_eq!(
             line,
             "1970-01-01T00:00:00Z floawty 0.1.0 started, WebView2 unknown"
@@ -61,7 +97,7 @@ mod tests {
 
     #[test]
     fn handles_leap_days() {
-        let line = startup_line(1_709_164_800, "0.1.0", None);
+        let line = stamped(1_709_164_800, "x");
         assert!(line.starts_with("2024-02-29T00:00:00Z"), "{line}");
     }
 }

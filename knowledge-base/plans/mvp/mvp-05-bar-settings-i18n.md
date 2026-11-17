@@ -36,6 +36,8 @@ and German.
 - [ ] One i18n file; English typed as the source, German complete; no text in
       components.
 - [ ] Bar and settings are keyboard-usable and have labels.
+- [ ] Hotkeys are shown localized (German: Strg+Alt+Umschalt), also in the
+      click-through hint.
 
 ## Tests first
 

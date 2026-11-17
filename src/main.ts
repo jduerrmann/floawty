@@ -1,7 +1,12 @@
-// Entry of floawty's own UI; for now it only shows which versions are running.
+// Entry of floawty's own UI: versions for now, and the click-through indicator.
 import { getVersion } from '@tauri-apps/api/app';
 import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 import { aboutText } from './about';
+import { createClickThroughIndicator, type OverlayState } from './click-through';
+import { pickLanguage } from './i18n';
+
+const language = pickLanguage(navigator.languages);
 
 async function showAbout(): Promise<void> {
   const element = document.getElementById('about');
@@ -13,4 +18,12 @@ async function showAbout(): Promise<void> {
   element.textContent = aboutText({ appVersion, webviewVersion });
 }
 
+async function followOverlayState(): Promise<void> {
+  const showClickThrough = createClickThroughIndicator(language);
+  showClickThrough(await invoke<OverlayState>('overlay_state'));
+  await listen<OverlayState>('overlay-state', (event) => showClickThrough(event.payload));
+}
+
+document.documentElement.lang = language;
 void showAbout();
+void followOverlayState();

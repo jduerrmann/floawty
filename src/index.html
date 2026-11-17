@@ -6,9 +6,11 @@
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <main class="placeholder">
-      <p id="about" class="about">floawty</p>
+    <main class="placeholder" data-tauri-drag-region>
+      <p id="about" class="about" data-tauri-drag-region>floawty</p>
     </main>
+    <div id="click-through-dot" class="click-through-dot" hidden></div>
+    <p id="click-through-hint" class="click-through-hint" hidden></p>
     <script type="module" src="./main.ts"></script>
   </body>
 </html>

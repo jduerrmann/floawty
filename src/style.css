@@ -3,6 +3,7 @@
   --surface: #111111;
   --text: #e6e6e6;
   --text-muted: #9a9a9a;
+  --accent: #00bcd4;
 }
 
 html,
@@ -24,4 +25,28 @@ body {
 
 .about {
   color: var(--text-muted);
+}
+
+.click-through-dot {
+  position: fixed;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 2px rgb(0 0 0 / 50%);
+}
+
+.click-through-hint {
+  position: fixed;
+  top: 4px;
+  right: 24px;
+  left: 8px;
+  margin: 0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgb(0 0 0 / 70%);
+  font-size: 12px;
+  text-align: right;
 }

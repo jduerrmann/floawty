@@ -39,6 +39,8 @@ tiles, and shows the WebView2 notice once.
       and German text; never shown again.
 - [ ] Start opens the last used service; with none, the tiles.
 - [ ] Service pages get no IPC access.
+- [ ] Hiding the overlay pauses the video; Ctrl+Alt+Shift+Space plays/pauses (moved
+      from mvp-02).
 
 ## Tests first
 

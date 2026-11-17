@@ -16,6 +16,7 @@ Vault conventions and budgets: `CLAUDE.md` in this folder.
 | Task | Read |
 |---|---|
 | Any code change | [[engineering-standards]] (§1 test first, §3–5 code, §7 resources) |
+| Window, settings, hotkeys | [[tech-window]] |
 | Multi-session work, resuming | [[active-plans]], [[planning]] |
 | A product or scope question | [[overview]], [[core-principles]], [[open-questions]] |
 | Stack, DRM, budgets | [[stack-by-spike]], [[stack-spike-results]], [[drm-in-desktop-webviews]] |
@@ -44,4 +45,4 @@ Vault conventions and budgets: `CLAUDE.md` in this folder.
 
 ## Tech
 
-None yet – tech notes are created together with the code (`tech/`).
+- [[tech-window]] – overlay window, geometry, settings file, hotkeys, local log
