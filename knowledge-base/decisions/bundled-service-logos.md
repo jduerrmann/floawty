@@ -2,13 +2,16 @@
 type: decision
 area: ui
 tags: [tiles, logos, trademarks, license]
-status: active
+status: archived
 created: 2026-11-17
 updated: 2026-11-17
 source: visual plan "MVP-Planung", round 2
 ---
 
 # Service tiles show the official logos, kept apart from the GPL code
+
+**Superseded by [[own-service-symbols]]** (2026-11-17): no reliable official sources;
+tiles use floawty's own SVG symbols.
 
 ## Context
 

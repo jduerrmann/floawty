@@ -6,12 +6,13 @@ use std::sync::Mutex;
 use std::thread;
 use std::time::Duration;
 
-use tauri::{AppHandle, Emitter, Manager, PhysicalPosition, PhysicalSize, WebviewWindow};
+use tauri::{AppHandle, Emitter, Manager, PhysicalPosition, PhysicalSize, Window};
 
 use crate::geometry::{self, Aspect, Rect};
 use crate::logbook;
 use crate::mode::{self, Mode};
 use crate::persistence;
+use crate::service;
 use crate::settings::{self, Settings};
 
 /// Waiting this long after the last move or resize counts as "the user let go".
@@ -47,7 +48,7 @@ impl Overlay {
         self.settings.lock().unwrap().clone()
     }
 
-    fn update(&self, app: &AppHandle, change: impl FnOnce(&mut Settings)) {
+    pub fn update(&self, app: &AppHandle, change: impl FnOnce(&mut Settings)) {
         let mut settings = self.settings.lock().unwrap();
         change(&mut settings);
         if let Err(error) = persistence::save(&self.settings_path, &settings) {
@@ -70,8 +71,9 @@ fn overlay(app: &AppHandle) -> tauri::State<'_, Overlay> {
     app.state::<Overlay>()
 }
 
-pub fn main_window(app: &AppHandle) -> WebviewWindow {
-    app.get_webview_window("main")
+// A plain Window: with the service webview inside, it is no longer a WebviewWindow.
+pub fn main_window(app: &AppHandle) -> Window {
+    app.get_window("main")
         .expect("the main window is defined in tauri.conf.json")
 }
 
@@ -84,7 +86,7 @@ fn to_rect(position: PhysicalPosition<i32>, size: PhysicalSize<u32>) -> Rect {
     }
 }
 
-fn work_areas(window: &WebviewWindow) -> tauri::Result<Vec<Rect>> {
+fn work_areas(window: &Window) -> tauri::Result<Vec<Rect>> {
     let monitors = window.available_monitors()?;
     Ok(monitors
         .iter()
@@ -93,11 +95,11 @@ fn work_areas(window: &WebviewWindow) -> tauri::Result<Vec<Rect>> {
 }
 
 // Geometry means the visible client area; Windows adds invisible resize borders around it.
-fn visible_rect(window: &WebviewWindow) -> tauri::Result<Rect> {
+fn visible_rect(window: &Window) -> tauri::Result<Rect> {
     Ok(to_rect(window.inner_position()?, window.inner_size()?))
 }
 
-fn set_rect(window: &WebviewWindow, rect: Rect) -> tauri::Result<()> {
+fn set_rect(window: &Window, rect: Rect) -> tauri::Result<()> {
     window.set_size(PhysicalSize::new(rect.width, rect.height))?;
     let inner = window.inner_position()?;
     let outer = window.outer_position()?;
@@ -106,7 +108,7 @@ fn set_rect(window: &WebviewWindow, rect: Rect) -> tauri::Result<()> {
     window.set_position(PhysicalPosition::new(x, y))
 }
 
-fn default_rect(window: &WebviewWindow, mode: Mode) -> tauri::Result<Rect> {
+fn default_rect(window: &Window, mode: Mode) -> tauri::Result<Rect> {
     let monitor = window
         .primary_monitor()?
         .expect("Windows always has a primary monitor");
@@ -118,7 +120,7 @@ fn default_rect(window: &WebviewWindow, mode: Mode) -> tauri::Result<Rect> {
 }
 
 /// Where the active mode was last time, or its default place.
-fn target_rect(window: &WebviewWindow, settings: &Settings) -> tauri::Result<Rect> {
+fn target_rect(window: &Window, settings: &Settings) -> tauri::Result<Rect> {
     let saved = mode::geometry_of(settings, settings.mode);
     let restored = saved.and_then(|rect| geometry::restore(rect, &work_areas(window).ok()?));
     match restored {
@@ -128,7 +130,7 @@ fn target_rect(window: &WebviewWindow, settings: &Settings) -> tauri::Result<Rec
 }
 
 /// Window mode is a normal window; the floaty view is frameless and stays on top.
-fn apply_mode_style(window: &WebviewWindow, mode: Mode) -> tauri::Result<()> {
+fn apply_mode_style(window: &Window, mode: Mode) -> tauri::Result<()> {
     window.set_decorations(mode == Mode::Window)?;
     window.set_always_on_top(mode == Mode::Floaty)
 }
@@ -169,7 +171,7 @@ pub fn toggle_mode(app: &AppHandle) -> tauri::Result<()> {
 }
 
 // Tauri has no opacity API, so the window becomes a layered Win32 window.
-fn apply_opacity(window: &WebviewWindow, opacity: f64) -> tauri::Result<()> {
+fn apply_opacity(window: &Window, opacity: f64) -> tauri::Result<()> {
     use windows_sys::Win32::UI::WindowsAndMessaging::{
         GetWindowLongPtrW, SetLayeredWindowAttributes, SetWindowLongPtrW, GWL_EXSTYLE, LWA_ALPHA,
         WS_EX_LAYERED,
@@ -213,7 +215,7 @@ pub fn toggle_click_through(app: &AppHandle) -> tauri::Result<()> {
     toggle_click_through_now(app, &main_window(app))
 }
 
-fn toggle_click_through_now(app: &AppHandle, window: &WebviewWindow) -> tauri::Result<()> {
+fn toggle_click_through_now(app: &AppHandle, window: &Window) -> tauri::Result<()> {
     let enabled = {
         let state = overlay(app);
         let mut click_through = state.click_through.lock().unwrap();
@@ -230,7 +232,7 @@ fn toggle_click_through_now(app: &AppHandle, window: &WebviewWindow) -> tauri::R
 pub fn toggle_visible(app: &AppHandle) -> tauri::Result<()> {
     let window = main_window(app);
     if window.is_visible()? {
-        // Pausing the service's video comes with the service webview (mvp-04).
+        service::pause(app);
         return window.hide();
     }
     window.show()?;

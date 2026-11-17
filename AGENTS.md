@@ -93,10 +93,10 @@ Prototype code stays on the `spike/*` branches; `spikes/measure` is the measurin
 - **Pure logic is separate:** geometry, snapping, opacity, settings and migration,
   hotkey mapping and the Shorts state machine have no window or DOM access.
 - **Layout:** `src-tauri/` Rust shell (window, settings, hotkeys), `src/` TypeScript UI
-  (Vite), `src/services/<id>/` adapters, `assets/third-party/` logos with their
-  NOTICE (not GPL).
+  (Vite), `src/services/<id>/` adapters, `src/assets/symbols/` floawty's own tile
+  symbols.
 - **Service adapters** are isolated modules `src/services/<id>/` with a manifest (id,
-  name, start URL, allowed domains, logo) and an optional page script. Core code
+  name, start URL, allowed domains, brand colour, symbol) and an optional page script. Core code
   never contains service-specific `if`s. DOM selectors live in one `selectors.ts` per
   adapter.
 - **Adapters fail soft:** a broken selector leaves a normal page, never a crash or
@@ -119,7 +119,7 @@ overlay window (frameless, always on top, opacity 10–100 %, resize, drag, corn
 snapping, multi-monitor, remembered geometry) and a window mode (normal window) with
 its own geometry; hover bar over the video; click-through with a corner dot and a
 hotkey to leave it; configurable global hotkeys (default Ctrl+Alt+Shift); app tiles
-with official logos ([bundled-service-logos](knowledge-base/decisions/bundled-service-logos.md))
+with own SVG symbols ([own-service-symbols](knowledge-base/decisions/own-service-symbols.md))
 and custom URL tiles; first-start notice about WebView2; best-effort "video only"
 view; YouTube Shorts auto mode; UI in English and German. Service tiles: YouTube,
 Twitch, Netflix, Prime Video, Disney+, RTL+; further services once they pass a

@@ -38,6 +38,8 @@ and German.
 - [ ] Bar and settings are keyboard-usable and have labels.
 - [ ] Hotkeys are shown localized (German: Strg+Alt+Umschalt), also in the
       click-through hint.
+- [ ] The click-through dot is visible while a service is open (moved from mvp-04).
+- [ ] "◀ services" in the bar closes the service and shows the tiles (`close_service`).
 
 ## Tests first
 

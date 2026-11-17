@@ -3,7 +3,8 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   root: 'src',
-  build: { outDir: '../dist', emptyOutDir: true, target: 'es2022' },
+  // No inlined data: URLs, so the strict CSP (img-src 'self') can stay as it is.
+  build: { outDir: '../dist', emptyOutDir: true, target: 'es2022', assetsInlineLimit: 0 },
   server: { port: 1420, strictPort: true },
   clearScreen: false,
   test: { root: '.', include: ['src/**/*.test.ts'] },

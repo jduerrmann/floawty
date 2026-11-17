@@ -6,6 +6,7 @@ use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 
 use crate::logbook;
 use crate::overlay;
+use crate::service;
 use crate::settings::Hotkeys;
 
 #[derive(Clone, Copy)]
@@ -15,15 +16,17 @@ enum Action {
     OpacityUp,
     OpacityDown,
     WindowMode,
+    PlayPause,
 }
 
-fn bindings(hotkeys: &Hotkeys) -> [(Action, &str); 5] {
+fn bindings(hotkeys: &Hotkeys) -> [(Action, &str); 6] {
     [
         (Action::ToggleVisible, &hotkeys.toggle_visible),
         (Action::ClickThrough, &hotkeys.click_through),
         (Action::OpacityUp, &hotkeys.opacity_up),
         (Action::OpacityDown, &hotkeys.opacity_down),
         (Action::WindowMode, &hotkeys.window_mode),
+        (Action::PlayPause, &hotkeys.play_pause),
     ]
 }
 
@@ -34,6 +37,7 @@ fn run(app: &AppHandle, action: Action) -> tauri::Result<()> {
         Action::OpacityUp => overlay::step_opacity(app, 1),
         Action::OpacityDown => overlay::step_opacity(app, -1),
         Action::WindowMode => overlay::toggle_mode(app),
+        Action::PlayPause => service::play_pause(app),
     }
 }
 

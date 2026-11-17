@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- floawty symbol for a custom page: a globe. -->
+  <circle cx="24" cy="24" r="15" stroke-width="3.5"/>
+  <path d="M9 24H39M24 9C16 17 16 31 24 39M24 9C32 17 32 31 24 39" stroke-width="3"/>
+</svg>

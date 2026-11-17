@@ -25,7 +25,8 @@ maintainer wants to use floawty daily as soon as the MVP is done.
   "video only" view. Order: overlay and tiles → Shorts → "video only" (YouTube and
   Netflix first). The old phase 4 is dropped.
 - **Hover bar** lies over the video (transparent webview on top of the service).
-- **App tiles** with the services' official logos ([[bundled-service-logos]]); a
+- **App tiles** with the services' official logos ([[bundled-service-logos]], since
+  2026-11-17 own SVG symbols: [[own-service-symbols]]); a
   custom URL can be saved as its own tile.
 - **First start:** a cookie-banner-like notice above the tiles about WebView2
   ([[webview2-diagnostics-disclosed]]), one OK.

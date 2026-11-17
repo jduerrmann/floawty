@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- floawty symbol for YouTube: a monogram Y in a screen frame, not the YouTube logo. -->
+  <rect x="6" y="9" width="36" height="30" rx="6" stroke-width="3"/>
+  <path d="M17 16 24 25 31 16M24 25V33"/>
+</svg>

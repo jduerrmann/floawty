@@ -30,6 +30,8 @@ decides whether the release pipeline (phase 3) starts.
 - [ ] Idle network: only the disclosed WebView2 connection, nothing else.
 - [ ] Maintainer checks: every tile plays, incl. Twitch, Apple TV+, Crunchyroll
       (tiles added for those that pass, [[drm-services-in-first-release]]).
+- [ ] Sign-in flows and pop-ups of every service work with the navigation guard
+      (moved from mvp-04).
 - [ ] Results note under `research/` linked from the index.
 
 ## Checks

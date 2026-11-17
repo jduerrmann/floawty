@@ -1,9 +1,10 @@
-// Entry of floawty's own UI: versions for now, and the click-through indicator.
+// Entry of floawty's own UI: home page with tiles, versions, click-through indicator.
 import { getVersion } from '@tauri-apps/api/app';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { aboutText } from './about';
 import { createClickThroughIndicator, type OverlayState } from './click-through';
+import { startHome } from './home';
 import { pickLanguage } from './i18n';
 
 const language = pickLanguage(navigator.languages);
@@ -25,5 +26,6 @@ async function followOverlayState(): Promise<void> {
 }
 
 document.documentElement.lang = language;
+void startHome(language);
 void showAbout();
 void followOverlayState();

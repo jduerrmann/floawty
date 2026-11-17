@@ -4,7 +4,9 @@ use std::io::{self, Write};
 use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use tauri::{AppHandle, Manager};
+use tauri::AppHandle;
+
+use crate::paths;
 
 const SECONDS_PER_DAY: u64 = 86_400;
 
@@ -37,11 +39,7 @@ fn append(app: &AppHandle, line: &str) -> io::Result<()> {
 }
 
 fn log_folder(app: &AppHandle) -> io::Result<PathBuf> {
-    let data_dir = app
-        .path()
-        .data_dir()
-        .map_err(|e| io::Error::other(e.to_string()))?;
-    Ok(data_dir.join("floawty").join("logs"))
+    Ok(paths::floawty_dir(app)?.join("logs"))
 }
 
 fn iso_utc(unix_seconds: u64) -> String {

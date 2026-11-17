@@ -11,12 +11,14 @@ rust-version = "1.90"
 tauri-build = { version = "~2.7", features = [] }
 
 [dependencies]
-tauri = { version = "~2.12", features = [] }
+# "unstable" allows the service webview inside the main window.
+tauri = { version = "~2.12", features = ["unstable"] }
 # Already in the tree through Tauri; listed so the settings file can use them directly.
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+url = "2"
 tauri-plugin-global-shortcut = "~2.4"
-windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging"] }
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_UI_Shell", "Win32_UI_WindowsAndMessaging"] }
 
 [profile.release]
 codegen-units = 1

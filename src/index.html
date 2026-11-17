@@ -6,7 +6,21 @@
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <main class="placeholder" data-tauri-drag-region>
+    <main class="home" data-tauri-drag-region>
+      <section id="notice" class="notice" hidden>
+        <p id="notice-text"></p>
+        <button id="notice-ok" type="button"></button>
+      </section>
+      <ul id="tiles" class="tiles"></ul>
+      <form id="tile-form" class="tile-form" hidden>
+        <label><span id="tile-name-label"></span><input id="tile-name" maxlength="80" /></label>
+        <label><span id="tile-url-label"></span><input id="tile-url" inputmode="url" /></label>
+        <p id="tile-error" class="tile-error" role="alert"></p>
+        <div class="tile-form-actions">
+          <button id="tile-cancel" type="button"></button>
+          <button id="tile-save" type="submit"></button>
+        </div>
+      </form>
       <p id="about" class="about" data-tauri-drag-region>floawty</p>
     </main>
     <div id="click-through-dot" class="click-through-dot" hidden></div>

@@ -15,6 +15,7 @@ pub struct Hotkeys {
     pub opacity_up: String,
     pub opacity_down: String,
     pub window_mode: String,
+    pub play_pause: String,
 }
 
 impl Default for Hotkeys {
@@ -25,8 +26,27 @@ impl Default for Hotkeys {
             opacity_up: "Ctrl+Alt+Shift+Up".into(),
             opacity_down: "Ctrl+Alt+Shift+Down".into(),
             window_mode: "Ctrl+Alt+Shift+F".into(),
+            play_pause: "Ctrl+Alt+Shift+Space".into(),
         }
     }
+}
+
+/// A tile the user added for any web page.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CustomTile {
+    pub id: String,
+    pub name: String,
+    pub url: String,
+}
+
+/// The service open at closing time, reopened on the next start.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OpenService {
+    pub id: String,
+    pub url: String,
+    pub allowed_domains: Vec<String>,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -38,6 +58,9 @@ pub struct Settings {
     pub floaty: Option<Rect>,
     pub window: Option<Rect>,
     pub hotkeys: Hotkeys,
+    pub notice_accepted: bool,
+    pub custom_tiles: Vec<CustomTile>,
+    pub last_service: Option<OpenService>,
 }
 
 impl Default for Settings {
@@ -49,6 +72,9 @@ impl Default for Settings {
             floaty: None,
             window: None,
             hotkeys: Hotkeys::default(),
+            notice_accepted: false,
+            custom_tiles: Vec::new(),
+            last_service: None,
         }
     }
 }
@@ -111,6 +137,34 @@ mod tests {
         assert_eq!(settings.mode, Mode::Floaty);
         assert_eq!(settings.window, None);
         assert_eq!(settings.hotkeys.window_mode, "Ctrl+Alt+Shift+F");
+    }
+
+    #[test]
+    fn custom_tiles_and_the_last_service_survive_a_round_trip() {
+        let settings = Settings {
+            notice_accepted: true,
+            custom_tiles: vec![CustomTile {
+                id: "custom-1".into(),
+                name: "My stream".into(),
+                url: "https://example.com/live".into(),
+            }],
+            last_service: Some(OpenService {
+                id: "netflix".into(),
+                url: "https://www.netflix.com/browse".into(),
+                allowed_domains: vec!["netflix.com".into()],
+            }),
+            ..Settings::default()
+        };
+        assert_eq!(parse(&to_json(&settings)), settings);
+    }
+
+    #[test]
+    fn a_file_from_before_tiles_has_no_tiles_and_shows_the_notice() {
+        let settings = parse(r#"{ "version": 1, "opacity": 0.5 }"#);
+        assert!(!settings.notice_accepted);
+        assert!(settings.custom_tiles.is_empty());
+        assert_eq!(settings.last_service, None);
+        assert_eq!(settings.hotkeys.play_pause, "Ctrl+Alt+Shift+Space");
     }
 
     #[test]

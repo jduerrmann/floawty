@@ -27,7 +27,8 @@ One line per decision record in `decisions/`. Template: `templates/t-decision.md
 ## ui
 
 - [[mvp-scope-and-controls]] – MVP scope, bar over the video, window mode ↔ floaty view, Ctrl+Alt+Shift hotkeys, click-through dot
-- [[bundled-service-logos]] – app tiles with official logos, kept apart from the GPL code
+- [[own-service-symbols]] – tiles show floawty's own SVG symbols on the brand colour
+- [[bundled-service-logos]] – superseded: official logos
 - [[overlay-controls]] – hover bar, tiles, settings, hide pauses, Shorts after one run (partly superseded)
 
 ## dist
