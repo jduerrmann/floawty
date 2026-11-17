@@ -34,5 +34,23 @@ By contributing you agree that your contribution is licensed under GPL-3.0.
 ## Development setup
 
 floawty is built with Tauri 2 (Rust + TypeScript) on WebView2, Windows 10/11 only
-([stack-by-spike](knowledge-base/decisions/stack-by-spike.md)). The exact setup is
-documented with the first app scaffold.
+([stack-by-spike](knowledge-base/decisions/stack-by-spike.md)).
+
+You need Node.js 24+, the Rust toolchain 1.90+ (`rustup`) and the WebView2 runtime
+(part of Windows 11).
+
+```powershell
+npm install
+npm run dev       # app with hot reload
+npm run verify    # everything CI will check: types, lint, format, Vitest, cargo fmt,
+                  # clippy, cargo test, release build, Playwright smoke test
+```
+
+| Path | What |
+|---|---|
+| `src/` | floawty's own UI (TypeScript, Vite, no framework) |
+| `src/services/<id>/` | one adapter per streaming service |
+| `src-tauri/` | Rust shell: window, settings, hotkeys |
+| `tests/` | Playwright tests, driven over WebView2's debug port |
+
+Logs are written to `%APPDATA%\floawty\logs\floawty.log` and never leave your PC.

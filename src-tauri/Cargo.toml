@@ -1,0 +1,21 @@
+[package]
+name = "floawty"
+version = "0.1.0"
+description = "Watch streaming services in a small always-on-top overlay"
+license = "GPL-3.0-only"
+edition = "2021"
+rust-version = "1.90"
+
+[build-dependencies]
+# Pinned to one minor version; an upgrade is its own task (AGENTS.md rule 7).
+tauri-build = { version = "~2.7", features = [] }
+
+[dependencies]
+tauri = { version = "~2.12", features = [] }
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true
