@@ -15,6 +15,15 @@ export default tseslint.config(
     },
   },
   {
+    files: ['src/services/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        { patterns: [{ group: ['@tauri-apps/*'], message: 'Page scripts never touch IPC.' }] },
+      ],
+    },
+  },
+  {
     files: ['**/*.test.ts', 'tests/**/*.ts'],
     rules: { 'max-lines-per-function': 'off' },
   },

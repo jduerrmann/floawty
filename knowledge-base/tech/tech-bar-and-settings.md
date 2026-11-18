@@ -41,6 +41,8 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
   German complete, same placeholders – Vitest). `system` follows Windows. Changing
   the language reloads both pages. Hotkeys are shown localized (Strg, Umschalt,
   Leertaste, arrows) everywhere, also in the click-through hint.
+- Shorts settings: pause 0–10 s, "hold while the mouse is over floawty" (default on),
+  size while a Short plays (`rotated` default or `separate`, [[tech-window]]).
 - The update check is stored only (off by default); nothing talks to GitHub yet.
 
 ## Structure
@@ -60,13 +62,15 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
 
 Bar controls: ◀ back to the tiles (only with a service), opacity 10–100 %, ⇄
 click-through, ▶ Shorts auto mode (only for services whose manifest sets
-`shortsAutoMode`), ⧉ window mode, ⚙ settings, ✕ close floawty. Opacity and
+`shortsAutoMode`; an amber dot and another tooltip when the page script reports
+missing controls, [[tech-shorts]]), ⧉ window mode, ⚙ settings, ✕ close floawty. Opacity and
 click-through are disabled in window mode. The empty parts of the strip drag the
 window. F6 moves between the bar and the page below; Esc leaves the bar and closes
 the settings.
 
 `OverlayState` (command `overlay_state`, event `overlay-state`): mode, opacity,
-clickThrough, serviceId, settingsOpen, hotkeys, language, shorts, updateCheck.
+clickThrough, serviceId, settingsOpen, hotkeys, language, shorts (auto, pauseSeconds,
+holdOnHover, portraitSize), updateCheck, pageProblem.
 
 ## Working on X → read Y
 

@@ -24,6 +24,7 @@ Vault conventions and budgets: `CLAUDE.md` in this folder.
 | Stack, DRM, budgets | [[stack-by-spike]], [[stack-spike-results]], [[drm-in-desktop-webviews]] |
 | Privacy, network, WebView2 | [[webview2-diagnostics-disclosed]], [[shared-webview2-profile-in-mvp]] |
 | MVP work, next package | [[plan-mvp]], [[active-plans]] |
+| Shorts auto mode, page scripts | [[tech-shorts]], [[page-scripts-polled-on-title-change]] |
 | Overlay UI, hotkeys, tiles, Shorts behavior | [[mvp-scope-and-controls]], [[own-service-symbols]], [[overlay-controls]] |
 | Logins, DRM download, network | [[google-login-honest-user-agent-first]], [[widevine-on-demand-with-notice]] |
 | Releases, signing | [[unsigned-first-then-signpath]] |
@@ -51,3 +52,4 @@ Vault conventions and budgets: `CLAUDE.md` in this folder.
 - [[tech-window]] – overlay window, geometry, settings file, hotkeys, local log
 - [[tech-services]] – tiles, own pages, service webview, navigation guard, no IPC for services
 - [[tech-bar-and-settings]] – hover bar over the service, settings panel, hotkey changes, EN/DE, reset all data
+- [[tech-shorts]] – Shorts auto mode, page scripts asked by floawty, turning the overlay

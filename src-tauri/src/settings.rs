@@ -62,11 +62,25 @@ pub enum Language {
     System,
 }
 
+/// How the floaty view finds its size while a Short plays.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum PortraitSize {
+    /// Each aspect keeps its own saved size.
+    Separate,
+    /// One size, turned: the sides swap.
+    #[default]
+    #[serde(other)]
+    Rotated,
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 pub struct Shorts {
     pub auto: bool,
     pub pause_seconds: f64,
+    pub hold_on_hover: bool,
+    pub portrait_size: PortraitSize,
 }
 
 impl Default for Shorts {
@@ -74,6 +88,8 @@ impl Default for Shorts {
         Self {
             auto: false,
             pause_seconds: DEFAULT_SHORTS_PAUSE,
+            hold_on_hover: true,
+            portrait_size: PortraitSize::Rotated,
         }
     }
 }
@@ -94,6 +110,7 @@ pub struct Settings {
     pub opacity: f64,
     pub mode: Mode,
     pub floaty: Option<Rect>,
+    pub floaty_portrait: Option<Rect>,
     pub window: Option<Rect>,
     pub hotkeys: Hotkeys,
     pub notice_accepted: bool,
@@ -112,6 +129,7 @@ impl Default for Settings {
             opacity: 1.0,
             mode: Mode::Floaty,
             floaty: None,
+            floaty_portrait: None,
             window: None,
             hotkeys: Hotkeys::default(),
             notice_accepted: false,
@@ -238,9 +256,12 @@ mod tests {
             settings.shorts,
             Shorts {
                 auto: false,
-                pause_seconds: 1.0
+                pause_seconds: 1.0,
+                hold_on_hover: true,
+                portrait_size: PortraitSize::Rotated,
             }
         );
+        assert_eq!(settings.floaty_portrait, None);
         assert!(!settings.update_check);
     }
 
@@ -261,6 +282,8 @@ mod tests {
                 shorts: Shorts {
                     auto: true,
                     pause_seconds: 2.5,
+                    hold_on_hover: false,
+                    portrait_size: PortraitSize::Separate,
                 },
                 update_check: true,
             },
@@ -277,6 +300,7 @@ mod tests {
             let shorts = Shorts {
                 auto: true,
                 pause_seconds: seconds,
+                ..Shorts::default()
             };
             apply_preferences(
                 &mut settings,
@@ -297,6 +321,36 @@ mod tests {
                 .pause_seconds,
             10.0
         );
+    }
+
+    #[test]
+    fn an_unknown_portrait_size_is_read_as_rotated() {
+        let settings = parse(r#"{ "shorts": { "portraitSize": "diagonal", "auto": true } }"#);
+        assert_eq!(settings.shorts.portrait_size, PortraitSize::Rotated);
+        assert!(settings.shorts.auto);
+    }
+
+    #[test]
+    fn the_separate_portrait_size_is_written_in_lowercase() {
+        let mut settings = Settings::default();
+        settings.shorts.portrait_size = PortraitSize::Separate;
+        assert!(to_json(&settings).contains(r#""portraitSize": "separate""#));
+    }
+
+    #[test]
+    fn a_saved_portrait_rect_survives_a_round_trip() {
+        let settings = Settings {
+            floaty_portrait: Some(Rect {
+                x: 1634,
+                y: 544,
+                width: 360,
+                height: 640,
+            }),
+            ..Settings::default()
+        };
+        let text = to_json(&settings);
+        assert!(text.contains(r#""floatyPortrait""#), "{text}");
+        assert_eq!(parse(&text), settings);
     }
 
     #[test]

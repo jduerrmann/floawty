@@ -23,3 +23,10 @@ User-facing changes, in plain language. Format based on
   not available yet) and "Reset all data".
 - English and German everywhere; German shows hotkeys as Strg+Alt+Umschalt.
 - The click-through dot is now visible over a service too.
+- YouTube Shorts auto mode (▶ in the bar): each Short – and each ad between them –
+  plays once in full, rests on its first frame for the chosen pause, then YouTube's
+  own "next" button moves on. The mouse over floawty holds it (can be turned off).
+- While Shorts play, the overlay turns upright (9:16) and turns back afterwards; in the
+  settings choose "same size, turned" or "its own size" for the upright overlay.
+- If YouTube changes its page so the auto mode cannot work, Shorts simply loop as
+  before and an amber dot on ▶ says so.

@@ -22,7 +22,8 @@ page inside the main window.
   `BROWSER_ARGS` = `tauri.conf.json`), or WebView2 refuses the shared environment.
 - **Service pages get no IPC:** the capability `main` lists only the webview `main`
   and no remote origin; `__TAURI_INTERNALS__` exists in service pages, but every
-  command is refused ("not allowed by ACL", checked for all commands).
+  command is refused ("not allowed by ACL", checked for all commands). Adapter page
+  scripts are asked by floawty instead ([[tech-shorts]]).
 - Top-level navigation stays on the service's `allowedDomains` and their subdomains;
   `about:`, `blob:` and `data:` stay; http(s)/mailto elsewhere open in the default
   browser, other schemes (e.g. `file:`) are dropped. Only the host is logged.

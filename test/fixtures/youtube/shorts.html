@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Short fixture</title>
+  </head>
+  <body>
+    <ytd-shorts>
+      <div id="shorts-player"><video loop></video></div>
+      <div id="ads-overlay" hidden></div>
+      <div id="navigation-button-down"><button aria-label="Next"></button></div>
+    </ytd-shorts>
+    <script>
+      const video = document.querySelector('video');
+      let shortNumber = 0;
+      window.__calls = [];
+      document.querySelector('#navigation-button-down button').addEventListener('click', () => {
+        window.__calls.push({ name: 'advance', at: Date.now() });
+        shortNumber += 1;
+        history.pushState({}, '', '/shorts/short' + shortNumber);
+        video.dispatchEvent(new Event('loadstart'));
+      });
+    </script>
+  </body>
+</html>

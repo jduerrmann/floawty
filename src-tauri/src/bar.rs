@@ -13,6 +13,7 @@ use windows_sys::Win32::Foundation::HWND;
 
 use crate::hover::{Hover, Sample};
 use crate::overlay::{self, Overlay, OverlayState};
+use crate::page;
 use crate::service;
 
 const LABEL: &str = "bar";
@@ -158,10 +159,14 @@ fn watch_hover(app: &AppHandle) {
         if !shown || !bar_state(app).hover_applies.load(Ordering::SeqCst) {
             hover = Hover::default();
             bar_state(app).hovered.store(false, Ordering::SeqCst);
+            page::set_hover(app, false);
             thread::park();
             continue;
         }
-        let hovered = hover.visible(look(main, host(app), started));
+        let sample = look(main, host(app), started);
+        // The page holds the Shorts automatic while the cursor is anywhere over floawty.
+        page::set_hover(app, sample.inside);
+        let hovered = hover.visible(sample);
         let was_hovered = bar_state(app).hovered.swap(hovered, Ordering::SeqCst);
         if hovered != was_hovered {
             set_visible(app, hovered);
@@ -221,6 +226,7 @@ mod tests {
             language: settings.language,
             shorts: settings.shorts,
             update_check: settings.update_check,
+            page_problem: false,
         }
     }
 

@@ -10,6 +10,7 @@ mod logbook;
 mod mode;
 mod navigation;
 mod overlay;
+mod page;
 mod paths;
 mod persistence;
 mod reset;
@@ -20,6 +21,7 @@ use tauri::{AppHandle, Manager, WebviewWindowBuilder, WindowEvent};
 
 use bar::Bar;
 use overlay::Overlay;
+use page::Page;
 
 /// A requested reset runs before any webview opens the profile.
 fn reset_if_requested(app: &AppHandle) -> std::io::Result<()> {
@@ -73,6 +75,7 @@ fn setup(app: &AppHandle) -> tauri::Result<()> {
         paths::floawty_dir(app)?.join("settings.json"),
     ));
     app.manage(Bar::default());
+    app.manage(Page::default());
     overlay::place_and_show(app)?;
     let settings = app.state::<Overlay>().settings();
     hotkeys::register(app, &settings.hotkeys);

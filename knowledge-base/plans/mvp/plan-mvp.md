@@ -3,7 +3,7 @@ type: plan
 tags: [plan-map, mvp]
 status: active
 created: 2026-11-17
-updated: 2026-11-17
+updated: 2026-11-18
 source: visual plan "MVP-Planung", approved 2026-11-17
 ---
 
@@ -38,4 +38,4 @@ Decisions: [[mvp-scope-and-controls]], [[bundled-service-logos]],
 | 07 | [[mvp-07-video-only]] | "Video only" for YouTube and Netflix, then the others | 05 |
 | 08 | [[mvp-08-measure-and-check]] | Budgets met, all services checked by the maintainer | 06, 07 |
 
-01–05 done and archived. Next candidate: 06.
+01–06 done and archived. Next: a "YouTube Shorts" tile (follow-up of 06, own change), then 07.

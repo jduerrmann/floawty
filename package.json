@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "tauri dev",
     "dev:ui": "vite",
-    "build:ui": "vite build",
+    "build:ui": "vite build && node scripts/build-page-scripts.mjs",
     "build": "tauri build --no-bundle",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",

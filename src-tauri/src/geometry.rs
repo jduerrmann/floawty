@@ -9,6 +9,10 @@ const WINDOW_HEIGHT: f64 = 720.0;
 const SNAP_GAP: f64 = 16.0;
 /// How close an edge must come before it snaps, in logical pixels.
 const SNAP_REACH: f64 = 32.0;
+/// How far an edge may sit from its snap position and still count as snapped, in pixels.
+const SNAP_TOLERANCE: i32 = 1;
+/// Same as `minWidth` in tauri.conf.json; Windows would widen a narrower window anyway.
+const MIN_WIDTH: f64 = 240.0;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Rect {
@@ -21,10 +25,6 @@ pub struct Rect {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Aspect {
     Landscape,
-    #[cfg_attr(
-        not(test),
-        expect(dead_code, reason = "Shorts report their format with mvp-06")
-    )]
     Portrait,
 }
 
@@ -111,6 +111,58 @@ pub fn fit_aspect(width: u32, aspect: Aspect) -> (u32, u32) {
     };
     let height = (f64::from(width) * f64::from(high) / f64::from(wide)).round() as u32;
     (width, height)
+}
+
+/// Gives `current` a new size: a snapped edge stays, otherwise the centre does, kept inside the area.
+pub fn turn(current: Rect, size: (u32, u32), area: Rect, scale: f64) -> Rect {
+    let gap = to_pixels(SNAP_GAP, scale);
+    let (width, height) = shrink_to_fit(at_least_min_width(size, scale), area, gap);
+    Rect {
+        x: turn_axis(current.x, current.width, width, area.x, area.width, gap),
+        y: turn_axis(current.y, current.height, height, area.y, area.height, gap),
+        width,
+        height,
+    }
+}
+
+fn at_least_min_width((width, height): (u32, u32), scale: f64) -> (u32, u32) {
+    let min_width = to_pixels(MIN_WIDTH, scale) as u32;
+    if width >= min_width {
+        return (width, height);
+    }
+    let grown = f64::from(height) * f64::from(min_width) / f64::from(width);
+    (min_width, grown.round() as u32)
+}
+
+/// Scales the size down, keeping its aspect, until it fits the area minus the gap on both sides.
+fn shrink_to_fit((width, height): (u32, u32), area: Rect, gap: i32) -> (u32, u32) {
+    let room_width = (area.width as i32 - 2 * gap).max(1) as u32;
+    let room_height = (area.height as i32 - 2 * gap).max(1) as u32;
+    let factor = (f64::from(room_width) / f64::from(width))
+        .min(f64::from(room_height) / f64::from(height))
+        .min(1.0);
+    let scaled = |side: u32, room: u32| ((f64::from(side) * factor).round() as u32).min(room);
+    (scaled(width, room_width), scaled(height, room_height))
+}
+
+fn turn_axis(
+    start: i32,
+    length: u32,
+    new_length: u32,
+    area_start: i32,
+    area_length: u32,
+    gap: i32,
+) -> i32 {
+    let end = start + length as i32;
+    let area_end = area_start + area_length as i32;
+    let turned = if (start - (area_start + gap)).abs() <= SNAP_TOLERANCE {
+        start
+    } else if (end - (area_end - gap)).abs() <= SNAP_TOLERANCE {
+        end - new_length as i32
+    } else {
+        start + (length as i32 - new_length as i32) / 2
+    };
+    turned.clamp(area_start, area_end - new_length as i32)
 }
 
 /// Where to put a saved window now; `None` when its monitor is gone.
@@ -219,6 +271,97 @@ mod tests {
     #[test]
     fn keeps_9_to_16_for_shorts() {
         assert_eq!(fit_aspect(270, Aspect::Portrait), (270, 480));
+    }
+
+    #[test]
+    fn an_upright_view_is_never_narrower_than_the_window_minimum() {
+        let smallest = rect(1664, 889, 240, 135);
+        assert_eq!(
+            turn(smallest, (135, 240), FULL_HD, 1.0),
+            rect(1664, 597, 240, 427)
+        );
+    }
+
+    #[test]
+    fn turning_keeps_the_bottom_right_corner() {
+        let snapped = rect(1424, 754, 480, 270);
+        assert_eq!(
+            turn(snapped, (270, 480), FULL_HD, 1.0),
+            rect(1634, 544, 270, 480)
+        );
+    }
+
+    #[test]
+    fn turning_keeps_the_top_left_corner() {
+        let snapped = rect(16, 16, 480, 270);
+        assert_eq!(
+            turn(snapped, (270, 480), FULL_HD, 1.0),
+            rect(16, 16, 270, 480)
+        );
+    }
+
+    #[test]
+    fn turning_back_keeps_the_corner_too() {
+        let snapped = rect(1634, 544, 270, 480);
+        assert_eq!(
+            turn(snapped, (480, 270), FULL_HD, 1.0),
+            rect(1424, 754, 480, 270)
+        );
+    }
+
+    #[test]
+    fn an_edge_one_pixel_off_the_gap_still_counts_as_snapped() {
+        let almost = rect(17, 15, 480, 270);
+        assert_eq!(
+            turn(almost, (270, 480), FULL_HD, 1.0),
+            rect(17, 15, 270, 480)
+        );
+    }
+
+    #[test]
+    fn a_free_floating_window_keeps_its_centre() {
+        let free = rect(700, 400, 480, 270);
+        assert_eq!(
+            turn(free, (270, 480), FULL_HD, 1.0),
+            rect(805, 295, 270, 480)
+        );
+    }
+
+    #[test]
+    fn a_turn_across_the_work_area_edge_is_pulled_inside() {
+        let low = rect(700, 700, 480, 270);
+        assert_eq!(
+            turn(low, (270, 480), FULL_HD, 1.0),
+            rect(805, 560, 270, 480)
+        );
+    }
+
+    #[test]
+    fn a_too_tall_result_shrinks_and_keeps_9_to_16() {
+        let big = rect(320, 160, 1280, 720);
+        assert_eq!(
+            turn(big, (720, 1280), FULL_HD, 1.0),
+            rect(676, 16, 567, 1008)
+        );
+    }
+
+    #[test]
+    fn turning_works_on_a_monitor_left_of_the_primary() {
+        let snapped = rect(-496, 698, 480, 270);
+        assert_eq!(
+            turn(snapped, (270, 480), LEFT_MONITOR, 1.0),
+            rect(-286, 488, 270, 480)
+        );
+    }
+
+    #[test]
+    fn the_gap_scales_with_the_display() {
+        let area = rect(0, 0, 2880, 1560);
+        let snapped = default_placement(area, 1.5);
+        assert_eq!(
+            turn(snapped, (405, 720), area, 1.5),
+            rect(2451, 816, 405, 720)
+        );
     }
 
     #[test]

@@ -12,6 +12,7 @@ use crate::bar;
 use crate::geometry::{self, Aspect, Rect};
 use crate::logbook;
 use crate::mode::{self, Mode};
+use crate::page;
 use crate::persistence;
 use crate::service;
 use crate::settings::{self, Hotkeys, Language, Settings, Shorts};
@@ -25,6 +26,12 @@ pub struct Overlay {
     click_through: Mutex<bool>,
     settings_open: Mutex<bool>,
     settle_generation: AtomicU64,
+    /// What the service page shows now; the floaty view turns with it.
+    aspect: Mutex<Aspect>,
+    /// The landscape view before it turned upright, restored unless the user changed the upright one.
+    before_turn: Mutex<Option<Rect>>,
+    turned_to: Mutex<Option<Rect>>,
+    page_problem: Mutex<bool>,
 }
 
 #[derive(Clone, serde::Serialize)]
@@ -39,6 +46,7 @@ pub struct OverlayState {
     pub language: Language,
     pub shorts: Shorts,
     pub update_check: bool,
+    pub page_problem: bool,
 }
 
 impl Overlay {
@@ -49,6 +57,10 @@ impl Overlay {
             click_through: Mutex::new(false),
             settings_open: Mutex::new(false),
             settle_generation: AtomicU64::new(0),
+            aspect: Mutex::new(Aspect::Landscape),
+            before_turn: Mutex::new(None),
+            turned_to: Mutex::new(None),
+            page_problem: Mutex::new(false),
         }
     }
 
@@ -68,6 +80,15 @@ impl Overlay {
         *self.settings_open.lock().unwrap() = open;
     }
 
+    /// Returns whether the problem state changed.
+    pub fn set_page_problem(&self, problem: bool) -> bool {
+        std::mem::replace(&mut *self.page_problem.lock().unwrap(), problem) != problem
+    }
+
+    fn aspect(&self) -> Aspect {
+        *self.aspect.lock().unwrap()
+    }
+
     pub fn state(&self) -> OverlayState {
         let settings = self.settings.lock().unwrap();
         OverlayState {
@@ -80,6 +101,7 @@ impl Overlay {
             language: settings.language,
             shorts: settings.shorts.clone(),
             update_check: settings.update_check,
+            page_problem: *self.page_problem.lock().unwrap(),
         }
     }
 }
@@ -174,7 +196,20 @@ pub fn place_and_show(app: &AppHandle) -> tauri::Result<()> {
 pub fn toggle_mode(app: &AppHandle) -> tauri::Result<()> {
     let window = main_window(app);
     let current = visible_rect(&window)?;
-    overlay(app).update(app, |s| *s = mode::switch(s, current));
+    let before = overlay(app).settings();
+    let turned = before.mode == Mode::Floaty && overlay(app).aspect() == Aspect::Portrait;
+    let before_turn = overlay(app).before_turn.lock().unwrap().take();
+    let floaty = match (turned, before_turn) {
+        (true, Some(landscape)) => landscape,
+        (true, None) => landscape_of(&before, current, current_area(&window)?),
+        (false, _) => current,
+    };
+    overlay(app).update(app, |s| {
+        if turned {
+            mode::remember_turned(s, current, floaty);
+        }
+        *s = mode::switch(s, floaty);
+    });
     let settings = overlay(app).settings();
     let click_through_on = *overlay(app).click_through.lock().unwrap();
     if settings.mode == Mode::Window && click_through_on {
@@ -182,9 +217,75 @@ pub fn toggle_mode(app: &AppHandle) -> tauri::Result<()> {
     }
     apply_mode_style(&window, settings.mode)?;
     set_rect(&window, target_rect(&window, &settings)?)?;
+    if settings.mode == Mode::Floaty && overlay(app).aspect() == Aspect::Portrait {
+        turn(app, &window, &settings, Aspect::Portrait)?;
+    }
     apply_opacity(&window, effective_opacity(&settings))?;
     emit_state(app);
     Ok(())
+}
+
+fn current_area(window: &Window) -> tauri::Result<Option<(Rect, f64)>> {
+    Ok(window.current_monitor()?.map(|monitor| {
+        let area = to_rect(monitor.work_area().position, monitor.work_area().size);
+        (area, monitor.scale_factor())
+    }))
+}
+
+/// Where the landscape floaty view would be, seen from the portrait one.
+fn landscape_of(settings: &Settings, portrait: Rect, area: Option<(Rect, f64)>) -> Rect {
+    let Some((area, scale)) = area else {
+        return portrait;
+    };
+    let size = mode::floaty_size(settings, Aspect::Landscape, portrait);
+    geometry::turn(portrait, size, area, scale)
+}
+
+/// The service page shows a Short or not; only the floaty view turns, window mode stays.
+pub fn set_aspect(app: &AppHandle, aspect: Aspect) {
+    let handle = app.clone();
+    // Turning, settling and mode changes share the main thread, so they never interleave.
+    let _ = app.run_on_main_thread(move || {
+        if let Err(error) = change_aspect(&handle, aspect) {
+            logbook::write(&handle, &format!("could not turn the overlay: {error}"));
+        }
+    });
+}
+
+fn change_aspect(app: &AppHandle, aspect: Aspect) -> tauri::Result<()> {
+    let previous = std::mem::replace(&mut *overlay(app).aspect.lock().unwrap(), aspect);
+    let settings = overlay(app).settings();
+    if previous == aspect || settings.mode == Mode::Window {
+        return Ok(());
+    }
+    turn(app, &main_window(app), &settings, aspect)
+}
+
+// Settling afterwards snaps the turned view and saves it.
+fn turn(
+    app: &AppHandle,
+    window: &Window,
+    settings: &Settings,
+    aspect: Aspect,
+) -> tauri::Result<()> {
+    let current = visible_rect(window)?;
+    let Some((area, scale)) = current_area(window)? else {
+        return Ok(());
+    };
+    let before = overlay(app).before_turn.lock().unwrap().take();
+    let target = match (aspect, before) {
+        (Aspect::Landscape, Some(landscape)) => landscape,
+        _ => geometry::turn(
+            current,
+            mode::floaty_size(settings, aspect, current),
+            area,
+            scale,
+        ),
+    };
+    let upright = aspect == Aspect::Portrait;
+    *overlay(app).before_turn.lock().unwrap() = upright.then_some(current);
+    *overlay(app).turned_to.lock().unwrap() = upright.then_some(target);
+    set_rect(window, target)
 }
 
 // Tauri has no opacity API, so the window becomes a layered Win32 window.
@@ -258,11 +359,12 @@ pub fn toggle_visible(app: &AppHandle) -> tauri::Result<()> {
         apply_opacity(&window, effective_opacity(&overlay(app).settings()))?;
     }
     emit_state(app);
+    page::sync(app);
     Ok(())
 }
 
 /// Saves the geometry once the user stops moving or resizing; the floaty view also
-/// snaps and keeps 16:9.
+/// snaps and keeps 16:9, or 9:16 while a Short plays.
 pub fn settle_later(app: &AppHandle) {
     let generation = overlay(app)
         .settle_generation
@@ -271,12 +373,15 @@ pub fn settle_later(app: &AppHandle) {
     let app = app.clone();
     thread::spawn(move || {
         thread::sleep(SETTLE_TIME);
-        if overlay(&app).settle_generation.load(Ordering::SeqCst) != generation {
-            return;
-        }
-        if let Err(error) = settle(&app) {
-            logbook::write(&app, &format!("could not settle the window: {error}"));
-        }
+        let handle = app.clone();
+        let _ = app.run_on_main_thread(move || {
+            if overlay(&handle).settle_generation.load(Ordering::SeqCst) != generation {
+                return;
+            }
+            if let Err(error) = settle(&handle) {
+                logbook::write(&handle, &format!("could not settle the window: {error}"));
+            }
+        });
     });
 }
 
@@ -287,11 +392,11 @@ fn settle(app: &AppHandle) -> tauri::Result<()> {
         overlay(app).update(app, |s| mode::remember(s, current));
         return Ok(());
     }
-    let Some(monitor) = window.current_monitor()? else {
+    let Some((area, scale)) = current_area(&window)? else {
         return Ok(());
     };
-    let area = to_rect(monitor.work_area().position, monitor.work_area().size);
-    let (width, height) = geometry::fit_aspect(current.width, Aspect::Landscape);
+    let aspect = overlay(app).aspect();
+    let (width, height) = geometry::fit_aspect(current.width, aspect);
     let snapped = geometry::snap(
         Rect {
             width,
@@ -299,11 +404,44 @@ fn settle(app: &AppHandle) -> tauri::Result<()> {
             ..current
         },
         area,
-        monitor.scale_factor(),
+        scale,
     );
     if snapped != current {
         set_rect(&window, snapped)?;
     }
-    overlay(app).update(app, |s| mode::remember(s, snapped));
+    if aspect == Aspect::Landscape {
+        overlay(app).update(app, |s| mode::remember(s, snapped));
+        return Ok(());
+    }
+    let landscape = match landscape_before_turn(app, current, snapped, (area, scale)) {
+        Some(landscape) => landscape,
+        None => landscape_of(&overlay(app).settings(), snapped, Some((area, scale))),
+    };
+    overlay(app).update(app, |s| mode::remember_turned(s, snapped, landscape));
     Ok(())
+}
+
+/// The pre-turn landscape view: kept while the upright one keeps floawty's size (a move
+/// only shifts it), forgotten once the user resizes.
+fn landscape_before_turn(
+    app: &AppHandle,
+    current: Rect,
+    snapped: Rect,
+    (area, scale): (Rect, f64),
+) -> Option<Rect> {
+    let state = overlay(app);
+    let mut turned_to = state.turned_to.lock().unwrap();
+    let mut before = state.before_turn.lock().unwrap();
+    // Settling derives the height from the width, so only the width tells a resize.
+    let same_size = turned_to.is_some_and(|r| r.width == current.width);
+    if !same_size {
+        *turned_to = None;
+        *before = None;
+        return None;
+    }
+    if *turned_to != Some(current) {
+        *before = before.map(|b| geometry::turn(snapped, (b.width, b.height), area, scale));
+    }
+    *turned_to = Some(snapped);
+    *before
 }

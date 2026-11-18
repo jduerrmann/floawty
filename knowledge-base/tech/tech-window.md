@@ -30,6 +30,16 @@ wiring talks to Tauri and Win32.
   snapping and 16:9. **Window mode** = title bar, not on top, fully opaque,
   click-through off and ignored, no snapping. Each mode keeps its own geometry
   ([[mvp-scope-and-controls]]).
+- **Turning:** while the service page reports a Short ([[tech-shorts]]) the floaty
+  view turns 9:16 (`overlay::set_aspect`, runtime only, starts landscape); window mode
+  never turns but turns on entering the floaty view. `geometry::turn` keeps a snapped
+  edge per axis, else the centre, pulls inside the work area, keeps the 240 px
+  minimum width and shrinks to fit. Turning back restores the exact pre-turn
+  landscape size unless the user resized the upright view; a move only shifts it.
+  The smallest overlay (240 × 135) turns to 240 × 427.
+  Size: `rotated` swaps the sides, `separate` uses `floaty` / `floatyPortrait`
+  (`mode::floaty_size`). While portrait, `floaty` stores the landscape equivalent so a
+  restart opens landscape in place (`mode::remember_turned`).
 - Logs stay local ([[core-principles]] #4).
 
 ## Structure
@@ -66,7 +76,8 @@ Settings file (v1):
   "customTiles": [],
   "lastService": null,
   "language": "system",
-  "shorts": { "auto": false, "pauseSeconds": 1 },
+  "floatyPortrait": null,
+  "shorts": { "auto": false, "pauseSeconds": 1, "holdOnHover": true, "portraitSize": "rotated" },
   "updateCheck": false
 }
 ```

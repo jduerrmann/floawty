@@ -7,6 +7,8 @@ import { resolveLanguage, type Language, type LanguageChoice } from './i18n';
 export interface Shorts {
   auto: boolean;
   pauseSeconds: number;
+  holdOnHover: boolean;
+  portraitSize: 'rotated' | 'separate';
 }
 
 export interface Preferences {
@@ -22,6 +24,7 @@ export interface OverlayState extends Preferences {
   serviceId: string | null;
   settingsOpen: boolean;
   hotkeys: Hotkeys;
+  pageProblem: boolean;
 }
 
 export type StateView = (state: OverlayState) => void;

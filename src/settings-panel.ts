@@ -15,6 +15,8 @@ const TEXTS: [string, MessageKey][] = [
   ['hotkeys-title', 'hotkeysTitle'],
   ['shorts-title', 'shortsTitle'],
   ['shorts-pause-label', 'shortsPause'],
+  ['shorts-hold-label', 'shortsHoldOnHover'],
+  ['portrait-size-label', 'portraitSize'],
   ['update-check-label', 'updateCheck'],
   ['update-check-note', 'updateCheckLater'],
   ['reset-title', 'resetTitle'],
@@ -23,6 +25,10 @@ const TEXTS: [string, MessageKey][] = [
   ['reset-yes', 'resetConfirm'],
   ['reset-no', 'cancel'],
 ];
+const PORTRAIT_OPTIONS: Record<string, MessageKey> = {
+  rotated: 'portraitRotated',
+  separate: 'portraitSeparate',
+};
 const LANGUAGE_OPTIONS: Record<string, MessageKey> = {
   system: 'languageSystem',
   en: 'languageEn',
@@ -33,6 +39,9 @@ function writeTexts(language: Language): void {
   for (const [id, key] of TEXTS) element(id).textContent = t(language, key);
   for (const option of element<HTMLSelectElement>('language').options) {
     option.textContent = t(language, LANGUAGE_OPTIONS[option.value] ?? 'languageSystem');
+  }
+  for (const option of element<HTMLSelectElement>('portrait-size').options) {
+    option.textContent = t(language, PORTRAIT_OPTIONS[option.value] ?? 'portraitRotated');
   }
 }
 
@@ -58,15 +67,31 @@ function wirePreferences(current: () => OverlayState): void {
     if (Number.isNaN(pause.valueAsNumber)) return;
     change((p) => ({ ...p, shorts: { ...p.shorts, pauseSeconds: pause.valueAsNumber } }));
   });
+  wireShorts(change);
   const updateCheck = element<HTMLInputElement>('update-check');
   updateCheck.addEventListener('change', () =>
     change((p) => ({ ...p, updateCheck: updateCheck.checked })),
   );
 }
 
+type Change = (patch: (preferences: Preferences) => Preferences) => void;
+
+function wireShorts(change: Change): void {
+  const shorts = (patch: Partial<Preferences['shorts']>) =>
+    change((p) => ({ ...p, shorts: { ...p.shorts, ...patch } }));
+  const hold = element<HTMLInputElement>('shorts-hold');
+  hold.addEventListener('change', () => shorts({ holdOnHover: hold.checked }));
+  const size = element<HTMLSelectElement>('portrait-size');
+  size.addEventListener('change', () =>
+    shorts({ portraitSize: size.value as Preferences['shorts']['portraitSize'] }),
+  );
+}
+
 function showValues(state: OverlayState): void {
   element<HTMLSelectElement>('language').value = state.language;
   element<HTMLInputElement>('shorts-pause').value = String(state.shorts.pauseSeconds);
+  element<HTMLInputElement>('shorts-hold').checked = state.shorts.holdOnHover;
+  element<HTMLSelectElement>('portrait-size').value = state.shorts.portraitSize;
   element<HTMLInputElement>('update-check').checked = state.updateCheck;
 }
 

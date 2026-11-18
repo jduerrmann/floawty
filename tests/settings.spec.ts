@@ -1,4 +1,4 @@
-// The settings panel: language, hotkeys and "Reset all data".
+// The settings panel: language, hotkeys, Shorts and "Reset all data".
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -31,6 +31,25 @@ test('the language changes both pages and is kept', async () => {
     await app.stop();
   }
   expect(readFileSync(settingsFile(profile), 'utf8')).toContain('"language": "en"');
+});
+
+test('the Shorts hover hold and portrait size are saved', async () => {
+  const profile = freshProfile();
+  const app = await launch(profile);
+  try {
+    await openSettings(app);
+    await expect(app.home.locator('#shorts-hold')).toBeChecked();
+    await expect(app.home.locator('#portrait-size')).toHaveValue('rotated');
+    await app.home.locator('#shorts-hold').uncheck();
+    await app.home.locator('#portrait-size').selectOption('separate');
+    await expect(app.home.locator('#portrait-size')).toHaveValue('separate');
+  } finally {
+    await app.stop();
+  }
+  const saved = JSON.parse(readFileSync(settingsFile(profile), 'utf8')) as {
+    shorts: { holdOnHover: boolean; portraitSize: string };
+  };
+  expect(saved.shorts).toMatchObject({ holdOnHover: false, portraitSize: 'separate' });
 });
 
 test('a new hotkey is recorded, a conflict is shown and it survives a restart', async () => {

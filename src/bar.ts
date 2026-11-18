@@ -63,6 +63,8 @@ function showControls(language: Language, state: OverlayState): void {
   button('click-through').disabled = !floaty;
   button('shorts').hidden = !offersShorts(state.serviceId);
   button('shorts').setAttribute('aria-pressed', String(state.shorts.auto));
+  button('shorts').classList.toggle('problem', state.pageProblem);
+  label(button('shorts'), language, state.pageProblem ? 'shortsProblem' : 'shortsAuto');
   label(button('mode'), language, floaty ? 'toWindowMode' : 'toFloatyView');
   button('settings').setAttribute('aria-pressed', String(state.settingsOpen));
 }

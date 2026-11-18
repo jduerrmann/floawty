@@ -1,13 +1,15 @@
 //! The service webview: one at a time, in floawty's shared WebView2 profile, on its domains.
-use tauri::{AppHandle, LogicalPosition, Manager, Url, Webview, WebviewBuilder, WebviewUrl};
+use tauri::webview::PageLoadEvent;
+use tauri::{AppHandle, LogicalPosition, Manager, Url, Webview, WebviewBuilder, WebviewUrl, Wry};
 
 use crate::bar;
 use crate::logbook;
 use crate::navigation::{self, Decision};
 use crate::overlay::{self, Overlay};
+use crate::page;
 use crate::settings::OpenService;
 
-const LABEL: &str = "service";
+pub const LABEL: &str = "service";
 // Must equal the main window's arguments in tauri.conf.json: one profile, one set of options.
 pub const BROWSER_ARGS: &str =
     "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --disable-background-networking";
@@ -26,13 +28,18 @@ pub fn open(app: &AppHandle, service: OpenService) -> tauri::Result<()> {
         .url
         .parse()
         .map_err(|_| tauri::Error::InvalidWebviewUrl("service url"))?;
-    let builder = WebviewBuilder::new(LABEL, WebviewUrl::External(url))
+    let mut builder = WebviewBuilder::new(LABEL, WebviewUrl::External(url))
         .additional_browser_args(BROWSER_ARGS)
         .auto_resize()
         .on_navigation(navigation_guard(
             app.clone(),
             service.allowed_domains.clone(),
         ));
+    let script = page::script(app, &service.id);
+    page::reset(app, script.is_some());
+    if let Some(script) = script {
+        builder = with_page_script(app, builder, script);
+    }
     let window = overlay::main_window(app);
     let size = window
         .inner_size()?
@@ -45,9 +52,28 @@ pub fn open(app: &AppHandle, service: OpenService) -> tauri::Result<()> {
     Ok(())
 }
 
+// The title is only a wake-up call and is never read: it names what the user watches.
+fn with_page_script(
+    app: &AppHandle,
+    builder: WebviewBuilder<Wry>,
+    script: String,
+) -> WebviewBuilder<Wry> {
+    let on_title = app.clone();
+    let on_load = app.clone();
+    builder
+        .initialization_script(script)
+        .on_document_title_changed(move |_, _| page::wake(&on_title))
+        .on_page_load(move |_, payload| {
+            if payload.event() == PageLoadEvent::Finished {
+                page::wake(&on_load);
+            }
+        })
+}
+
 /// Back to the tiles; the next start opens the tiles too.
 pub fn close(app: &AppHandle) -> tauri::Result<()> {
     close_webview(app)?;
+    page::reset(app, false);
     app.state::<Overlay>()
         .update(app, |s| s.last_service = None);
     overlay::emit_state(app);

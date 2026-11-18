@@ -5,6 +5,7 @@ use tauri::{AppHandle, Manager};
 use crate::hotkeys::{self, Action};
 use crate::logbook;
 use crate::overlay::{self, Overlay, OverlayState};
+use crate::page;
 use crate::paths;
 use crate::reset;
 use crate::service;
@@ -86,6 +87,7 @@ pub fn set_settings_open(app: AppHandle, open: bool) -> CommandResult {
     app.state::<Overlay>().set_settings_open(open);
     let result = service::cover(&app, open);
     overlay::emit_state(&app);
+    page::sync(&app);
     report(result.and_then(|()| focus(&app, false)))
 }
 
@@ -94,6 +96,7 @@ pub fn set_preferences(app: AppHandle, preferences: Preferences) {
     app.state::<Overlay>()
         .update(&app, |s| settings::apply_preferences(s, preferences));
     overlay::emit_state(&app);
+    page::sync(&app);
 }
 
 #[tauri::command]

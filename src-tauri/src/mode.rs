@@ -1,8 +1,8 @@
 //! Window mode (a normal window) and floaty view (the overlay); each keeps its own geometry.
 use serde::{Deserialize, Serialize};
 
-use crate::geometry::Rect;
-use crate::settings::Settings;
+use crate::geometry::{Aspect, Rect};
+use crate::settings::{PortraitSize, Settings};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -36,6 +36,27 @@ pub fn remember(settings: &mut Settings, current: Rect) {
     match settings.mode {
         Mode::Floaty => settings.floaty = Some(current),
         Mode::Window => settings.window = Some(current),
+    }
+}
+
+/// The size the floaty view takes when it turns to `target` from `current`, the other aspect.
+pub fn floaty_size(settings: &Settings, target: Aspect, current: Rect) -> (u32, u32) {
+    let swapped = (current.height, current.width);
+    if settings.shorts.portrait_size == PortraitSize::Rotated {
+        return swapped;
+    }
+    let saved = match target {
+        Aspect::Landscape => settings.floaty,
+        Aspect::Portrait => settings.floaty_portrait,
+    };
+    saved.map_or(swapped, |rect| (rect.width, rect.height))
+}
+
+/// While a Short turns the view, keeps the landscape place for a restart and, if asked, the portrait one.
+pub fn remember_turned(settings: &mut Settings, portrait: Rect, landscape: Rect) {
+    settings.floaty = Some(landscape);
+    if settings.shorts.portrait_size == PortraitSize::Separate {
+        settings.floaty_portrait = Some(portrait);
     }
 }
 
@@ -76,6 +97,94 @@ mod tests {
         assert_eq!(back.mode, Mode::Floaty);
         assert_eq!(geometry_of(&back, Mode::Floaty), Some(FLOATY));
         assert_eq!(geometry_of(&back, Mode::Window), Some(WINDOW));
+    }
+
+    const PORTRAIT: Rect = Rect {
+        x: 1634,
+        y: 544,
+        width: 360,
+        height: 640,
+    };
+    const LANDSCAPE: Rect = Rect {
+        x: 1264,
+        y: 664,
+        width: 640,
+        height: 360,
+    };
+
+    fn separate() -> Settings {
+        let mut settings = Settings::default();
+        settings.shorts.portrait_size = PortraitSize::Separate;
+        settings
+    }
+
+    #[test]
+    fn rotated_turns_a_landscape_floaty_into_portrait_by_swapping_the_sides() {
+        assert_eq!(
+            floaty_size(&Settings::default(), Aspect::Portrait, FLOATY),
+            (270, 480)
+        );
+    }
+
+    #[test]
+    fn rotated_turns_an_enlarged_portrait_back_into_the_swapped_landscape() {
+        assert_eq!(
+            floaty_size(&Settings::default(), Aspect::Landscape, PORTRAIT),
+            (640, 360)
+        );
+    }
+
+    #[test]
+    fn separate_uses_the_saved_portrait_size() {
+        let settings = Settings {
+            floaty_portrait: Some(PORTRAIT),
+            ..separate()
+        };
+        assert_eq!(floaty_size(&settings, Aspect::Portrait, FLOATY), (360, 640));
+    }
+
+    #[test]
+    fn separate_uses_the_saved_landscape_size() {
+        let settings = Settings {
+            floaty: Some(LANDSCAPE),
+            ..separate()
+        };
+        assert_eq!(
+            floaty_size(&settings, Aspect::Landscape, PORTRAIT),
+            (640, 360)
+        );
+    }
+
+    #[test]
+    fn separate_swaps_the_sides_while_no_portrait_size_is_saved() {
+        assert_eq!(
+            floaty_size(&separate(), Aspect::Portrait, FLOATY),
+            (270, 480)
+        );
+    }
+
+    #[test]
+    fn separate_swaps_the_sides_while_no_landscape_size_is_saved() {
+        assert_eq!(
+            floaty_size(&separate(), Aspect::Landscape, PORTRAIT),
+            (640, 360)
+        );
+    }
+
+    #[test]
+    fn rotated_remembers_only_the_landscape_rect() {
+        let mut settings = Settings::default();
+        remember_turned(&mut settings, PORTRAIT, LANDSCAPE);
+        assert_eq!(settings.floaty, Some(LANDSCAPE));
+        assert_eq!(settings.floaty_portrait, None);
+    }
+
+    #[test]
+    fn separate_remembers_both_rects() {
+        let mut settings = separate();
+        remember_turned(&mut settings, PORTRAIT, LANDSCAPE);
+        assert_eq!(settings.floaty, Some(LANDSCAPE));
+        assert_eq!(settings.floaty_portrait, Some(PORTRAIT));
     }
 
     #[test]
