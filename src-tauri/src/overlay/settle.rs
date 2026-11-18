@@ -1,4 +1,4 @@
-//! Settling: once the user lets go of a move or resize, keep the aspect, snap and save.
+//! Settling: once the user lets go of a move or resize, fit the shape, snap and save.
 use std::sync::atomic::Ordering;
 use std::thread;
 use std::time::Duration;
@@ -14,7 +14,7 @@ use crate::mode::{self, Mode};
 const SETTLE_TIME: Duration = Duration::from_millis(250);
 
 /// Saves the geometry once the user stops moving or resizing; the floaty view also
-/// snaps and keeps 16:9, or 9:16 while a Short plays.
+/// snaps and fits its shape: free with magnets at 16:9 and 12:5, or 9:16 while a Short plays.
 pub fn settle_later(app: &AppHandle) {
     let generation = overlay(app)
         .settle_generation
@@ -64,7 +64,12 @@ fn settle(app: &AppHandle) -> tauri::Result<()> {
     };
     let aspect = overlay(app).aspect();
     let before = overlay(app).settled.lock().unwrap().take();
-    let (width, height) = geometry::fit_resized(before, (current.width, current.height), aspect);
+    let now = (current.width, current.height);
+    // Free in landscape with magnets at 16:9 and 12:5; a Short keeps the overlay 9:16.
+    let (width, height) = match aspect {
+        Aspect::Landscape => geometry::fit_landscape(before, now, scale),
+        Aspect::Portrait => geometry::fit_resized(before, now, aspect),
+    };
     let fitted = Rect {
         width,
         height,

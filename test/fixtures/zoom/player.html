@@ -1,0 +1,125 @@
+<!doctype html>
+<!-- Hand-made player for the zoom tests. Query: w, h = picture size (a canvas stream);
+     layout = contain (video fills the view, picture letterboxed inside, like most DRM
+     players), sized (video sized to its picture and centred, like YouTube), cover (fills
+     with object-fit cover), left (a player column at the left), small (a preview);
+     late = the stream starts after 300 ms; preview = a small video before the main one.
+     window.__swap() replaces the main video, __reshape(w, h) changes the picture,
+     __shrink() makes the page set a small video size without a window resize. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Zoom fixture</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #000;
+      }
+      #player {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+      }
+      #player video {
+        position: absolute;
+      }
+      .contain video,
+      .cover video {
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      .cover video {
+        object-fit: cover;
+      }
+      .left video {
+        left: 0;
+        top: 0;
+        width: 70%;
+        height: 100%;
+        object-fit: contain;
+      }
+      .small video {
+        left: 10px;
+        top: 10px;
+        width: 160px;
+        height: 90px;
+      }
+      #preview {
+        position: fixed;
+        left: 4px;
+        top: 4px;
+        width: 64px;
+        height: 36px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="player"><video muted></video></div>
+    <script>
+      const query = new URLSearchParams(location.search);
+      const canvas = document.createElement('canvas');
+      let stream = null;
+      function reshape(width, height) {
+        Object.assign(canvas, { width, height });
+        canvas.getContext('2d').fillRect(0, 0, width, height);
+        stream ??= canvas.captureStream();
+      }
+      reshape(Number(query.get('w') ?? 320), Number(query.get('h') ?? 180));
+      const layout = query.get('layout') ?? 'contain';
+      const player = document.getElementById('player');
+      player.className = layout;
+      let video = player.querySelector('video');
+      let shrunk = false;
+      function attach(element) {
+        element.srcObject = stream;
+        element.play();
+      }
+      if (query.has('preview')) {
+        const preview = Object.assign(document.createElement('video'), {
+          id: 'preview',
+          muted: true,
+        });
+        document.body.prepend(preview);
+        attach(preview);
+      }
+      if (query.has('late')) setTimeout(() => attach(video), 300);
+      else attach(video);
+      // Like YouTube: the element itself gets the picture's size, centred in the view.
+      function size() {
+        if (layout !== 'sized') return;
+        const ratio = canvas.width / canvas.height;
+        const width = shrunk ? 200 : Math.min(innerWidth, innerHeight * ratio);
+        const height = width / ratio;
+        Object.assign(video.style, {
+          width: `${width}px`,
+          height: `${height}px`,
+          left: `${(innerWidth - width) / 2}px`,
+          top: `${(innerHeight - height) / 2}px`,
+        });
+      }
+      addEventListener('resize', size);
+      size();
+      window.__swap = () => {
+        const next = document.createElement('video');
+        next.muted = true;
+        video.replaceWith(next);
+        video = next;
+        size();
+        attach(next);
+      };
+      window.__reshape = (width, height) => {
+        reshape(width, height);
+        size();
+      };
+      window.__shrink = () => {
+        shrunk = true;
+        size();
+      };
+    </script>
+  </body>
+</html>

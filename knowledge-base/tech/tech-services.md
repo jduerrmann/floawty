@@ -47,6 +47,7 @@ page inside the main window.
 | `src/assets/symbols/*.svg` | floawty's own symbols; Vite emits them as files (`assetsInlineLimit: 0`) so the CSP needs no `data:` | Vitest (files exist) |
 | `src-tauri/src/service.rs` | open/close the service webview, navigation guard, pause on hide, play/pause, cover for the settings, focus | Playwright, check scripts |
 | `src-tauri/src/navigation.rs` | stay or open in the browser | unit |
+| `src/services/_zoom/page.ts` | in every service: frozen `__floawtyZoom(on)` (a frozen no-op outside http(s)); scales the largest video to the view's width when on, the view is wider than 16:9 (× 1.01), the picture (letterboxed by `object-fit: contain`) fills ≥ 95 % of the height, the box is centred, the page applies no transform of its own and the scale is ≤ 1.5; window `resize`, captured `loadedmetadata`/`resize` and a ResizeObserver on the main video, no polling | `tests/adapters/zoom.spec.ts` |
 | `src/services/netflix/page.ts` | no page scrollbar on `/watch/` (Navigation API follows page changes) | `tests/adapters/netflix.spec.ts` |
 | `src-tauri/src/commands.rs` | `tiles_state`, `accept_notice`, `set_custom_tiles`, `open_service` / `close_service` (async) | Playwright |
 
@@ -67,5 +68,7 @@ set to fresh temporary folders (`tests/app.ts`), so they never touch the user's 
   the service: Google (YouTube), Amazon (Prime Video, RTL+ "Sign in with Amazon").
 - Prime Video's password step shows the Windows passkey dialog: Amazon's own direct
   request, the same in Edge; left alone ([[passkey-prompts-left-to-the-service]]).
+- Zoom: videos inside shadow roots or iframes get none (unverified which services);
+  subtitles drawn into the video picture itself are cut with the bottom.
 - `lastService` stores the allowed domains it was opened with: a restored service keeps
   them until it is opened from its tile again, so manifest changes reach it only then.

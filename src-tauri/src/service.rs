@@ -37,10 +37,15 @@ pub fn open(app: &AppHandle, service: OpenService) -> tauri::Result<()> {
             service.allowed_domains.clone(),
         ));
     let script = page::script(app, &service.id);
-    page::reset(app, script.is_some());
+    let scripted = script.is_some();
+    page::reset(app, scripted);
     if let Some(script) = script {
         builder = with_page_script(app, builder, script);
     }
+    if let Some(zoom) = page::zoom_script(app) {
+        builder = builder.initialization_script(zoom);
+    }
+    builder = with_load_hook(app, builder, scripted);
     let window = overlay::main_window(app);
     let size = window
         .inner_size()?
@@ -72,15 +77,26 @@ fn with_page_script(
     script: String,
 ) -> WebviewBuilder<Wry> {
     let on_title = app.clone();
-    let on_load = app.clone();
     builder
         .initialization_script(script)
         .on_document_title_changed(move |_, _| page::wake(&on_title))
-        .on_page_load(move |_, payload| {
-            if payload.event() == PageLoadEvent::Finished {
+}
+
+/// Every loaded page learns the zoom; a scripted one is also asked for its status.
+fn with_load_hook(
+    app: &AppHandle,
+    builder: WebviewBuilder<Wry>,
+    scripted: bool,
+) -> WebviewBuilder<Wry> {
+    let on_load = app.clone();
+    builder.on_page_load(move |_, payload| {
+        if payload.event() == PageLoadEvent::Finished {
+            if scripted {
                 page::wake(&on_load);
             }
-        })
+            page::push_zoom(&on_load);
+        }
+    })
 }
 
 /// Back to the tiles; the next start opens the tiles too.

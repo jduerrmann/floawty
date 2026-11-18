@@ -8,7 +8,8 @@ export type HotkeyAction =
   | 'opacityDown'
   | 'windowMode'
   | 'playPause'
-  | 'videoOnly';
+  | 'videoOnly'
+  | 'zoom';
 
 export type Hotkeys = Record<HotkeyAction, string>;
 
@@ -20,6 +21,7 @@ export const HOTKEY_ACTIONS: readonly HotkeyAction[] = [
   'windowMode',
   'playPause',
   'videoOnly',
+  'zoom',
 ];
 
 export interface KeyPress {

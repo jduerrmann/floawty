@@ -97,13 +97,40 @@ pub fn script(app: &AppHandle, service_id: &str) -> Option<String> {
     if !valid_id(service_id) {
         return None;
     }
-    let asset = app.asset_resolver().get(format!("page/{service_id}.js"))?;
+    asset_script(app, &format!("page/{service_id}.js"))
+}
+
+/// The zoom script for every service page; its fixed asset name never passes `valid_id`.
+pub fn zoom_script(app: &AppHandle) -> Option<String> {
+    asset_script(app, "page/_zoom.js")
+}
+
+fn asset_script(app: &AppHandle, path: &str) -> Option<String> {
+    let asset = app.asset_resolver().get(path.into())?;
     let text = String::from_utf8(asset.bytes().to_vec()).ok()?;
     // A missing asset falls back to index.html, which must never run inside a service page.
     if text.trim_start().starts_with('<') {
         return None;
     }
     Some(text)
+}
+
+/// Zoom works in the floaty view only; window mode shows the page as it is.
+fn zoom_wanted(settings: &Settings) -> bool {
+    settings.zoom && settings.mode == Mode::Floaty
+}
+
+fn zoom_script_call(on: bool) -> String {
+    format!("window.__floawtyZoom && window.__floawtyZoom({on})")
+}
+
+/// Tells the open service page whether to zoom; a page without the script ignores it.
+pub fn push_zoom(app: &AppHandle) {
+    let Some(webview) = app.get_webview(service::LABEL) else {
+        return;
+    };
+    let on = zoom_wanted(&app.state::<Overlay>().settings());
+    let _ = webview.eval(zoom_script_call(on));
 }
 
 /// A service was opened or closed: forget everything the previous page reported.
@@ -336,6 +363,35 @@ mod tests {
         assert!(input(true, Mode::Window).contains(r#""videoOnly":false"#));
         assert!(input(false, Mode::Floaty).contains(r#""videoOnly":false"#));
         assert!(input(false, Mode::Window).contains(r#""videoOnly":false"#));
+    }
+
+    #[test]
+    fn the_zoom_script_name_can_never_be_a_tile_id() {
+        assert!(!valid_id("_zoom"));
+    }
+
+    #[test]
+    fn zoom_reaches_the_page_only_in_the_floaty_view() {
+        let wanted = |zoom: bool, mode: Mode| {
+            zoom_wanted(&Settings {
+                zoom,
+                mode,
+                ..Settings::default()
+            })
+        };
+        assert!(wanted(true, Mode::Floaty));
+        assert!(!wanted(true, Mode::Window));
+        assert!(!wanted(false, Mode::Floaty));
+        assert!(!wanted(false, Mode::Window));
+    }
+
+    #[test]
+    fn the_zoom_script_calls_the_page_function_when_it_exists() {
+        assert_eq!(
+            zoom_script_call(true),
+            "window.__floawtyZoom && window.__floawtyZoom(true)"
+        );
+        assert!(zoom_script_call(false).ends_with("(false)"));
     }
 
     #[test]

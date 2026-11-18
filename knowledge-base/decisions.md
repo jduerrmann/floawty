@@ -33,6 +33,7 @@ One line per decision record in `decisions/`. Template: `templates/t-decision.md
 
 - [[mvp-scope-and-controls]] – MVP scope, bar over the video, window mode ↔ floaty view, Ctrl+Alt+Shift hotkeys, click-through dot
 - [[bar-hover-by-cursor-look]] – the bar notices hovering by a 100 ms cursor look while a service is open
+- [[overlay-shape-free-with-zoom]] – any overlay shape (magnets 16:9, 12:5); zoom switch fills a wide overlay
 - [[overlay-snaps-flush]] – the overlay snaps flush to corners and edges, no 16 px margin
 - [[bar-leaves-the-page-clickable]] – bar above the page in window mode, only as wide as its controls over a service
 - [[own-service-symbols]] – tiles show floawty's own SVG symbols on the brand colour

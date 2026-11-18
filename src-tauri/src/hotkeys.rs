@@ -21,9 +21,10 @@ pub enum Action {
     WindowMode,
     PlayPause,
     VideoOnly,
+    Zoom,
 }
 
-const ACTIONS: [Action; 7] = [
+const ACTIONS: [Action; 8] = [
     Action::ToggleVisible,
     Action::ClickThrough,
     Action::OpacityUp,
@@ -31,6 +32,7 @@ const ACTIONS: [Action; 7] = [
     Action::WindowMode,
     Action::PlayPause,
     Action::VideoOnly,
+    Action::Zoom,
 ];
 
 /// Why a new hotkey was not taken; the UI shows a text for each.
@@ -58,6 +60,7 @@ fn slot(hotkeys: &mut Hotkeys, action: Action) -> &mut String {
         Action::WindowMode => &mut hotkeys.window_mode,
         Action::PlayPause => &mut hotkeys.play_pause,
         Action::VideoOnly => &mut hotkeys.video_only,
+        Action::Zoom => &mut hotkeys.zoom,
     }
 }
 
@@ -71,6 +74,10 @@ fn run(app: &AppHandle, action: Action) -> tauri::Result<()> {
         Action::PlayPause => service::play_pause(app),
         Action::VideoOnly => {
             overlay::toggle_video_only(app);
+            Ok(())
+        }
+        Action::Zoom => {
+            overlay::toggle_zoom(app);
             Ok(())
         }
     }
@@ -149,6 +156,7 @@ mod tests {
             ("windowMode", "Ctrl+Alt+Shift+F"),
             ("playPause", "Ctrl+Alt+Shift+Space"),
             ("videoOnly", "Ctrl+Alt+Shift+V"),
+            ("zoom", "Ctrl+Alt+Shift+Z"),
         ];
         let mut hotkeys = Hotkeys::default();
         for (name, default) in names {

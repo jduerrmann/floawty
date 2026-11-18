@@ -83,7 +83,11 @@ body {
 }
 
 .controls.compact button {
-  width: 24px;
+  width: 22px;
+}
+
+.controls.compact input {
+  min-width: 24px;
 }
 
 /* Measures the natural width, free of the bar's current width and the compact layout. */

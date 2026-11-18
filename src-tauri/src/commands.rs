@@ -51,6 +51,11 @@ pub fn toggle_video_only(app: AppHandle) {
 }
 
 #[tauri::command]
+pub fn toggle_zoom(app: AppHandle) {
+    overlay::toggle_zoom(&app);
+}
+
+#[tauri::command]
 pub fn set_opacity(app: AppHandle, value: f64) -> CommandResult {
     report(overlay::set_opacity(&app, value))
 }

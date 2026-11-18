@@ -41,7 +41,14 @@ pub fn remember(settings: &mut Settings, current: Rect) {
 
 /// The size the floaty view takes when it turns to `target` from `current`, the other aspect.
 pub fn floaty_size(settings: &Settings, target: Aspect, current: Rect) -> (u32, u32) {
-    let swapped = (current.height, current.width);
+    let swapped = match target {
+        // Any landscape shape turns into a true 9:16 that keeps its long side.
+        Aspect::Portrait => {
+            let long = current.width.max(current.height);
+            ((f64::from(long) * 9.0 / 16.0).round() as u32, long)
+        }
+        Aspect::Landscape => (current.height, current.width),
+    };
     if settings.shorts.portrait_size == PortraitSize::Rotated {
         return swapped;
     }
@@ -123,6 +130,19 @@ mod tests {
         assert_eq!(
             floaty_size(&Settings::default(), Aspect::Portrait, FLOATY),
             (270, 480)
+        );
+    }
+
+    #[test]
+    fn a_wider_than_16_9_floaty_turns_into_a_true_9_16_keeping_its_long_side() {
+        let cinema = Rect {
+            width: 640,
+            height: 270,
+            ..FLOATY
+        };
+        assert_eq!(
+            floaty_size(&Settings::default(), Aspect::Portrait, cinema),
+            (360, 640)
         );
     }
 

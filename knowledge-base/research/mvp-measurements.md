@@ -35,6 +35,11 @@ Budgets: [[stack-by-spike]]; spike values: [[stack-spike-results]].
 - Idle RAM is ~35 MB above the spike, YouTube ~50 MB: the bar webview and the page
   scripts. Both stay within budget.
 
+- mvp-10 (free shape, zoom script in every service, zoom off): start 47 ms, idle 216 MB,
+  YouTube 1080p 738 MB at 61.5 fps, hidden 730 MB / 0.05 % CPU; within budget.
+- Zoom (mvp-10): live-checked by the maintainer on all services, works everywhere,
+  no black picture with protected video.
+
 ## Network while idle
 
 - `msedgewebview2.exe` network service → `edge.microsoft.com/componentupdater` about

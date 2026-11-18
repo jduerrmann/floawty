@@ -102,6 +102,7 @@ fn main() {
             commands::set_opacity,
             commands::toggle_mode,
             commands::toggle_video_only,
+            commands::toggle_zoom,
             commands::set_bar_width,
             commands::tiles_state,
             commands::accept_notice,

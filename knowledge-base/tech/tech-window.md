@@ -27,7 +27,7 @@ wiring talks to Tauri and Win32.
 - The main window is created in `setup` (`create: false` in `tauri.conf.json`), after
   a requested reset has wiped the profile.
 - **Floaty view** = frameless, always on top, stored opacity, click-through allowed,
-  snapping and 16:9. **Window mode** = title bar, not on top, fully opaque,
+  snapping, any landscape shape with magnets at 16:9 and 12:5. **Window mode** = title bar, not on top, fully opaque,
   click-through off and ignored, no snapping. Each mode keeps its own geometry
   ([[mvp-scope-and-controls]]).
 - **Turning:** while the service page reports a Short ([[tech-shorts]]) the floaty
@@ -37,7 +37,8 @@ wiring talks to Tauri and Win32.
   minimum width and shrinks to fit. Turning back restores the exact pre-turn
   landscape size unless the user resized the upright view; a move only shifts it.
   The smallest overlay (240 × 135) turns to 240 × 427.
-  Size: `rotated` swaps the sides, `separate` uses `floaty` / `floatyPortrait`
+  Size: `rotated` turns any landscape shape into a true 9:16 that keeps its long side
+  (back: the swapped sides), `separate` uses `floaty` / `floatyPortrait`
   (`mode::floaty_size`). While portrait, `floaty` stores the landscape equivalent so a
   restart opens landscape in place (`mode::remember_turned`).
 - Logs stay local ([[core-principles]] #4).
@@ -46,12 +47,12 @@ wiring talks to Tauri and Win32.
 
 | File | Role | Tests |
 |---|---|---|
-| `geometry.rs` | first placement (floaty: flush bottom right, 480 × 270; window: centred 1280 × 720 or smaller to fit with 16 px room; scaled), per-axis snapping flush within 32 px ([[overlay-snaps-flush]]), 16:9 / 9:16 (`fit_resized`: a height-only drag keeps its height, anything else the width), restore on the monitor with the largest overlap | unit |
-| `settings.rs` | `Settings` v1 (opacity, geometry, hotkeys, tiles, language, Shorts, update check, video only), tolerant `parse` (unknown language → system), opacity clamp 10–100 % and 10 % steps, Shorts pause 0–10 s | unit |
+| `geometry.rs` | first placement (floaty: flush bottom right, 480 × 270; window: centred 1280 × 720 or smaller to fit with 16 px room; scaled), per-axis snapping flush within 32 px ([[overlay-snaps-flush]]), landscape shape free with magnets at 16:9 and 12:5 within 4 % (`fit_landscape`, never below the minimum height), 9:16 while a Short plays (`fit_resized`); a height-only drag keeps its height, anything else the width ([[overlay-shape-free-with-zoom]]), restore on the monitor with the largest overlap | unit |
+| `settings.rs` | `Settings` v1 (opacity, geometry, hotkeys, tiles, language, Shorts, update check, video only, zoom), tolerant `parse` (unknown language → system), opacity clamp 10–100 % and 10 % steps, Shorts pause 0–10 s | unit |
 | `persistence.rs` | `%APPDATA%\floawty\settings.json`, atomic write (temp + rename), keeps broken files | unit (temp dir) |
 | `mode.rs` | `Mode` (floaty / window), switch and remember geometry per mode | unit |
 | `overlay.rs` | place and show in the saved mode, mode style (decorations, on top), layered-window opacity, click-through, hide/show, settle 250 ms after the last move/resize, not before the mouse button is up (floaty: aspect, back onto the work area, snap; both: save) | Win32 check scripts |
-| `hotkeys.rs` | registers the hotkeys from the settings (default Ctrl+Alt+Shift + O / D / ↑ / ↓ / F / Space / V), changes one at once, pauses all while recording | unit, check scripts |
+| `hotkeys.rs` | registers the hotkeys from the settings (default Ctrl+Alt+Shift + O / D / ↑ / ↓ / F / Space / V / Z), changes one at once, pauses all while recording | unit, check scripts |
 | `logbook.rs` | `%APPDATA%\floawty\logs\floawty.log`, UTC timestamps | unit |
 | `bar.rs`, `hover.rs`, `reset.rs` | the bar over the service, hover, reset all data | [[tech-bar-and-settings]] |
 
@@ -71,7 +72,8 @@ Settings file (v1):
     "opacityDown": "Ctrl+Alt+Shift+Down",
     "windowMode": "Ctrl+Alt+Shift+F",
     "playPause": "Ctrl+Alt+Shift+Space",
-    "videoOnly": "Ctrl+Alt+Shift+V"
+    "videoOnly": "Ctrl+Alt+Shift+V",
+    "zoom": "Ctrl+Alt+Shift+Z"
   },
   "noticeAccepted": true,
   "customTiles": [],
@@ -80,7 +82,8 @@ Settings file (v1):
   "floatyPortrait": null,
   "shorts": { "auto": false, "pauseSeconds": 1, "holdOnHover": true, "portraitSize": "rotated" },
   "updateCheck": false,
-  "videoOnly": false
+  "videoOnly": false,
+  "zoom": false
 }
 ```
 

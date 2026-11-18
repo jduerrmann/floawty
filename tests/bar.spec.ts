@@ -188,10 +188,10 @@ test('the service follows the window size and fills it again in the floaty view'
   }
 });
 
-test('the bar fits seven controls when narrow and grows back when the window widens', async () => {
+test('the bar fits all eight controls at the minimum width and grows back when wider', async () => {
   const app = await launch(freshProfile());
   try {
-    // YouTube's id offers ▶ and ▣ too; the page itself stays on example.com.
+    // YouTube's id offers ▶ and ▣ too, ⤢ is always there; the page stays on example.com.
     await app.home.evaluate(() =>
       window.__TAURI_INTERNALS__.invoke('open_service', {
         service: { id: 'youtube', url: 'https://example.com/', allowedDomains: ['example.com'] },
@@ -205,8 +205,9 @@ test('the bar fits seven controls when narrow and grows back when the window wid
       });
     const sliderWidth = () =>
       app.bar.evaluate(() => document.getElementById('opacity')?.getBoundingClientRect().width);
-    resizeWindow(app.pid, 280, 158);
-    await expect.poll(() => app.home.evaluate(() => innerWidth)).toBeLessThan(300);
+    // The smallest overlay a user can drag: 240 px inside, plus the 2 × 8 px invisible border.
+    resizeWindow(app.pid, 256, 151);
+    await expect.poll(() => app.home.evaluate(() => innerWidth)).toBe(240);
     await app.bar.evaluate(() => window.__TAURI_INTERNALS__.invoke('set_opacity', { value: 0.8 }));
     await expect.poll(fits).toBe(true);
     resizeWindow(app.pid, 800, 450);

@@ -29,7 +29,8 @@ services, which brings legal and ethical constraints.
 6. Distribution only via **GitHub Releases**, built by GitHub Actions; portable build
    and installer, no admin rights. Windows first.
 7. Only the **official web players** are embedded: no DRM circumvention, no
-   downloading or recording, no ad blocking, no credential handling.
+   downloading or recording, no ad blocking, no credential handling. Amended by
+   [[overlay-shape-free-with-zoom]] (a zoom the user switches on also crops ads).
 8. **Light on resources:** runs next to other work on an ordinary PC.
 
 ## Alternatives

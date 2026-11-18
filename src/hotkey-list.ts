@@ -18,6 +18,7 @@ const ACTION_LABELS: Record<HotkeyAction, MessageKey> = {
   windowMode: 'hotkeyWindowMode',
   playPause: 'hotkeyPlayPause',
   videoOnly: 'hotkeyVideoOnly',
+  zoom: 'hotkeyZoom',
 };
 
 function row(language: Language, action: HotkeyAction): [HTMLElement, HTMLButtonElement] {

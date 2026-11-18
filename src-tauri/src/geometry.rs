@@ -9,10 +9,16 @@ const WINDOW_HEIGHT: f64 = 720.0;
 const WINDOW_MARGIN: f64 = 16.0;
 /// How close an edge must come before it snaps, in logical pixels.
 const SNAP_REACH: f64 = 32.0;
+/// Landscape shapes the overlay snaps onto: 16:9 and cinema scope 12:5 (2.40, "21:9").
+const MAGNETS: [(u32, u32); 2] = [(16, 9), (12, 5)];
+/// How close a shape must come to a magnet, as a share of its ratio.
+const MAGNET_REACH: f64 = 0.04;
 /// How far an edge may sit from its snap position and still count as snapped, in pixels.
 const SNAP_TOLERANCE: i32 = 1;
 /// Same as `minWidth` in tauri.conf.json; Windows would widen a narrower window anyway.
 const MIN_WIDTH: f64 = 240.0;
+/// Same as `minHeight` in tauri.conf.json.
+const MIN_HEIGHT: f64 = 135.0;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Rect {
@@ -119,12 +125,32 @@ pub fn fit_aspect(width: u32, aspect: Aspect) -> (u32, u32) {
 /// Keeps the aspect ratio after the user let go: a height-only drag keeps its height,
 /// anything else keeps the width.
 pub fn fit_resized(before: Option<(u32, u32)>, now: (u32, u32), aspect: Aspect) -> (u32, u32) {
+    fit_ratio(before, now, ratio(aspect))
+}
+
+/// A landscape overlay takes any shape; close to 16:9 or 12:5 it snaps onto that.
+pub fn fit_landscape(before: Option<(u32, u32)>, now: (u32, u32), scale: f64) -> (u32, u32) {
+    let shape = f64::from(now.0) / f64::from(now.1);
+    let close = |&(wide, high): &(u32, u32)| {
+        (shape / (f64::from(wide) / f64::from(high)) - 1.0).abs() <= MAGNET_REACH
+    };
+    let min_height = to_pixels(MIN_HEIGHT, scale) as u32;
+    MAGNETS
+        .iter()
+        .find(|magnet| close(magnet))
+        .map(|&magnet| fit_ratio(before, now, magnet))
+        // Windows would not go below the minimum height, so the magnet does not either.
+        .filter(|&(_, height)| height >= min_height)
+        .unwrap_or(now)
+}
+
+fn fit_ratio(before: Option<(u32, u32)>, now: (u32, u32), (wide, high): (u32, u32)) -> (u32, u32) {
     let (width, height) = now;
-    if !before.is_some_and(|(w, h)| w == width && h != height) {
-        return fit_aspect(width, aspect);
+    if before.is_some_and(|(w, h)| w == width && h != height) {
+        let width = (f64::from(height) * f64::from(wide) / f64::from(high)).round() as u32;
+        return (width, height);
     }
-    let (wide, high) = ratio(aspect);
-    let width = (f64::from(height) * f64::from(wide) / f64::from(high)).round() as u32;
+    let height = (f64::from(width) * f64::from(high) / f64::from(wide)).round() as u32;
     (width, height)
 }
 
@@ -323,6 +349,28 @@ mod tests {
             shift_inside(rect(100, 100, 640, 360), FULL_HD),
             rect(100, 100, 640, 360)
         );
+    }
+
+    #[test]
+    fn a_free_shape_away_from_the_magnets_is_kept() {
+        assert_eq!(fit_landscape(Some((640, 360)), (700, 500), 1.0), (700, 500));
+        assert_eq!(fit_landscape(None, (500, 500), 1.0), (500, 500));
+    }
+
+    #[test]
+    fn a_shape_close_to_16_9_or_12_5_snaps_onto_it() {
+        assert_eq!(fit_landscape(Some((640, 360)), (800, 460), 1.0), (800, 450));
+        assert_eq!(fit_landscape(Some((640, 360)), (800, 345), 1.0), (800, 333));
+    }
+
+    #[test]
+    fn the_magnet_never_goes_below_the_minimum_height() {
+        assert_eq!(fit_landscape(Some((640, 360)), (316, 135), 1.0), (316, 135));
+    }
+
+    #[test]
+    fn the_magnet_keeps_the_dragged_axis() {
+        assert_eq!(fit_landscape(Some((800, 450)), (800, 340), 1.0), (816, 340));
     }
 
     #[test]

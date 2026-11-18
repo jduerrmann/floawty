@@ -1,4 +1,4 @@
-// The bar over the video: back to the tiles, opacity, click-through, Shorts, video only, mode, settings, close.
+// The bar over the video: back to the tiles, opacity, click-through, Shorts, video only, zoom, mode, settings, close.
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { createClickThroughIndicator } from './click-through';
@@ -52,6 +52,7 @@ function wire(language: Language, current: () => OverlayState): void {
   button('video-only').addEventListener('click', (event) =>
     keysBack(event, invoke('toggle_video_only')),
   );
+  button('zoom').addEventListener('click', (event) => keysBack(event, invoke('toggle_zoom')));
   button('mode').addEventListener('click', (event) => keysBack(event, invoke('toggle_mode')));
   button('settings').addEventListener('click', (event) =>
     keysBack(event, invoke('set_settings_open', { open: !current().settingsOpen })),
@@ -64,6 +65,7 @@ function wire(language: Language, current: () => OverlayState): void {
     ['click-through', 'clickThroughOn'],
     ['shorts', 'shortsAuto'],
     ['video-only', 'videoOnly'],
+    ['zoom', 'zoom'],
     ['settings', 'settings'],
     ['quit', 'quit'],
   ];
@@ -88,6 +90,8 @@ function showControls(language: Language, state: OverlayState): void {
   button('video-only').setAttribute('aria-pressed', String(state.videoOnly));
   button('video-only').classList.toggle('problem', playerMissing);
   label(button('video-only'), language, playerMissing ? 'videoOnlyProblem' : 'videoOnly');
+  button('zoom').hidden = state.serviceId === null;
+  button('zoom').setAttribute('aria-pressed', String(state.zoom));
   label(button('mode'), language, floaty ? 'toWindowMode' : 'toFloatyView');
   button('settings').setAttribute('aria-pressed', String(state.settingsOpen));
 }

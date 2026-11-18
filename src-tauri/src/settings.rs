@@ -19,6 +19,7 @@ pub struct Hotkeys {
     pub window_mode: String,
     pub play_pause: String,
     pub video_only: String,
+    pub zoom: String,
 }
 
 impl Default for Hotkeys {
@@ -31,6 +32,7 @@ impl Default for Hotkeys {
             window_mode: "Ctrl+Alt+Shift+F".into(),
             play_pause: "Ctrl+Alt+Shift+Space".into(),
             video_only: "Ctrl+Alt+Shift+V".into(),
+            zoom: "Ctrl+Alt+Shift+Z".into(),
         }
     }
 }
@@ -124,6 +126,8 @@ pub struct Settings {
     pub update_check: bool,
     /// One switch for all services; it only takes effect in the floaty view.
     pub video_only: bool,
+    /// One switch for all services; it only takes effect in the floaty view.
+    pub zoom: bool,
 }
 
 impl Default for Settings {
@@ -143,6 +147,7 @@ impl Default for Settings {
             shorts: Shorts::default(),
             update_check: false,
             video_only: false,
+            zoom: false,
         }
     }
 }
@@ -286,6 +291,25 @@ mod tests {
         };
         let written = to_json(&settings);
         assert!(written.contains(r#""videoOnly": true"#), "{written}");
+        assert_eq!(parse(&written), settings);
+    }
+
+    #[test]
+    fn a_file_without_zoom_has_it_off() {
+        let settings = parse(r#"{ "version": 1, "opacity": 0.5 }"#);
+        assert!(!settings.zoom);
+        assert_eq!(settings.hotkeys.zoom, "Ctrl+Alt+Shift+Z");
+    }
+
+    #[test]
+    fn zoom_survives_a_round_trip() {
+        assert!(parse(r#"{ "zoom": true }"#).zoom);
+        let settings = Settings {
+            zoom: true,
+            ..Settings::default()
+        };
+        let written = to_json(&settings);
+        assert!(written.contains(r#""zoom": true"#), "{written}");
         assert_eq!(parse(&written), settings);
     }
 

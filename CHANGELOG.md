@@ -7,7 +7,7 @@ User-facing changes, in plain language. Format based on
 ## [Unreleased]
 
 - Small window that stays on top: bottom right at first, snaps to corners and edges,
-  keeps 16:9, remembers where it was.
+  remembers where it was.
 - Adjustable transparency, click-through with a dot in the corner, hide/show – all
   with hotkeys (Ctrl+Alt+Shift + ↑/↓, D, O).
 - Window mode: a normal window for signing in and browsing (Ctrl+Alt+Shift+F).
@@ -32,6 +32,10 @@ User-facing changes, in plain language. Format based on
 - Netflix shows no page scrollbar while a title plays.
 - Dragging only the top or bottom edge of the overlay keeps the new height.
 - The overlay snaps right into corners and onto edges, without a gap.
+- The overlay can take any shape; near 16:9 or cinema scope (2.40) it snaps onto it.
+- Zoom (⤢ in the bar or Ctrl+Alt+Shift+Z, off at first): in an overlay wider than
+  16:9 the video fills the width, so films with bars in the picture show without them;
+  only top and bottom are cut.
 - "Video only" on YouTube also works in a large overlay, where YouTube uses a wider layout.
 - YouTube Shorts auto mode (▶ in the bar): each Short – and each ad between them –
   plays once in full, rests on its first frame for the chosen pause, then YouTube's

@@ -304,6 +304,7 @@ mod tests {
             shorts: settings.shorts,
             update_check: settings.update_check,
             video_only: false,
+            zoom: false,
             page_problems: Vec::new(),
         }
     }

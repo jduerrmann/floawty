@@ -47,6 +47,7 @@ pub struct OverlayState {
     pub shorts: Shorts,
     pub update_check: bool,
     pub video_only: bool,
+    pub zoom: bool,
     pub page_problems: Vec<Problem>,
 }
 
@@ -104,6 +105,7 @@ impl Overlay {
             shorts: settings.shorts.clone(),
             update_check: settings.update_check,
             video_only: settings.video_only,
+            zoom: settings.zoom,
             page_problems: self.page_problems.lock().unwrap().clone(),
         }
     }
@@ -227,6 +229,7 @@ pub fn toggle_mode(app: &AppHandle) -> tauri::Result<()> {
     emit_state(app);
     // The page shows video only in the floaty view alone, so it learns the new mode.
     page::sync(app);
+    page::push_zoom(app);
     Ok(())
 }
 
@@ -235,6 +238,13 @@ pub fn toggle_video_only(app: &AppHandle) {
     overlay(app).update(app, |s| s.video_only = !s.video_only);
     emit_state(app);
     page::sync(app);
+}
+
+/// Zoom on or off for all services; the open page is told at once.
+pub fn toggle_zoom(app: &AppHandle) {
+    overlay(app).update(app, |s| s.zoom = !s.zoom);
+    emit_state(app);
+    page::push_zoom(app);
 }
 
 fn current_area(window: &Window) -> tauri::Result<Option<(Rect, f64)>> {
