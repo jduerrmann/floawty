@@ -39,5 +39,5 @@ Decisions: [[mvp-scope-and-controls]], [[bundled-service-logos]],
 | 08 | [[mvp-08-measure-and-check]] | Budgets met, all services checked by the maintainer | 06, 07 |
 | 09 | [[mvp-09-passkey-prompt]] | Prime Video's passkey prompt no longer interrupts the password | 08 |
 
-01–08 done and archived, plus the "YouTube Shorts" tile. Next candidate: 09; then the
-release pipeline (phase 3) and open question 5 (free aspect ratio).
+01–09 done and archived, plus the "YouTube Shorts" tile. Next: the release pipeline
+(phase 3) and open question 5 (free aspect ratio).

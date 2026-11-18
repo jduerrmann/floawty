@@ -26,6 +26,7 @@ One line per decision record in `decisions/`. Template: `templates/t-decision.md
 - [[google-login-honest-user-agent-first]] – Google login is a must; honest user agent first, Chrome only if blocked
 - [[widevine-on-demand-with-notice]] – superseded: Widevine comes with WebView2
 - [[video-only-lays-player-over-page]] – "video only" covers the page with the player by styles; YouTube, Twitch, Crunchyroll
+- [[passkey-prompts-left-to-the-service]] – passkey dialogs come from the services (Amazon too in Edge); floawty leaves them
 - [[page-scripts-polled-on-title-change]] – floawty asks the page script on title change; service pages never call floawty
 
 ## ui

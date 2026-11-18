@@ -54,7 +54,7 @@ Budgets: [[stack-by-spike]]; spike values: [[stack-spike-results]].
 |---|---|---|---|
 | YouTube, YouTube Shorts | yes | yes (Google) | Shorts auto mode moves on |
 | Netflix | yes | yes | only the player while playing; page scrollbar removed by its script |
-| Prime Video | yes | yes | Windows passkey prompt on the password field ([[mvp-09-passkey-prompt]]) |
+| Prime Video | yes | yes | Windows passkey dialog at the password step: Amazon's direct request, same in Edge ([[passkey-prompts-left-to-the-service]]) |
 | Disney+ | yes | yes | only the player while playing |
 | RTL+ | yes | yes after the fix | "Sign in with Amazon" needed `amazon.de`/`amazon.com` |
 | Twitch | yes | yes after the fix | sign-in button was under the bar |

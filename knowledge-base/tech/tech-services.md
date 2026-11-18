@@ -65,6 +65,7 @@ set to fresh temporary folders (`tests/app.ts`), so they never touch the user's 
 - `window.open` pop-ups are denied (wry's default without a handler); sign-ins that
   need one fail. Live checks 2026-11-18: [[mvp-measurements]]. Sign-in domains outside
   the service: Google (YouTube), Amazon (Prime Video, RTL+ "Sign in with Amazon").
-- Prime Video's password field triggers a Windows passkey prompt ([[mvp-09-passkey-prompt]]).
+- Prime Video's password step shows the Windows passkey dialog: Amazon's own direct
+  request, the same in Edge; left alone ([[passkey-prompts-left-to-the-service]]).
 - `lastService` stores the allowed domains it was opened with: a restored service keeps
   them until it is opened from its tile again, so manifest changes reach it only then.

@@ -1,7 +1,7 @@
 ---
 type: plan
 tags: [package, mvp, services, sign-in]
-status: planned
+status: done
 created: 2026-11-18
 updated: 2026-11-18
 source: mvp-08 service checks, maintainer 2026-11-18
@@ -24,10 +24,10 @@ passkey dialog by itself, or the maintainer decides it stays.
   arguments are shared by every webview).
 
 ## Acceptance criteria
-- [ ] Cause found: which request (`navigator.credentials.get`, conditional mediation)
+- [x] Cause found: which request (`navigator.credentials.get`, conditional mediation)
       makes WebView2 show the Windows dialog, and whether Edge behaves the same.
-- [ ] Options with tradeoffs to the maintainer; chosen option built and checked live.
-- [ ] Passkey sign-in still possible where the user wants it.
+- [x] Options with tradeoffs to the maintainer; chosen: leave it (nothing to build).
+- [x] Passkey sign-in still possible where the user wants it (unchanged).
 
 ## Tests first
 - Depends on the option: a browser argument gets a check that WebView2 starts with it.
