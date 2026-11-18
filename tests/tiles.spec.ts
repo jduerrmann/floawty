@@ -4,7 +4,15 @@ import path from 'node:path';
 import { expect, test } from '@playwright/test';
 import { freshProfile, launch } from './app';
 
-const SERVICE_NAMES = ['YouTube', 'Twitch', 'Netflix', 'Prime Video', 'Disney+', 'RTL+'];
+const SERVICE_NAMES = [
+  'YouTube',
+  'YouTube Shorts',
+  'Twitch',
+  'Netflix',
+  'Prime Video',
+  'Disney+',
+  'RTL+',
+];
 
 test('shows one tile per service and a tile to add a page', async () => {
   const app = await launch(freshProfile());
@@ -94,6 +102,35 @@ test('a tile opens its page over the home page and it reopens on start', async (
   } finally {
     await second.stop();
   }
+});
+
+test('the YouTube Shorts tile opens the Shorts with the auto mode on', async () => {
+  const profile = freshProfile();
+  const app = await launch(profile);
+  try {
+    // Real YouTube is never contacted: the new service page gets an empty answer.
+    const requested: string[] = [];
+    const context = app.browser.contexts()[0];
+    if (!context) throw new Error('no browser context to guard YouTube');
+    await context.route('https://www.youtube.com/**', (route) => {
+      requested.push(route.request().url());
+      return route.fulfill({ body: '<title>Shorts</title>', contentType: 'text/html' });
+    });
+    await expect(app.bar.locator('#shorts')).toHaveAttribute('aria-pressed', 'false');
+    await app.home.getByRole('button', { name: 'YouTube Shorts', exact: true }).click();
+    await expect.poll(() => requested).toContain('https://www.youtube.com/shorts');
+    await expect(app.bar.locator('#shorts')).toHaveAttribute('aria-pressed', 'true');
+    const service = app.pages().find((page) => page.url().startsWith('https://www.youtube.com'));
+    expect(await service?.evaluate(() => '__floawty' in window)).toBe(true);
+  } finally {
+    await app.stop();
+  }
+  const saved = JSON.parse(readFileSync(path.join(profile.dataDir, 'settings.json'), 'utf8')) as {
+    shorts: { auto: boolean };
+    lastService: { id: string };
+  };
+  expect(saved.shorts.auto).toBe(true);
+  expect(saved.lastService.id).toBe('youtube-shorts');
 });
 
 test('window commands keep working while a service is open', async () => {

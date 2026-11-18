@@ -4,6 +4,7 @@ import { customTileDomains, type CustomTile } from './custom-tiles';
 import { t, type Language } from './i18n';
 import { services } from './services';
 import type { ServiceManifest } from './services/manifest';
+import { preferencesOf, withShortsAuto, type OverlayState } from './state';
 
 const symbolUrls = import.meta.glob<string>('./assets/symbols/*.svg', {
   eager: true,
@@ -28,6 +29,11 @@ function openService(id: string, url: string, allowedDomains: string[]): void {
   void invoke('open_service', { service: { id, url, allowedDomains } });
 }
 
+async function turnShortsAutoOn(): Promise<void> {
+  const state = await invoke<OverlayState>('overlay_state');
+  await invoke('set_preferences', { preferences: withShortsAuto(preferencesOf(state)) });
+}
+
 function tileButton(label: string, color: string, symbol: string): HTMLButtonElement {
   const button = document.createElement('button');
   button.type = 'button';
@@ -45,9 +51,10 @@ function tileButton(label: string, color: string, symbol: string): HTMLButtonEle
 function serviceTile(service: ServiceManifest): HTMLLIElement {
   const item = document.createElement('li');
   const button = tileButton(service.name, service.brandColor, service.symbol);
-  button.addEventListener('click', () =>
-    openService(service.id, service.startUrl, service.allowedDomains),
-  );
+  button.addEventListener('click', async () => {
+    if (service.startsShortsAuto) await turnShortsAutoOn();
+    openService(service.id, service.startUrl, service.allowedDomains);
+  });
   item.append(button);
   return item;
 }

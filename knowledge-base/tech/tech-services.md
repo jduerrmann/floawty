@@ -4,7 +4,7 @@ area: services
 tags: [tiles, services, webview, navigation, privacy]
 status: active
 created: 2026-11-17
-updated: 2026-11-17
+updated: 2026-11-18
 source: mvp-04 implementation, mvp-05
 ---
 
@@ -40,7 +40,7 @@ page inside the main window.
 
 | File | Role | Tests |
 |---|---|---|
-| `src/services/<id>/manifest.ts` | id, name, start URL, allowed domains (incl. sign-in), brand colour, symbol, `shortsAutoMode` (YouTube) | Vitest |
+| `src/services/<id>/manifest.ts` | id, name, start URL, allowed domains (incl. sign-in), brand colour, symbol, `shortsAutoMode` (YouTube, YouTube Shorts), `startsShortsAuto` (the Shorts tile turns the auto mode on before opening) | Vitest, Playwright |
 | `src/services/manifest.ts` | manifest validation, `hostAllowed` | Vitest |
 | `src/custom-tiles.ts` | own pages: name and URL rules, https added, duplicates, allowed domain = host without `www.` | Vitest |
 | `src/tiles.ts`, `src/home.ts` | tiles, options menu (rename, remove), add/rename form, first-start notice | Playwright |
@@ -56,6 +56,10 @@ Tests run the release build with `FLOAWTY_DATA_DIR` and `WEBVIEW2_USER_DATA_FOLD
 set to fresh temporary folders (`tests/app.ts`), so they never touch the user's data.
 
 ## Known gaps
+
+- A tile id is also its page-script key (`page/<id>.js`): `youtube-shorts` has its own
+  entry that imports the YouTube script. Per-service profiles must give it the
+  `youtube` profile, or the sign-in splits.
 
 - Sign-in flows of the real services and `window.open` pop-ups are not yet checked
   live (mvp-08).

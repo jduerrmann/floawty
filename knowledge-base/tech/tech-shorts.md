@@ -4,7 +4,7 @@ area: shorts
 tags: [shorts, youtube, page-script]
 status: active
 created: 2026-11-17
-updated: 2026-11-17
+updated: 2026-11-18
 source: mvp-06 implementation
 ---
 
@@ -57,6 +57,7 @@ the page unblocks, the next end advances.
 | File | Role | Tests |
 |---|---|---|
 | `src/services/youtube/shorts.ts` | pure state machine `step(state, event) → actions` | Vitest |
+| `src/services/youtube-shorts/` | the Shorts tile: YouTube manifest with `/shorts` start, own symbol, `startsShortsAuto`; its `page.ts` imports the YouTube script | Vitest, Playwright |
 | `src/services/youtube/page.ts`, `selectors.ts` | DOM wiring, `__floawty.sync`, aspect from `/shorts/`, problem after 2 s | Playwright adapter (Edge) |
 | `src-tauri/src/page.rs` | script lookup, reset per service, wake, hover, sync, parse | unit |
 | `src-tauri/src/service.rs` | init script, title and page-load wake-ups | Playwright (`tests/shorts.spec.ts`, fixtures on routed youtube.com) |

@@ -6,5 +6,14 @@ import { prime } from './prime/manifest';
 import { rtlplus } from './rtlplus/manifest';
 import { twitch } from './twitch/manifest';
 import { youtube } from './youtube/manifest';
+import { youtubeShorts } from './youtube-shorts/manifest';
 
-export const services: ServiceManifest[] = [youtube, twitch, netflix, prime, disney, rtlplus];
+export const services: ServiceManifest[] = [
+  youtube,
+  youtubeShorts,
+  twitch,
+  netflix,
+  prime,
+  disney,
+  rtlplus,
+];

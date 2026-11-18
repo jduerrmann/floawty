@@ -4,7 +4,7 @@ area: ui
 tags: [bar, settings, i18n, hotkeys, reset]
 status: active
 created: 2026-11-17
-updated: 2026-11-17
+updated: 2026-11-18
 source: mvp-05 implementation
 ---
 
@@ -54,7 +54,7 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
 | `src-tauri/src/reset.rs` | reset request and wipe at start | unit (temp dirs), Playwright |
 | `src-tauri/src/hotkeys.rs` | register, change one, pause all; action names | unit |
 | `src-tauri/src/commands.rs` | `toggle_click_through`, `set_settings_open`, `set_preferences`, `set_hotkey`, `set_hotkeys_paused`, `move_focus` (F6), `reset_all_data`, `quit` | Playwright |
-| `src/state.ts` | `OverlayState`, start a page in its language, reload on change | – |
+| `src/state.ts` | `OverlayState`, start a page in its language, reload on change, `withShortsAuto` | Vitest |
 | `src/bar.ts`, `src/bar.css`, `src/click-through.ts` | controls, dot and hint | Playwright |
 | `src/settings-panel.ts`, `src/hotkey-list.ts` | panel, preferences, reset confirm, hotkey recording | Playwright |
 | `src/hotkeys.ts` | key press → hotkey, conflicts, localized display | Vitest |

@@ -27,6 +27,11 @@ export interface OverlayState extends Preferences {
   pageProblem: boolean;
 }
 
+/** The preferences with the Shorts auto mode on, as the Shorts tile opens. */
+export function withShortsAuto(preferences: Preferences): Preferences {
+  return { ...preferences, shorts: { ...preferences.shorts, auto: true } };
+}
+
 export type StateView = (state: OverlayState) => void;
 
 export function preferencesOf(state: OverlayState): Preferences {

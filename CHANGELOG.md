@@ -28,5 +28,6 @@ User-facing changes, in plain language. Format based on
   own "next" button moves on. The mouse over floawty holds it (can be turned off).
 - While Shorts play, the overlay turns upright (9:16) and turns back afterwards; in the
   settings choose "same size, turned" or "its own size" for the upright overlay.
+- A "YouTube Shorts" tile opens the Shorts feed directly with the auto mode on.
 - If YouTube changes its page so the auto mode cannot work, Shorts simply loop as
   before and an amber dot on ▶ says so.

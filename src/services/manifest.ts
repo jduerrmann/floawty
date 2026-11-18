@@ -11,6 +11,8 @@ export interface ServiceManifest {
   symbol: string;
   /** Offers the Shorts auto mode toggle in the bar. */
   shortsAutoMode?: true;
+  /** Opening this tile turns the Shorts auto mode on. */
+  startsShortsAuto?: true;
 }
 
 /** Returns the problems of a manifest; an empty list means it is valid. */

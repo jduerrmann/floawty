@@ -42,6 +42,7 @@ describe('service manifests', () => {
   it('every shipped service is valid and unique', () => {
     expect(services.map((s) => s.id)).toEqual([
       'youtube',
+      'youtube-shorts',
       'twitch',
       'netflix',
       'prime',
@@ -52,7 +53,11 @@ describe('service manifests', () => {
       expect(manifestProblems(service), service.id).toEqual([]);
       expect(existsSync(path.join(SYMBOLS, service.symbol)), service.symbol).toBe(true);
     }
-    expect(services.filter((s) => s.shortsAutoMode).map((s) => s.id)).toEqual(['youtube']);
+    expect(services.filter((s) => s.shortsAutoMode).map((s) => s.id)).toEqual([
+      'youtube',
+      'youtube-shorts',
+    ]);
+    expect(services.filter((s) => s.startsShortsAuto).map((s) => s.id)).toEqual(['youtube-shorts']);
   });
 });
 

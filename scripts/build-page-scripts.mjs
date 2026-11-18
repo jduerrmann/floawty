@@ -24,7 +24,8 @@ for (const id of ids) {
       lib: {
         entry: path.join(servicesDir, id, 'page.ts'),
         formats: ['iife'],
-        name: `floawtyPage_${id}`,
+        // Service ids may contain dashes; the IIFE name must be an identifier.
+        name: `floawtyPage_${id.replaceAll('-', '_')}`,
         fileName: () => `${id}.js`,
       },
     },
