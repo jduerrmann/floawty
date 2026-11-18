@@ -115,6 +115,21 @@ pub fn set_preferences(app: AppHandle, preferences: Preferences) {
     page::sync(&app);
 }
 
+/// WebView2 takes its arguments only at start, so the choice is saved and floawty restarts.
+#[tauri::command]
+pub fn set_graphics_acceleration(app: AppHandle, enabled: bool) {
+    app.state::<Overlay>()
+        .update(&app, |s| s.graphics_acceleration = enabled);
+    logbook::write(
+        &app,
+        &format!(
+            "graphics acceleration turned {}, restarting",
+            if enabled { "on" } else { "off" }
+        ),
+    );
+    app.restart()
+}
+
 #[tauri::command]
 pub fn set_hotkey(app: AppHandle, action: Action, hotkey: String) -> CommandResult {
     hotkeys::change(&app, action, hotkey).map_err(|error| error.code().to_string())

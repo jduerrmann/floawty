@@ -66,6 +66,24 @@
         </label>
         <p id="update-check-note" class="setting-note"></p>
       </div>
+      <div class="setting-group">
+        <label class="setting-check">
+          <input
+            id="graphics-acceleration"
+            type="checkbox"
+            aria-describedby="graphics-acceleration-note"
+          />
+          <span id="graphics-acceleration-label"></span>
+        </label>
+        <p id="graphics-acceleration-note" class="setting-note"></p>
+        <div id="restart-confirm" role="group" aria-labelledby="restart-question" hidden>
+          <p id="restart-question" class="setting-note"></p>
+          <div class="setting-actions">
+            <button id="restart-yes" type="button"></button>
+            <button id="restart-no" type="button"></button>
+          </div>
+        </div>
+      </div>
       <fieldset class="setting-group">
         <legend id="reset-title"></legend>
         <p id="reset-explain" class="setting-note"></p>

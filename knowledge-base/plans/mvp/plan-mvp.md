@@ -39,6 +39,7 @@ Decisions: [[mvp-scope-and-controls]], [[bundled-service-logos]],
 | 08 | [[mvp-08-measure-and-check]] | Budgets met, all services checked by the maintainer | 06, 07 |
 | 09 | [[mvp-09-passkey-prompt]] | Prime Video's passkey prompt no longer interrupts the password | 08 |
 | 10 | [[mvp-10-free-aspect-and-zoom]] | Free overlay shape, zoom over bars baked into the picture | 08 |
+| 11 | [[mvp-11-graphics-acceleration]] | Graphics acceleration can be switched off, like in Edge | 10 |
 
-01–10 done and archived, plus the "YouTube Shorts" tile. Next: 11 (graphics
-acceleration setting, to be planned), then the release pipeline (phase 3).
+01–10 done and archived, plus the "YouTube Shorts" tile. In progress: 11 (graphics
+acceleration setting), then the release pipeline (phase 3).

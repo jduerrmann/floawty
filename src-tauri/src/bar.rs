@@ -91,7 +91,7 @@ pub fn create(app: &AppHandle) -> tauri::Result<()> {
         .to_logical::<f64>(window.scale_factor()?)
         .width;
     let builder = WebviewBuilder::new(LABEL, WebviewUrl::App("bar.html".into()))
-        .additional_browser_args(service::BROWSER_ARGS)
+        .additional_browser_args(&service::current_browser_args(app))
         .transparent(true);
     window.add_child(
         builder,
@@ -303,6 +303,7 @@ mod tests {
             language: settings.language,
             shorts: settings.shorts,
             update_check: settings.update_check,
+            graphics_acceleration: settings.graphics_acceleration,
             video_only: false,
             zoom: false,
             page_problems: Vec::new(),

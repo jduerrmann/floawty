@@ -57,6 +57,10 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
 - Shorts settings: pause 0–10 s, "hold while the mouse is over floawty" (default on),
   size while a Short plays (`rotated` default or `separate`, [[tech-window]]).
 - The update check is stored only (off by default); nothing talks to GitHub yet.
+- "Use graphics acceleration" (default on): turning it off or on asks "Restart floawty
+  now?" in place; Cancel puts the box back, Restart saves and restarts
+  (`set_graphics_acceleration`), because WebView2 takes its arguments only at start.
+  Off starts every webview with `--disable-gpu`: no PlayReady, more CPU (mvp-11).
 
 ## Structure
 
@@ -66,10 +70,10 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
 | `src-tauri/src/hover.rs` | when the bar shows: delay, leave, idle | unit |
 | `src-tauri/src/reset.rs` | reset request and wipe at start | unit (temp dirs), Playwright |
 | `src-tauri/src/hotkeys.rs` | register, change one, pause all; action names | unit |
-| `src-tauri/src/commands.rs` | `toggle_click_through`, `toggle_video_only`, `toggle_zoom`, `set_bar_width`, `set_settings_open`, `set_preferences`, `set_hotkey`, `set_hotkeys_paused`, `move_focus` (F6), `reset_all_data`, `quit` | Playwright |
+| `src-tauri/src/commands.rs` | `toggle_click_through`, `toggle_video_only`, `toggle_zoom`, `set_bar_width`, `set_settings_open`, `set_preferences`, `set_graphics_acceleration` (save, restart), `set_hotkey`, `set_hotkeys_paused`, `move_focus` (F6), `reset_all_data`, `quit` | Playwright |
 | `src/state.ts` | `OverlayState`, start a page in its language, reload on change, `withShortsAuto` | Vitest |
 | `src/bar.ts`, `src/bar.css`, `src/click-through.ts` | controls, dot and hint | Playwright |
-| `src/settings-panel.ts`, `src/hotkey-list.ts` | panel, preferences, reset confirm, hotkey recording | Playwright |
+| `src/settings-panel.ts`, `src/hotkey-list.ts` | panel, preferences, restart and reset confirms, hotkey recording | Playwright |
 | `src/hotkeys.ts` | key press → hotkey, conflicts, localized display | Vitest |
 | `src/i18n.ts` | all texts, `resolveLanguage` | Vitest |
 
@@ -86,7 +90,8 @@ the settings.
 
 `OverlayState` (command `overlay_state`, event `overlay-state`): mode, opacity,
 clickThrough, serviceId, settingsOpen, hotkeys, language, shorts (auto, pauseSeconds,
-holdOnHover, portraitSize), updateCheck, videoOnly, zoom, pageProblems.
+holdOnHover, portraitSize), updateCheck, graphicsAcceleration, videoOnly, zoom,
+pageProblems.
 
 ## Working on X → read Y
 

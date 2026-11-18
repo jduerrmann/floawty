@@ -14,7 +14,7 @@ note or decision. Numbers are not reused.
 
 | # | Question | Answered by | Blocks |
 |---|---|---|---|
-| – | No open question. | | |
+| 6 | Allow only one running floawty (single-instance guard, new dependency `tauri-plugin-single-instance`)? A second instance with another graphics-acceleration setting cannot start (logged) | maintainer | – |
 
 Answered: #5 free aspect ratio → [[overlay-shape-free-with-zoom]]; #1 stack and #2 budgets → [[stack-by-spike]]; #3 UI scope →
 [[overlay-controls]]; #4 Widevine download → [[widevine-on-demand-with-notice]],

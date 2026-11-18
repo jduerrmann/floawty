@@ -18,8 +18,10 @@ page inside the main window.
 
 - One service webview at a time (label `service`); opening another closes it first.
 - Service webviews share floawty's WebView2 profile ([[shared-webview2-profile-in-mvp]])
-  and need the **same browser arguments** as the main window (`service.rs`
-  `BROWSER_ARGS` = `tauri.conf.json`), or WebView2 refuses the shared environment.
+  and need the **same browser arguments** as the main window, or WebView2 refuses the
+  shared environment: main window, bar and service all take `service::browser_args`
+  (from the setting `graphicsAcceleration`, `--disable-gpu` when off); `tauri.conf.json`
+  sets none.
 - **Service pages get no IPC:** the capability `main` lists only floawty's own
   webviews `main` and `bar` and no remote origin; `__TAURI_INTERNALS__` exists in service pages, but every
   command is refused ("not allowed by ACL", checked for all commands). Adapter page

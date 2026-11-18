@@ -128,6 +128,8 @@ pub struct Settings {
     pub video_only: bool,
     /// One switch for all services; it only takes effect in the floaty view.
     pub zoom: bool,
+    /// Off starts WebView2 without its GPU; it takes effect at the next start.
+    pub graphics_acceleration: bool,
 }
 
 impl Default for Settings {
@@ -148,6 +150,7 @@ impl Default for Settings {
             update_check: false,
             video_only: false,
             zoom: false,
+            graphics_acceleration: true,
         }
     }
 }
@@ -437,5 +440,16 @@ mod tests {
         assert_eq!(step_opacity(1.0, 1), 1.0);
         assert_eq!(step_opacity(0.2, -1), 0.1);
         assert_eq!(step_opacity(0.1, -1), 0.1);
+    }
+
+    #[test]
+    fn graphics_acceleration_is_on_unless_turned_off() {
+        assert!(parse(r#"{ "version": 1, "opacity": 0.5 }"#).graphics_acceleration);
+        let off = Settings {
+            graphics_acceleration: false,
+            ..Settings::default()
+        };
+        assert!(to_json(&off).contains("\"graphicsAcceleration\": false"));
+        assert_eq!(parse(&to_json(&off)), off);
     }
 }

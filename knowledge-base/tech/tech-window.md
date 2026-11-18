@@ -48,7 +48,7 @@ wiring talks to Tauri and Win32.
 | File | Role | Tests |
 |---|---|---|
 | `geometry.rs` | first placement (floaty: flush bottom right, 480 × 270; window: centred 1280 × 720 or smaller to fit with 16 px room; scaled), per-axis snapping flush within 32 px ([[overlay-snaps-flush]]), landscape shape free with magnets at 16:9 and 12:5 within 4 % (`fit_landscape`, never below the minimum height), 9:16 while a Short plays (`fit_resized`); a height-only drag keeps its height, anything else the width ([[overlay-shape-free-with-zoom]]), restore on the monitor with the largest overlap | unit |
-| `settings.rs` | `Settings` v1 (opacity, geometry, hotkeys, tiles, language, Shorts, update check, video only, zoom), tolerant `parse` (unknown language → system), opacity clamp 10–100 % and 10 % steps, Shorts pause 0–10 s | unit |
+| `settings.rs` | `Settings` v1 (opacity, geometry, hotkeys, tiles, language, Shorts, update check, graphics acceleration, video only, zoom), tolerant `parse` (unknown language → system), opacity clamp 10–100 % and 10 % steps, Shorts pause 0–10 s | unit |
 | `persistence.rs` | `%APPDATA%\floawty\settings.json`, atomic write (temp + rename), keeps broken files | unit (temp dir) |
 | `mode.rs` | `Mode` (floaty / window), switch and remember geometry per mode | unit |
 | `overlay.rs` | place and show in the saved mode, mode style (decorations, on top), layered-window opacity, click-through, hide/show, settle 250 ms after the last move/resize, not before the mouse button is up (floaty: aspect, back onto the work area, snap; both: save) | Win32 check scripts |
@@ -83,7 +83,8 @@ Settings file (v1):
   "shorts": { "auto": false, "pauseSeconds": 1, "holdOnHover": true, "portraitSize": "rotated" },
   "updateCheck": false,
   "videoOnly": false,
-  "zoom": false
+  "zoom": false,
+  "graphicsAcceleration": true
 }
 ```
 

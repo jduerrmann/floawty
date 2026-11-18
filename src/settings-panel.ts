@@ -19,6 +19,11 @@ const TEXTS: [string, MessageKey][] = [
   ['portrait-size-label', 'portraitSize'],
   ['update-check-label', 'updateCheck'],
   ['update-check-note', 'updateCheckLater'],
+  ['graphics-acceleration-label', 'graphicsAcceleration'],
+  ['graphics-acceleration-note', 'graphicsAccelerationNote'],
+  ['restart-question', 'restartQuestion'],
+  ['restart-yes', 'restartConfirm'],
+  ['restart-no', 'cancel'],
   ['reset-title', 'resetTitle'],
   ['reset-explain', 'resetExplain'],
   ['reset', 'resetTitle'],
@@ -53,6 +58,24 @@ function wireReset(): void {
   });
   element('reset-no').addEventListener('click', () => (confirm.hidden = true));
   element('reset-yes').addEventListener('click', () => void invoke('reset_all_data'));
+}
+
+// WebView2 takes its arguments only at start, so a change needs a restart; cancelling undoes it.
+function wireGraphicsAcceleration(current: () => OverlayState): void {
+  const box = element<HTMLInputElement>('graphics-acceleration');
+  const confirm = element('restart-confirm');
+  box.addEventListener('change', () => {
+    confirm.hidden = box.checked === current().graphicsAcceleration;
+    if (!confirm.hidden) element('restart-no').focus();
+  });
+  element('restart-no').addEventListener('click', () => {
+    box.checked = current().graphicsAcceleration;
+    confirm.hidden = true;
+    box.focus();
+  });
+  element('restart-yes').addEventListener('click', () => {
+    void invoke('set_graphics_acceleration', { enabled: box.checked });
+  });
 }
 
 function wirePreferences(current: () => OverlayState): void {
@@ -93,6 +116,10 @@ function showValues(state: OverlayState): void {
   element<HTMLInputElement>('shorts-hold').checked = state.shorts.holdOnHover;
   element<HTMLSelectElement>('portrait-size').value = state.shorts.portraitSize;
   element<HTMLInputElement>('update-check').checked = state.updateCheck;
+  // An open restart question keeps the box as the user just set it.
+  if (element('restart-confirm').hidden) {
+    element<HTMLInputElement>('graphics-acceleration').checked = state.graphicsAcceleration;
+  }
 }
 
 export function startSettingsPanel(state: OverlayState, language: Language): StateView {
@@ -102,6 +129,7 @@ export function startSettingsPanel(state: OverlayState, language: Language): Sta
   writeTexts(language);
   wireReset();
   wirePreferences(() => latest);
+  wireGraphicsAcceleration(() => latest);
   element('settings-done').addEventListener('click', close);
   panel.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && !event.defaultPrevented) close();
@@ -113,12 +141,13 @@ export function startSettingsPanel(state: OverlayState, language: Language): Sta
     latest = next;
     panel.hidden = !next.settingsOpen;
     element('home').hidden = next.settingsOpen;
-    showValues(next);
-    showHotkeys(next.hotkeys);
     if (opening) {
       element('reset-confirm').hidden = true;
+      element('restart-confirm').hidden = true;
       element('hotkey-error').textContent = '';
       element('language').focus();
     }
+    showValues(next);
+    showHotkeys(next.hotkeys);
   };
 }

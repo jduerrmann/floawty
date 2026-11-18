@@ -1,4 +1,4 @@
-// The settings panel: language, hotkeys, Shorts and "Reset all data".
+// The settings panel: language, hotkeys, Shorts, graphics acceleration and "Reset all data".
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -78,6 +78,40 @@ test('a new hotkey is recorded, a conflict is shown and it survives a restart', 
     await second.stop();
   }
 });
+
+test('graphics acceleration asks before it restarts floawty, and cancelling keeps it', async () => {
+  const profile = freshProfile();
+  const app = await launch(profile);
+  const acceleration = app.home.locator('#graphics-acceleration');
+  let restarted: number[] = [];
+  try {
+    await openSettings(app);
+    await expect(acceleration).toBeChecked();
+    await acceleration.uncheck();
+    await expect(app.home.locator('#restart-confirm')).toBeVisible();
+    await expect(app.home.locator('#restart-no')).toBeFocused();
+    await app.home.locator('#restart-no').click();
+    await expect(app.home.locator('#restart-confirm')).toBeHidden();
+    await expect(acceleration).toBeChecked();
+    await acceleration.uncheck();
+    await app.home.locator('#restart-yes').click();
+    await expect.poll(() => childrenOf(app.pid).length, { timeout: 15_000 }).toBeGreaterThan(0);
+    restarted = childrenOf(app.pid);
+    // Written by the new floawty only after its main window exists.
+    await expect
+      .poll(() => logOf(profile), { timeout: 15_000 })
+      .toContain('graphics acceleration is off');
+  } finally {
+    await app.stop();
+    for (const pid of restarted) process.kill(pid);
+  }
+  expect(readFileSync(settingsFile(profile), 'utf8')).toContain('"graphicsAcceleration": false');
+});
+
+function logOf(profile: Profile): string {
+  const file = path.join(profile.dataDir, 'logs', 'floawty.log');
+  return existsSync(file) ? readFileSync(file, 'utf8') : '';
+}
 
 function childrenOf(pid: number): number[] {
   const query = `(Get-CimInstance Win32_Process -Filter "ParentProcessId=${pid} AND Name='floawty.exe'").ProcessId`;

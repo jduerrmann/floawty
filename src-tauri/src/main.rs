@@ -32,7 +32,7 @@ fn reset_if_requested(app: &AppHandle) -> std::io::Result<()> {
     Ok(())
 }
 
-fn create_main_window(app: &AppHandle) -> tauri::Result<()> {
+fn create_main_window(app: &AppHandle, browser_args: &str) -> tauri::Result<()> {
     let config = app
         .config()
         .app
@@ -40,7 +40,9 @@ fn create_main_window(app: &AppHandle) -> tauri::Result<()> {
         .iter()
         .find(|w| w.label == "main")
         .expect("the main window is defined in tauri.conf.json");
-    WebviewWindowBuilder::from_config(app, config)?.build()?;
+    WebviewWindowBuilder::from_config(app, config)?
+        .additional_browser_args(browser_args)
+        .build()?;
     Ok(())
 }
 
@@ -66,14 +68,20 @@ fn setup(app: &AppHandle) -> tauri::Result<()> {
             &format!("could not reset all data, trying again next start: {error}"),
         );
     }
-    create_main_window(app)?;
-    let version = app.package_info().version.to_string();
-    let webview = tauri::webview_version().ok();
-    logbook::write(app, &logbook::startup_message(&version, webview.as_deref()));
-
     app.manage(Overlay::load(
         paths::floawty_dir(app)?.join("settings.json"),
     ));
+    if let Err(error) = create_main_window(app, &service::current_browser_args(app)) {
+        // E.g. another floawty on the same profile still runs with other WebView2 arguments.
+        logbook::write(app, &format!("could not create the main window: {error}"));
+        return Err(error);
+    }
+    let version = app.package_info().version.to_string();
+    let webview = tauri::webview_version().ok();
+    logbook::write(app, &logbook::startup_message(&version, webview.as_deref()));
+    if !app.state::<Overlay>().settings().graphics_acceleration {
+        logbook::write(app, "graphics acceleration is off");
+    }
     app.manage(Bar::default());
     app.manage(Page::default());
     overlay::place_and_show(app)?;
@@ -112,6 +120,7 @@ fn main() {
             commands::toggle_click_through,
             commands::set_settings_open,
             commands::set_preferences,
+            commands::set_graphics_acceleration,
             commands::set_hotkey,
             commands::set_hotkeys_paused,
             commands::move_focus,

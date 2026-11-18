@@ -12,12 +12,25 @@ use crate::page;
 use crate::settings::OpenService;
 
 pub const LABEL: &str = "service";
-// Must equal the main window's arguments in tauri.conf.json: one profile, one set of options.
-pub const BROWSER_ARGS: &str =
+const BROWSER_ARGS: &str =
     "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --disable-background-networking";
 const PAUSE: &str = "document.querySelectorAll('video').forEach((v) => v.pause())";
 const PLAY_PAUSE: &str =
     "(() => { const v = document.querySelector('video'); if (v) v.paused ? v.play() : v.pause(); })()";
+
+/// WebView2's arguments; every webview of one run must get the same, they share one profile.
+pub fn browser_args(graphics_acceleration: bool) -> String {
+    if graphics_acceleration {
+        BROWSER_ARGS.into()
+    } else {
+        format!("{BROWSER_ARGS} --disable-gpu")
+    }
+}
+
+/// The arguments this run started with; the setting only changes right before a restart.
+pub fn current_browser_args(app: &AppHandle) -> String {
+    browser_args(app.state::<Overlay>().settings().graphics_acceleration)
+}
 
 fn current(app: &AppHandle) -> Option<Webview> {
     app.get_webview(LABEL)
@@ -31,7 +44,7 @@ pub fn open(app: &AppHandle, service: OpenService) -> tauri::Result<()> {
         .parse()
         .map_err(|_| tauri::Error::InvalidWebviewUrl("service url"))?;
     let mut builder = WebviewBuilder::new(LABEL, WebviewUrl::External(url))
-        .additional_browser_args(BROWSER_ARGS)
+        .additional_browser_args(&current_browser_args(app))
         .on_navigation(navigation_guard(
             app.clone(),
             service.allowed_domains.clone(),
@@ -179,5 +192,26 @@ pub fn cover(app: &AppHandle, covered: bool) -> tauri::Result<()> {
 pub fn focus(app: &AppHandle) {
     if let Some(webview) = current(app) {
         let _ = webview.set_focus();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::browser_args;
+
+    #[test]
+    fn with_graphics_acceleration_webview2_keeps_its_gpu() {
+        assert_eq!(
+            browser_args(true),
+            "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --disable-background-networking"
+        );
+    }
+
+    #[test]
+    fn without_graphics_acceleration_webview2_starts_without_its_gpu() {
+        assert_eq!(
+            browser_args(false),
+            format!("{} --disable-gpu", browser_args(true))
+        );
     }
 }

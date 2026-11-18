@@ -63,6 +63,11 @@ const en = {
   zoom: 'Zoom to fill (wide overlay)',
   updateCheck: 'Check GitHub for new versions',
   updateCheckLater: 'Not available yet – floawty keeps the choice for a later version.',
+  graphicsAcceleration: 'Use graphics acceleration',
+  graphicsAccelerationNote:
+    'Turned off, floawty needs more CPU, and services with copy protection may play in lower quality.',
+  restartQuestion: 'Restart floawty now? The change takes effect at the restart.',
+  restartConfirm: 'Restart',
   resetTitle: 'Reset all data',
   resetExplain: 'Deletes the settings, your own tiles and all sign-ins. floawty then restarts.',
   resetConfirm: 'Delete everything',
@@ -136,6 +141,11 @@ const de: Record<MessageKey, string> = {
   zoom: 'Auf Fläche zoomen (breites Overlay)',
   updateCheck: 'Auf GitHub nach neuen Versionen suchen',
   updateCheckLater: 'Noch nicht verfügbar – floawty merkt sich die Wahl für eine spätere Version.',
+  graphicsAcceleration: 'Grafikbeschleunigung verwenden',
+  graphicsAccelerationNote:
+    'Ausgeschaltet braucht floawty mehr CPU, und Dienste mit Kopierschutz spielen evtl. in geringerer Qualität.',
+  restartQuestion: 'floawty jetzt neu starten? Die Änderung wirkt nach dem Neustart.',
+  restartConfirm: 'Neu starten',
   resetTitle: 'Alle Daten zurücksetzen',
   resetExplain:
     'Löscht die Einstellungen, deine eigenen Kacheln und alle Anmeldungen. Danach startet floawty neu.',

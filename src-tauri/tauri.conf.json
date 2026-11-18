@@ -17,7 +17,6 @@
         "title": "floawty",
         "width": 480,
         "height": 270,
-        "additionalBrowserArgs": "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --disable-background-networking",
         "decorations": false,
         "alwaysOnTop": true,
         "visible": false,

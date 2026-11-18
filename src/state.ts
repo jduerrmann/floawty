@@ -18,6 +18,7 @@ export interface Preferences {
 }
 
 export interface OverlayState extends Preferences {
+  graphicsAcceleration: boolean;
   mode: 'floaty' | 'window';
   opacity: number;
   clickThrough: boolean;

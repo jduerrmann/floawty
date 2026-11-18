@@ -48,3 +48,6 @@ User-facing changes, in plain language. Format based on
 - "Video only" (▣ in the bar or Ctrl+Alt+Shift+V): on YouTube, YouTube Shorts and
   Twitch the video fills the overlay, the rest of the page is hidden beneath it. It
   stays on until you switch it off; window mode always shows the whole page.
+- Settings: "Use graphics acceleration" (on at first). Turning it off makes floawty
+  restart without the graphics card, like the same switch in Edge; it needs more CPU,
+  and services with copy protection may play in lower quality.
