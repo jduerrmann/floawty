@@ -16,14 +16,27 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
 
 ## Invariants
 
-- **Bar visibility:** pinned on the tiles and while the settings are open; over a
-  service only on hover (300 ms, hidden after 3 s of a resting cursor except over
-  the bar, hidden when the cursor leaves); always shown while click-through is on,
+- **Bar visibility:** pinned on the tiles, while the settings are open and in window
+  mode; over a service in the floaty view only on hover (300 ms, hidden after 3 s of a
+  resting cursor except over the bar, hidden when the cursor leaves; a page's pop-up
+  owned by floawty's window, such as a suggestion list, counts as inside); always shown while click-through is on,
   then with the dot and hint only. Hover detection: [[bar-hover-by-cursor-look]].
+- **Bar placement** (`bar::layout`, [[bar-leaves-the-page-clickable]]): in window mode a
+  full-width strip with a solid background above the page, the service starting 40 px
+  lower; over a service in the floaty view only as wide as the controls (natural width
+  reported by the page, `set_bar_width`, plus 8 px), centred, so the page beside it
+  stays clickable; otherwise the full width. `bar::fit` places bar and service after
+  every resize and state change; the service webview has no `auto_resize`.
 - The bar must stay above the service webview: WebView2 puts every new child window
   on top, so `service::open` calls `bar::raise` (Win32 `SetWindowPos`).
-- When the hover hides the bar and floawty is the foreground window, the keyboard
-  goes back to the service, never away from another app.
+- The cursor is watched while a service is visible and clickable, also in window mode
+  (the page's Shorts hold), but the bar follows it only in the floaty view.
+- When the hover hides the bar and the keyboard is in the bar (asked before hiding), it
+  goes back to the service; never from the page (that would close its pop-ups) or from
+  another app. A pointer click on a bar button also hands the keyboard to the page
+  (`move_focus`); keyboard users stay in the bar.
+- The controls turn compact (24 px buttons, no gap) only when they overflow the bar;
+  their natural width is measured under `.measuring`, free of the current width.
 - A hidden webview keeps `document.visibilityState` "visible"; the bar learns its
   visibility from the event `bar-visible` (also `body[data-visible]` for tests).
 - **Settings open** (`set_settings_open`): the service video pauses, its webview is
@@ -49,11 +62,11 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
 
 | File | Role | Tests |
 |---|---|---|
-| `src-tauri/src/bar.rs` | create, fit to the width, raise, show/hide, hover watcher | unit (`wanted`), Playwright |
+| `src-tauri/src/bar.rs` | create, place bar and service (`layout`), raise, show/hide, hover watcher | unit (`wanted`, `layout`), Playwright |
 | `src-tauri/src/hover.rs` | when the bar shows: delay, leave, idle | unit |
 | `src-tauri/src/reset.rs` | reset request and wipe at start | unit (temp dirs), Playwright |
 | `src-tauri/src/hotkeys.rs` | register, change one, pause all; action names | unit |
-| `src-tauri/src/commands.rs` | `toggle_click_through`, `toggle_video_only`, `set_settings_open`, `set_preferences`, `set_hotkey`, `set_hotkeys_paused`, `move_focus` (F6), `reset_all_data`, `quit` | Playwright |
+| `src-tauri/src/commands.rs` | `toggle_click_through`, `toggle_video_only`, `set_bar_width`, `set_settings_open`, `set_preferences`, `set_hotkey`, `set_hotkeys_paused`, `move_focus` (F6), `reset_all_data`, `quit` | Playwright |
 | `src/state.ts` | `OverlayState`, start a page in its language, reload on change, `withShortsAuto` | Vitest |
 | `src/bar.ts`, `src/bar.css`, `src/click-through.ts` | controls, dot and hint | Playwright |
 | `src/settings-panel.ts`, `src/hotkey-list.ts` | panel, preferences, reset confirm, hotkey recording | Playwright |
@@ -65,8 +78,8 @@ click-through, ▶ Shorts auto mode (only for services whose manifest sets
 `shortsAutoMode`; an amber dot and another tooltip when the page script reports
 missing controls, [[tech-shorts]]), ▣ video only (only for manifests with `videoOnly`;
 the dot when the player is missing, [[tech-video-only]]), ⧉ window mode, ⚙ settings, ✕ close floawty. Opacity and
-click-through are disabled in window mode. The empty parts of the strip drag the
-window. F6 moves between the bar and the page below; Esc leaves the bar and closes
+click-through are disabled in window mode. The grip ⠿ at the left of the controls drags
+the window (the bar may be no wider than the controls); in window mode the title bar too. F6 moves between the bar and the page below; Esc leaves the bar and closes
 the settings.
 
 `OverlayState` (command `overlay_state`, event `overlay-state`): mode, opacity,

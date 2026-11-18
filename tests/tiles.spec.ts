@@ -2,6 +2,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test } from '@playwright/test';
+import { resizeWindow } from './desktop';
 import { freshProfile, launch } from './app';
 
 const SERVICE_NAMES = [
@@ -12,6 +13,8 @@ const SERVICE_NAMES = [
   'Prime Video',
   'Disney+',
   'RTL+',
+  'Crunchyroll',
+  'Apple TV',
 ];
 
 test('shows one tile per service and a tile to add a page', async () => {
@@ -19,6 +22,24 @@ test('shows one tile per service and a tile to add a page', async () => {
   try {
     const tiles = app.home.locator('#tiles > li');
     await expect(tiles).toHaveCount(SERVICE_NAMES.length + 1);
+    const columns = await app.home.evaluate(
+      () =>
+        getComputedStyle(document.getElementById('tiles') as HTMLElement).gridTemplateColumns.split(
+          ' ',
+        ).length,
+    );
+    expect(columns).toBe(4);
+    resizeWindow(app.pid, 320, 180);
+    await expect
+      .poll(() =>
+        app.home.evaluate(
+          () =>
+            getComputedStyle(
+              document.getElementById('tiles') as HTMLElement,
+            ).gridTemplateColumns.split(' ').length,
+        ),
+      )
+      .toBe(3);
     for (const name of SERVICE_NAMES) {
       await expect(
         app.home.locator('#tiles').getByRole('button', { name, exact: true }),

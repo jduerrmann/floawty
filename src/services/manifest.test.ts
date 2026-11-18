@@ -48,6 +48,8 @@ describe('service manifests', () => {
       'prime',
       'disney',
       'rtlplus',
+      'crunchyroll',
+      'appletv',
     ]);
     for (const service of services) {
       expect(manifestProblems(service), service.id).toEqual([]);
@@ -61,6 +63,7 @@ describe('service manifests', () => {
       'youtube',
       'youtube-shorts',
       'twitch',
+      'crunchyroll',
     ]);
     expect(services.filter((s) => s.startsShortsAuto).map((s) => s.id)).toEqual(['youtube-shorts']);
   });

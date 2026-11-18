@@ -2,6 +2,7 @@
 use serde::Serialize;
 use tauri::{AppHandle, Manager};
 
+use crate::bar;
 use crate::hotkeys::{self, Action};
 use crate::logbook;
 use crate::overlay::{self, Overlay, OverlayState};
@@ -37,6 +38,11 @@ pub fn overlay_state(app: AppHandle) -> OverlayState {
 #[tauri::command]
 pub fn toggle_mode(app: AppHandle) -> CommandResult {
     report(overlay::toggle_mode(&app))
+}
+
+#[tauri::command]
+pub fn set_bar_width(app: AppHandle, width: f64) -> CommandResult {
+    report(bar::set_controls_width(&app, width))
 }
 
 #[tauri::command]

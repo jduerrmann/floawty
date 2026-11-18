@@ -1,4 +1,6 @@
 // The services with a tile, in tile order.
+import { appletv } from './appletv/manifest';
+import { crunchyroll } from './crunchyroll/manifest';
 import { disney } from './disney/manifest';
 import type { ServiceManifest } from './manifest';
 import { netflix } from './netflix/manifest';
@@ -16,4 +18,6 @@ export const services: ServiceManifest[] = [
   prime,
   disney,
   rtlplus,
+  crunchyroll,
+  appletv,
 ];

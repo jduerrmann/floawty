@@ -1,10 +1,8 @@
 //! The main window in floaty view or window mode: placement, snapping, opacity,
 //! click-through, visibility.
 use std::path::PathBuf;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::AtomicU64;
 use std::sync::Mutex;
-use std::thread;
-use std::time::Duration;
 
 use tauri::{AppHandle, Emitter, Manager, PhysicalPosition, PhysicalSize, Window};
 
@@ -17,8 +15,8 @@ use crate::persistence;
 use crate::service;
 use crate::settings::{self, Hotkeys, Language, Settings, Shorts};
 
-/// Waiting this long after the last move or resize counts as "the user let go".
-const SETTLE_TIME: Duration = Duration::from_millis(250);
+mod settle;
+pub use settle::settle_later;
 
 pub struct Overlay {
     settings: Mutex<Settings>,
@@ -31,6 +29,8 @@ pub struct Overlay {
     /// The landscape view before it turned upright, restored unless the user changed the upright one.
     before_turn: Mutex<Option<Rect>>,
     turned_to: Mutex<Option<Rect>>,
+    /// Size after the last settle, to tell which edge the user dragged.
+    settled: Mutex<Option<(u32, u32)>>,
     page_problems: Mutex<Vec<Problem>>,
 }
 
@@ -61,6 +61,7 @@ impl Overlay {
             aspect: Mutex::new(Aspect::Landscape),
             before_turn: Mutex::new(None),
             turned_to: Mutex::new(None),
+            settled: Mutex::new(None),
             page_problems: Mutex::new(Vec::new()),
         }
     }
@@ -372,87 +373,4 @@ pub fn toggle_visible(app: &AppHandle) -> tauri::Result<()> {
     emit_state(app);
     page::sync(app);
     Ok(())
-}
-
-/// Saves the geometry once the user stops moving or resizing; the floaty view also
-/// snaps and keeps 16:9, or 9:16 while a Short plays.
-pub fn settle_later(app: &AppHandle) {
-    let generation = overlay(app)
-        .settle_generation
-        .fetch_add(1, Ordering::SeqCst)
-        + 1;
-    let app = app.clone();
-    thread::spawn(move || {
-        thread::sleep(SETTLE_TIME);
-        let handle = app.clone();
-        let _ = app.run_on_main_thread(move || {
-            if overlay(&handle).settle_generation.load(Ordering::SeqCst) != generation {
-                return;
-            }
-            if let Err(error) = settle(&handle) {
-                logbook::write(&handle, &format!("could not settle the window: {error}"));
-            }
-        });
-    });
-}
-
-fn settle(app: &AppHandle) -> tauri::Result<()> {
-    let window = main_window(app);
-    let current = visible_rect(&window)?;
-    if overlay(app).settings().mode == Mode::Window {
-        overlay(app).update(app, |s| mode::remember(s, current));
-        return Ok(());
-    }
-    let Some((area, scale)) = current_area(&window)? else {
-        return Ok(());
-    };
-    let aspect = overlay(app).aspect();
-    let (width, height) = geometry::fit_aspect(current.width, aspect);
-    let snapped = geometry::snap(
-        Rect {
-            width,
-            height,
-            ..current
-        },
-        area,
-        scale,
-    );
-    if snapped != current {
-        set_rect(&window, snapped)?;
-    }
-    if aspect == Aspect::Landscape {
-        overlay(app).update(app, |s| mode::remember(s, snapped));
-        return Ok(());
-    }
-    let landscape = match landscape_before_turn(app, current, snapped, (area, scale)) {
-        Some(landscape) => landscape,
-        None => landscape_of(&overlay(app).settings(), snapped, Some((area, scale))),
-    };
-    overlay(app).update(app, |s| mode::remember_turned(s, snapped, landscape));
-    Ok(())
-}
-
-/// The pre-turn landscape view: kept while the upright one keeps floawty's size (a move
-/// only shifts it), forgotten once the user resizes.
-fn landscape_before_turn(
-    app: &AppHandle,
-    current: Rect,
-    snapped: Rect,
-    (area, scale): (Rect, f64),
-) -> Option<Rect> {
-    let state = overlay(app);
-    let mut turned_to = state.turned_to.lock().unwrap();
-    let mut before = state.before_turn.lock().unwrap();
-    // Settling derives the height from the width, so only the width tells a resize.
-    let same_size = turned_to.is_some_and(|r| r.width == current.width);
-    if !same_size {
-        *turned_to = None;
-        *before = None;
-        return None;
-    }
-    if *turned_to != Some(current) {
-        *before = before.map(|b| geometry::turn(snapped, (b.width, b.height), area, scale));
-    }
-    *turned_to = Some(snapped);
-    *before
 }

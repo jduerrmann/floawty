@@ -1,4 +1,5 @@
-// Adapter tests: "video only" lays the player over the page in the YouTube and Twitch scripts.
+// Adapter tests: "video only" lays the player over the page in the YouTube, Twitch and
+// Crunchyroll scripts.
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
@@ -19,6 +20,12 @@ interface Site {
 
 const YOUTUBE: Site = { script: 'youtube', origin: 'https://www.youtube.com', fixtures: 'youtube' };
 const TWITCH: Site = { script: 'twitch', origin: 'https://www.twitch.tv', fixtures: 'twitch' };
+const CRUNCHYROLL: Site = {
+  script: 'crunchyroll',
+  origin: 'https://www.crunchyroll.com',
+  fixtures: 'crunchyroll',
+};
+const EPISODE = '/de/watch/G0000000/episode';
 
 async function open(page: Page, site: Site, fixture: string, pathname: string): Promise<void> {
   const script = path.join(ROOT, 'dist', 'page', `${site.script}.js`);
@@ -303,5 +310,40 @@ test.describe('Twitch', () => {
     await page.goto('https://id.twitch.tv.example.com/');
     expect(await sync(page, input(true))).toBeNull();
     expect(await page.evaluate(() => Object.isFrozen((window as never)['__floawty']))).toBe(true);
+  });
+});
+
+test.describe('Crunchyroll', () => {
+  test('video only lays the player over the header and the episode page', async ({ page }) => {
+    await open(page, CRUNCHYROLL, 'watch.html', EPISODE);
+    expect(await sync(page, input(true))).toEqual({ aspect: 'landscape', problems: [] });
+    expect(await rectOf(page, '.video-player-wrapper')).toEqual(await viewport(page));
+    expect(await rectOf(page, 'video')).toEqual(await viewport(page));
+    expect(await covers(page, '.video-player-wrapper', CORNERS)).toEqual([true, true, true, true]);
+    expect(await scrollLocked(page)).toBe(true);
+  });
+
+  test('turning video only off restores the player', async ({ page }) => {
+    await open(page, CRUNCHYROLL, 'watch.html', '/watch/G0000000/episode');
+    const before = await rectOf(page, '.video-player-wrapper');
+    await sync(page, input(true));
+    await sync(page, input(false));
+    expect(await rectOf(page, '.video-player-wrapper')).toEqual(before);
+    expect(await scrollLocked(page)).toBe(false);
+  });
+
+  test('browsing pages are left alone and report nothing', async ({ page }) => {
+    await page.clock.install();
+    await open(page, CRUNCHYROLL, 'no-player.html', '/de/series/G0000000');
+    await page.clock.runFor(3000);
+    expect(await sync(page, input(true))).toEqual({ aspect: 'landscape', problems: [] });
+    expect(await scrollLocked(page)).toBe(false);
+  });
+
+  test('an episode page without its player reports it after the page settled', async ({ page }) => {
+    await open(page, CRUNCHYROLL, 'no-player.html', EPISODE);
+    await expect
+      .poll(() => sync(page, input(true)), { timeout: SETTLE_TIMEOUT })
+      .toEqual({ aspect: 'landscape', problems: ['player-missing'] });
   });
 });

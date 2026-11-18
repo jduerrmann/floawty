@@ -4,7 +4,7 @@ area: process
 tags: [principles, license, privacy]
 status: active
 created: 2026-11-16
-updated: 2026-11-17
+updated: 2026-11-18
 source: conversation
 ---
 
@@ -22,7 +22,8 @@ services, which brings legal and ethical constraints.
 2. **No ads, no monetization** inside the app.
 3. **No server** operated by the project. Outgoing connections only to the services
    the user opens and to GitHub Releases for an update check the user triggers or
-   turns on (off by default). Amended by [[webview2-diagnostics-disclosed]].
+   turns on (off by default). Amended by [[webview2-diagnostics-disclosed]]
+   and [[webview2-component-updates-disclosed]].
 4. **No telemetry or tracking**, not even opt-in.
 5. **No accounts and no API keys.**
 6. Distribution only via **GitHub Releases**, built by GitHub Actions; portable build

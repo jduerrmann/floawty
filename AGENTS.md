@@ -32,9 +32,11 @@ Breaking one needs a new decision and the maintainer's explicit OK first.
 3. **No server.** No backend, API, database or proxy. floawty's own code talks only
    to the services the user opens and to GitHub Releases for an update check the
    user triggers or turns on (off by default). The Windows component WebView2 also
-   sends diagnostic data to Microsoft; this is disclosed at first start, in
+   sends diagnostic data to Microsoft and loads updates of its own components (e.g.
+   the DRM module) from Microsoft; both are disclosed at first start, in
    PRIVACY.md and in the README, never hidden or denied
-   ([webview2-diagnostics-disclosed](knowledge-base/decisions/webview2-diagnostics-disclosed.md)).
+   ([webview2-diagnostics-disclosed](knowledge-base/decisions/webview2-diagnostics-disclosed.md),
+   [webview2-component-updates-disclosed](knowledge-base/decisions/webview2-component-updates-disclosed.md)).
 4. **No tracking.** Never telemetry, analytics, crash reporting, fingerprinting or
    unique IDs – not even opt-in.
 5. **No accounts, no API keys.** Users sign in on the official sites.

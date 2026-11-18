@@ -16,7 +16,8 @@ else, and can even let your mouse click right through it.
 - Adjustable size, opacity and position (snap to corners, multi-monitor)
 - Click-through mode – the overlay stays visible, your clicks go to the app behind it
 - Global hotkeys (show/hide, opacity, click-through, play/pause)
-- Services: YouTube, Netflix, Prime Video, Disney+, Twitch, RTL+, or any custom URL
+- Services: YouTube, Netflix, Prime Video, Disney+, Twitch, RTL+, Crunchyroll, Apple
+  TV, or any custom URL
 - **YouTube Shorts auto mode** – automatically moves on to the next Short
 - English and German interface
 
@@ -27,10 +28,11 @@ else, and can even let your mouse click right through it.
 - **No server, no account, no tracking.** floawty only talks to the streaming sites
   you open, and to GitHub only when you ask it to check for updates. Honest
   footnote: floawty uses Windows' WebView2 component, which sends diagnostic data to
-  Microsoft and cannot be stopped from doing so – floawty tells you at the first
-  start. See [PRIVACY.md](PRIVACY.md).
+  Microsoft, which cannot be stopped, and loads updates of its own parts (such as the
+  video DRM module) from Microsoft, which floawty keeps on because some services need
+  that module. floawty tells you at the first start. See [PRIVACY.md](PRIVACY.md).
 - **Light on resources.** Made to run next to your work on an ordinary PC: a 4 MB
-  download, under 200 MB of memory when idle.
+  download, under 250 MB of memory when idle.
 - **Fair to the services.** You sign in on the official websites; floawty does not
   touch DRM, does not download content and does not block ads.
 

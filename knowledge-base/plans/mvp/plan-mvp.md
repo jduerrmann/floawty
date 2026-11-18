@@ -37,5 +37,7 @@ Decisions: [[mvp-scope-and-controls]], [[bundled-service-logos]],
 | 06 | [[mvp-06-shorts-auto-mode]] | Shorts move on after one run, configurable | 05 |
 | 07 | [[mvp-07-video-only]] | "Video only" for YouTube and Netflix, then the others | 05 |
 | 08 | [[mvp-08-measure-and-check]] | Budgets met, all services checked by the maintainer | 06, 07 |
+| 09 | [[mvp-09-passkey-prompt]] | Prime Video's passkey prompt no longer interrupts the password | 08 |
 
-01–07 done and archived, plus the "YouTube Shorts" tile. Next candidate: 08.
+01–08 done and archived, plus the "YouTube Shorts" tile. Next candidate: 09; then the
+release pipeline (phase 3) and open question 5 (free aspect ratio).

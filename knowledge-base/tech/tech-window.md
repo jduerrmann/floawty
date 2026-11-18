@@ -46,11 +46,11 @@ wiring talks to Tauri and Win32.
 
 | File | Role | Tests |
 |---|---|---|
-| `geometry.rs` | first placement (floaty: bottom right, 480 × 270, 16 px gap; window: centred 1280 × 720 or smaller to fit; scaled), per-axis snapping within 32 px, 16:9 / 9:16, restore on the monitor with the largest overlap | unit |
+| `geometry.rs` | first placement (floaty: flush bottom right, 480 × 270; window: centred 1280 × 720 or smaller to fit with 16 px room; scaled), per-axis snapping flush within 32 px ([[overlay-snaps-flush]]), 16:9 / 9:16 (`fit_resized`: a height-only drag keeps its height, anything else the width), restore on the monitor with the largest overlap | unit |
 | `settings.rs` | `Settings` v1 (opacity, geometry, hotkeys, tiles, language, Shorts, update check, video only), tolerant `parse` (unknown language → system), opacity clamp 10–100 % and 10 % steps, Shorts pause 0–10 s | unit |
 | `persistence.rs` | `%APPDATA%\floawty\settings.json`, atomic write (temp + rename), keeps broken files | unit (temp dir) |
 | `mode.rs` | `Mode` (floaty / window), switch and remember geometry per mode | unit |
-| `overlay.rs` | place and show in the saved mode, mode style (decorations, on top), layered-window opacity, click-through, hide/show, settle 250 ms after the last move/resize (floaty: snap, aspect; both: save) | Win32 check scripts |
+| `overlay.rs` | place and show in the saved mode, mode style (decorations, on top), layered-window opacity, click-through, hide/show, settle 250 ms after the last move/resize, not before the mouse button is up (floaty: aspect, back onto the work area, snap; both: save) | Win32 check scripts |
 | `hotkeys.rs` | registers the hotkeys from the settings (default Ctrl+Alt+Shift + O / D / ↑ / ↓ / F / Space / V), changes one at once, pauses all while recording | unit, check scripts |
 | `logbook.rs` | `%APPDATA%\floawty\logs\floawty.log`, UTC timestamps | unit |
 | `bar.rs`, `hover.rs`, `reset.rs` | the bar over the service, hover, reset all data | [[tech-bar-and-settings]] |

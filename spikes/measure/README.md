@@ -43,6 +43,12 @@ apps, and wait a minute after login before measuring.
    Test video: Big Buck Bunny 60 fps 4K (Blender Foundation, CC BY 3.0),
    `https://www.youtube.com/watch?v=aqz-KE-bpKQ`, quality fixed to 1080p.
 
+   **floawty itself** is measured with `npm run measure` after `npm run build`: a
+   Playwright driver (`tests/measure/`) starts the release build with fresh data
+   folders, measures start and `idle` without the debug port, sets up
+   `youtube-1080p` and `hidden` over it and checks what really played. The app has
+   no `--scenario` switch.
+
    `run-scenarios.ps1` does this for all scenarios when the app supports
    `--scenario=<name>` (it starts the app, waits 25 s, measures 60 s, stops it):
 

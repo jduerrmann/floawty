@@ -3,7 +3,7 @@ type: note
 tags: [questions]
 status: active
 created: 2026-11-16
-updated: 2026-11-17
+updated: 2026-11-18
 source: conversation
 ---
 
@@ -14,7 +14,7 @@ note or decision. Numbers are not reused.
 
 | # | Question | Answered by | Blocks |
 |---|---|---|---|
-| – | No open question. | | |
+| 5 | Free aspect ratio for the overlay: height and width apart (e.g. 21:9 films without bars), or a choice of 16:9 / 21:9 / 4:3 / free? Today 16:9, 9:16 for Shorts. | Maintainer (visual plan) | – (follow-up after mvp-08) |
 
 Answered: #1 stack and #2 budgets → [[stack-by-spike]]; #3 UI scope →
 [[overlay-controls]]; #4 Widevine download → [[widevine-on-demand-with-notice]],

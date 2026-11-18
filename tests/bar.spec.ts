@@ -1,7 +1,16 @@
 // The bar over a service: hover, back to the tiles, opacity and the click-through dot.
 import { expect, test, type Page } from '@playwright/test';
 import { freshProfile, launch, type RunningApp } from './app';
-import { pointAt, pointAway } from './desktop';
+import {
+  clickAt,
+  dragBy,
+  ownedPopups,
+  pointAt,
+  pointAway,
+  pressKeys,
+  resizeWindow,
+  windowPosition,
+} from './desktop';
 
 const EXAMPLE = {
   service: { id: 'example', url: 'https://example.com/', allowedDomains: ['example.com'] },
@@ -84,6 +93,127 @@ test('click-through shows the dot over a service with its hotkey', async () => {
     await expect(app.bar.locator('#click-through-dot')).toBeHidden();
   } finally {
     pointAway(app.pid);
+    await app.stop();
+  }
+});
+
+test('the bar leaves the page clickable: narrow over a service, above it in window mode', async () => {
+  const app = await launch(freshProfile());
+  try {
+    await openExample(app);
+    const service = app.pages().find((page) => page.url().startsWith('https://example.com'));
+    if (!service) throw new Error('the service page is missing');
+    const width = (page: Page) => page.evaluate(() => innerWidth);
+    const height = (page: Page) => page.evaluate(() => innerHeight);
+    const windowWidth = await width(app.home);
+    await expect.poll(() => width(app.bar)).toBeLessThan(windowWidth - 100);
+    expect(await app.bar.evaluate(() => document.getElementById('controls')?.scrollWidth)).toBe(
+      await app.bar.evaluate(() => document.getElementById('controls')?.clientWidth),
+    );
+    expect(await height(service)).toBe(await height(app.home));
+
+    await app.bar.evaluate(() => window.__TAURI_INTERNALS__.invoke('toggle_mode'));
+    await expect.poll(() => barShown(app.bar)).toBe('true');
+    await expect(app.bar.locator('body')).toHaveClass(/docked/);
+    await expect.poll(async () => (await width(app.bar)) === (await width(app.home))).toBe(true);
+    await expect.poll(async () => (await height(app.home)) - (await height(service))).toBe(40);
+  } finally {
+    pointAway(app.pid);
+    await app.stop();
+  }
+});
+
+test("a page's suggestion list stays open when the bar hides", async () => {
+  const app = await launch(freshProfile());
+  try {
+    await openExample(app);
+    const service = app.pages().find((page) => page.url().startsWith('https://example.com'));
+    if (!service) throw new Error('the service page is missing');
+    await service.setContent(
+      '<input id="mail" list="mails" style="margin: 80px 20px; width: 300px">' +
+        '<datalist id="mails"><option value="a@example.com"><option value="b@example.com"></datalist>',
+    );
+    clickAt(app.pid, 0.35, 0.34);
+    pressKeys('a');
+    await expect.poll(() => ownedPopups(app.pid)).toBe(1);
+    // The resting cursor hides the bar after 3 s; the list must survive that.
+    await expect.poll(() => barShown(app.bar), { timeout: 6000 }).toBe('false');
+    expect(ownedPopups(app.pid)).toBe(1);
+  } finally {
+    pointAway(app.pid);
+    await app.stop();
+  }
+});
+
+test('the grip in the bar moves the window over a service', async () => {
+  const app = await launch(freshProfile());
+  try {
+    await openExample(app);
+    await hoverVideo(app);
+    const windowWidth = await app.home.evaluate(() => innerWidth);
+    const windowHeight = await app.home.evaluate(() => innerHeight);
+    const barWidth = await app.bar.evaluate(() => innerWidth);
+    const grip = await app.bar.evaluate(() => {
+      const rect = document.getElementById('grip')?.getBoundingClientRect();
+      return rect ? { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 } : null;
+    });
+    if (!grip) throw new Error('the grip is missing');
+    const offset = Math.floor((windowWidth - barWidth) / 2);
+    pointAt(app.pid, (offset + grip.x) / windowWidth, grip.y / windowHeight);
+    const before = windowPosition(app.pid);
+    const after = dragBy(app.pid, -120, -90);
+    expect(before.x - after.x).toBeGreaterThan(100);
+    expect(before.y - after.y).toBeGreaterThan(70);
+  } finally {
+    pointAway(app.pid);
+    await app.stop();
+  }
+});
+
+test('the service follows the window size and fills it again in the floaty view', async () => {
+  const app = await launch(freshProfile());
+  try {
+    await openExample(app);
+    const service = app.pages().find((page) => page.url().startsWith('https://example.com'));
+    if (!service) throw new Error('the service page is missing');
+    const size = (page: Page) => page.evaluate(() => `${innerWidth}x${innerHeight}`);
+    resizeWindow(app.pid, 800, 450);
+    await expect.poll(() => app.home.evaluate(() => innerWidth)).toBeGreaterThan(600);
+    await expect.poll(async () => (await size(service)) === (await size(app.home))).toBe(true);
+    await app.bar.evaluate(() => window.__TAURI_INTERNALS__.invoke('toggle_mode'));
+    await app.bar.evaluate(() => window.__TAURI_INTERNALS__.invoke('toggle_mode'));
+    await expect.poll(async () => (await size(service)) === (await size(app.home))).toBe(true);
+  } finally {
+    await app.stop();
+  }
+});
+
+test('the bar fits seven controls when narrow and grows back when the window widens', async () => {
+  const app = await launch(freshProfile());
+  try {
+    // YouTube's id offers ▶ and ▣ too; the page itself stays on example.com.
+    await app.home.evaluate(() =>
+      window.__TAURI_INTERNALS__.invoke('open_service', {
+        service: { id: 'youtube', url: 'https://example.com/', allowedDomains: ['example.com'] },
+      }),
+    );
+    await expect(app.bar.locator('#video-only')).toBeVisible();
+    const fits = () =>
+      app.bar.evaluate(() => {
+        const controls = document.getElementById('controls') as HTMLElement;
+        return controls.scrollWidth <= controls.clientWidth;
+      });
+    const sliderWidth = () =>
+      app.bar.evaluate(() => document.getElementById('opacity')?.getBoundingClientRect().width);
+    resizeWindow(app.pid, 280, 158);
+    await expect.poll(() => app.home.evaluate(() => innerWidth)).toBeLessThan(300);
+    await app.bar.evaluate(() => window.__TAURI_INTERNALS__.invoke('set_opacity', { value: 0.8 }));
+    await expect.poll(fits).toBe(true);
+    resizeWindow(app.pid, 800, 450);
+    await expect.poll(() => app.home.evaluate(() => innerWidth)).toBeGreaterThan(600);
+    await expect.poll(sliderWidth).toBe(88);
+    expect(await fits()).toBe(true);
+  } finally {
     await app.stop();
   }
 });

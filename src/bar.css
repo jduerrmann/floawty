@@ -20,6 +20,11 @@ body {
     sans-serif;
 }
 
+/* In window mode the bar is a strip above the page, not over it. */
+body.docked {
+  background: #111;
+}
+
 body {
   display: flex;
   align-items: center;
@@ -36,6 +41,17 @@ body {
   border-radius: 16px;
   background: var(--pill);
   box-shadow: 0 1px 6px rgb(0 0 0 / 40%);
+}
+
+/* Over a service the bar is only as wide as its controls; the grip moves the window. */
+.grip {
+  flex: none;
+  width: 14px;
+  color: rgb(255 255 255 / 55%);
+  font-size: 14px;
+  text-align: center;
+  cursor: move;
+  user-select: none;
 }
 
 .controls.appear {
@@ -61,15 +77,30 @@ body {
   cursor: pointer;
 }
 
-/* With all of YouTube's controls, the narrowest overlay would cut off ✕. */
-@media (width < 260px) {
-  .controls {
-    gap: 0;
-  }
+/* Set by the page when the controls do not fit, e.g. YouTube's in the upright Shorts view. */
+.controls.compact {
+  gap: 0;
+}
 
-  .controls button {
-    width: 24px;
-  }
+.controls.compact button {
+  width: 24px;
+}
+
+/* Measures the natural width, free of the bar's current width and the compact layout. */
+.controls.measuring {
+  flex: none;
+  width: max-content;
+  max-width: none;
+  gap: 2px;
+}
+
+.controls.measuring button {
+  width: 28px;
+}
+
+.controls.measuring input {
+  width: 88px;
+  flex: none;
 }
 
 .controls button:hover,

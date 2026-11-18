@@ -27,6 +27,13 @@
         width: 640px;
         height: 360px;
       }
+      /* YouTube names the player container for view transitions (seen live 2026-11-18),
+         which makes it a stacking context around the player. */
+      #player-container {
+        position: absolute;
+        inset: 0;
+        view-transition-name: player-resize;
+      }
       #movie_player {
         position: relative;
         width: 100%;
@@ -57,7 +64,9 @@
         <div id="columns">
           <div id="primary">
             <div id="player">
-              <div id="movie_player"><video></video></div>
+              <div id="player-container">
+                <div id="movie_player"><video></video></div>
+              </div>
             </div>
             <div id="below">Title and comments</div>
           </div>

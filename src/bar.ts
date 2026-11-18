@@ -25,26 +25,37 @@ function offersVideoOnly(serviceId: string | null): boolean {
   return services.some((service) => service.id === serviceId && service.videoOnly);
 }
 
+// A pointer click leaves the keyboard with the page, as a browser toolbar does; keyboard users
+// keep it in the bar.
+function keysBack(event: MouseEvent, done: Promise<unknown>): void {
+  if (event.detail > 0) void done.then(() => invoke('move_focus', { toBar: false }));
+}
+
 function wire(language: Language, current: () => OverlayState): void {
   const opacity = document.getElementById('opacity') as HTMLInputElement;
   opacity.addEventListener('input', () => {
     void invoke('set_opacity', { value: Number(opacity.value) / 100 });
   });
-  button('back').addEventListener('click', async () => {
+  const closeService = async () => {
     if (current().settingsOpen) await invoke('set_settings_open', { open: false });
     await invoke('close_service');
-  });
-  button('click-through').addEventListener('click', () => void invoke('toggle_click_through'));
-  button('shorts').addEventListener('click', () => {
+  };
+  button('back').addEventListener('click', (event) => keysBack(event, closeService()));
+  button('click-through').addEventListener('click', (event) =>
+    keysBack(event, invoke('toggle_click_through')),
+  );
+  button('shorts').addEventListener('click', (event) => {
     const preferences = preferencesOf(current());
     const shorts = { ...preferences.shorts, auto: !preferences.shorts.auto };
-    void invoke('set_preferences', { preferences: { ...preferences, shorts } });
+    keysBack(event, invoke('set_preferences', { preferences: { ...preferences, shorts } }));
   });
-  button('video-only').addEventListener('click', () => void invoke('toggle_video_only'));
-  button('mode').addEventListener('click', () => void invoke('toggle_mode'));
-  button('settings').addEventListener('click', () => {
-    void invoke('set_settings_open', { open: !current().settingsOpen });
-  });
+  button('video-only').addEventListener('click', (event) =>
+    keysBack(event, invoke('toggle_video_only')),
+  );
+  button('mode').addEventListener('click', (event) => keysBack(event, invoke('toggle_mode')));
+  button('settings').addEventListener('click', (event) =>
+    keysBack(event, invoke('set_settings_open', { open: !current().settingsOpen })),
+  );
   button('quit').addEventListener('click', () => void invoke('quit'));
   label(controls, language, 'barLabel');
   label(opacity, language, 'opacity');
@@ -81,6 +92,26 @@ function showControls(language: Language, state: OverlayState): void {
   button('settings').setAttribute('aria-pressed', String(state.settingsOpen));
 }
 
+let reportedWidth = 0;
+
+// The shell sizes the bar to its controls over a service, so the page around them stays clickable.
+function reportWidth(): void {
+  controls.classList.add('measuring');
+  const width = Math.ceil(controls.getBoundingClientRect().width);
+  controls.classList.remove('measuring');
+  fitControls();
+  if (width === 0 || width === reportedWidth) return;
+  reportedWidth = width;
+  void invoke('set_bar_width', { width });
+}
+
+function fitControls(): void {
+  controls.classList.remove('compact');
+  controls.classList.toggle('compact', controls.scrollWidth > controls.clientWidth);
+}
+
+addEventListener('resize', fitControls);
+
 function startBar(state: OverlayState, language: Language): StateView {
   let latest = state;
   wire(language, () => latest);
@@ -89,6 +120,8 @@ function startBar(state: OverlayState, language: Language): StateView {
     latest = next;
     showControls(language, next);
     showClickThrough(next);
+    document.body.classList.toggle('docked', next.mode === 'window');
+    reportWidth();
   };
 }
 

@@ -42,3 +42,6 @@ already show only their player while playing.
 ## Consequences
 Selectors and layer numbers depend on each site's DOM ([[tech-video-only]]); a missing
 player leaves the normal page and a warning dot. Builds on [[page-scripts-polled-on-title-change]].
+
+Extended to Crunchyroll with its tile (maintainer, visual plan "mvp-08", round 2,
+2026-11-18).

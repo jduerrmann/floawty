@@ -1,6 +1,8 @@
 //! The service webview: one at a time, in floawty's shared WebView2 profile, on its domains.
 use tauri::webview::PageLoadEvent;
-use tauri::{AppHandle, LogicalPosition, Manager, Url, Webview, WebviewBuilder, WebviewUrl, Wry};
+use tauri::{
+    AppHandle, LogicalPosition, LogicalSize, Manager, Url, Webview, WebviewBuilder, WebviewUrl, Wry,
+};
 
 use crate::bar;
 use crate::logbook;
@@ -30,7 +32,6 @@ pub fn open(app: &AppHandle, service: OpenService) -> tauri::Result<()> {
         .map_err(|_| tauri::Error::InvalidWebviewUrl("service url"))?;
     let mut builder = WebviewBuilder::new(LABEL, WebviewUrl::External(url))
         .additional_browser_args(BROWSER_ARGS)
-        .auto_resize()
         .on_navigation(navigation_guard(
             app.clone(),
             service.allowed_domains.clone(),
@@ -50,6 +51,18 @@ pub fn open(app: &AppHandle, service: OpenService) -> tauri::Result<()> {
         .update(app, |s| s.last_service = Some(service));
     overlay::emit_state(app);
     Ok(())
+}
+
+/// Puts the service below `top` (the bar in window mode) and fills the rest of the window.
+pub fn fit(app: &AppHandle, top: f64, window: LogicalSize<f64>) -> tauri::Result<()> {
+    let Some(service) = current(app) else {
+        return Ok(());
+    };
+    service.set_position(LogicalPosition::new(0.0, top))?;
+    service.set_size(LogicalSize::new(
+        window.width,
+        (window.height - top).max(0.0),
+    ))
 }
 
 // The title is only a wake-up call and is never read: it names what the user watches.

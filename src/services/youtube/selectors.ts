@@ -23,9 +23,13 @@ export const VIDEO_ONLY: VideoOnlyRules = {
       player: SHORTS_PLAYER,
     },
   ],
-  // Each Short's box contains its layout, which would trap the fixed player inside it.
+  // Each Short's box contains its layout, and the wider watch layout names the player's
+  // container for view transitions; both would trap the fixed player inside them.
   css: `
     html.floawty-video-only ${WATCH_PLAYER} { ${FILL} }
+    html.floawty-video-only ytd-watch-flexy:not([hidden]) :has(#movie_player) {
+      view-transition-name: none !important;
+    }
     html.floawty-video-only ${SHORTS_PLAYER} { ${FILL} }
     html.floawty-video-only ytd-shorts #shorts-inner-container > * { contain: none !important; }
   `,

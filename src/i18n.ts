@@ -6,7 +6,7 @@ const en = {
   clickThroughHint: 'Click-through is on – {hotkey} turns it off',
   clickThroughDot: 'Click-through on',
   noticeText:
-    'floawty shows the services through Microsoft Edge WebView2, a part of Windows that sends diagnostic data to Microsoft. floawty itself collects nothing.',
+    'floawty shows the services through Microsoft Edge WebView2, a part of Windows that sends diagnostic data to Microsoft and loads updates of its own parts, such as the video DRM module, from Microsoft. floawty itself collects nothing.',
   noticeOk: 'OK',
   tilesLabel: 'Services',
   addTile: 'Add page',
@@ -76,7 +76,7 @@ const de: Record<MessageKey, string> = {
   clickThroughHint: 'Durchklicken ist an – {hotkey} schaltet es aus',
   clickThroughDot: 'Durchklicken an',
   noticeText:
-    'floawty zeigt die Dienste mit Microsoft Edge WebView2 an, einem Teil von Windows, der Diagnosedaten an Microsoft sendet. floawty selbst sammelt nichts.',
+    'floawty zeigt die Dienste mit Microsoft Edge WebView2 an, einem Teil von Windows, der Diagnosedaten an Microsoft sendet und Updates seiner eigenen Bausteine, etwa des DRM-Moduls für Videos, von Microsoft lädt. floawty selbst sammelt nichts.',
   noticeOk: 'OK',
   tilesLabel: 'Dienste',
   addTile: 'Seite hinzufügen',

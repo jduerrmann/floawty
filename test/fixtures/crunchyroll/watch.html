@@ -1,0 +1,66 @@
+<!doctype html>
+<!-- Hand-made stand-in for a Crunchyroll episode page: fixed header (z 100), the layout
+     overlay (z 99) and the player nesting seen live on 2026-11-18. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Crunchyroll episode</title>
+    <style>
+      body {
+        margin: 0;
+      }
+      .header-content {
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 0;
+        z-index: 100;
+        height: 60px;
+        background: #222;
+      }
+      .app-layout__overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 99;
+        pointer-events: none;
+      }
+      .app-layout__content {
+        position: relative;
+        padding-top: 60px;
+      }
+      .video-player-wrapper {
+        position: relative;
+      }
+      #player-container {
+        position: relative;
+        padding-top: 56.25%;
+      }
+      .bitmovinplayer-container {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        background: #000;
+      }
+      video {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+      }
+      .episode-details {
+        height: 2000px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header-content">Crunchyroll</div>
+    <div class="app-layout__overlay"></div>
+    <div class="app-layout__content">
+      <div class="video-player-wrapper">
+        <div id="player-container" class="player-container">
+          <div class="bitmovinplayer-container aspect-16x9"><video></video></div>
+        </div>
+      </div>
+      <div class="episode-details">Episode details and comments</div>
+    </div>
+  </body>
+</html>

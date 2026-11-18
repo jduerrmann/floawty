@@ -1,4 +1,5 @@
 // "Video only": lays a service's player over its own page with styles alone; nothing is removed.
+import { startBridge, type Status } from './bridge';
 
 /** A kind of page that shows a player, and how to find it there. */
 export interface PlayerPage {
@@ -62,4 +63,23 @@ export function readVideoOnly(input: unknown): boolean | null {
   if (typeof input !== 'object' || input === null) return null;
   const value = (input as Record<string, unknown>)['videoOnly'];
   return typeof value === 'boolean' ? value : null;
+}
+
+/** The whole page script of a service whose only feature is video only. */
+export function startVideoOnlyPage(hosts: readonly string[], rules: VideoOnlyRules): void {
+  startBridge(hosts, () => {
+    const applyVideoOnly = createVideoOnly(rules);
+    let videoOnly = false;
+    return (input: unknown): Status => {
+      try {
+        videoOnly = readVideoOnly(input) ?? videoOnly;
+        return {
+          aspect: 'landscape',
+          problems: applyVideoOnly(videoOnly) ? ['player-missing'] : [],
+        };
+      } catch {
+        return { aspect: 'landscape', problems: [] };
+      }
+    };
+  });
 }

@@ -14,7 +14,8 @@ User-facing changes, in plain language. Format based on
 - Tiles for YouTube, Twitch, Netflix, Prime Video, Disney+ and RTL+, plus your own
   pages; floawty reopens the last service on start.
 - Hiding pauses the video; Ctrl+Alt+Shift+Space plays and pauses.
-- A one-time notice explains that Windows' WebView2 sends diagnostic data to Microsoft.
+- A one-time notice explains that Windows' WebView2 sends diagnostic data to Microsoft
+  and loads updates of its own parts, such as the DRM module, from Microsoft.
 - A bar appears over the video when you rest the mouse on floawty: back to the
   services, transparency, click-through, Shorts auto mode, window mode, settings and
   close. Drag the window by the bar.
@@ -23,6 +24,15 @@ User-facing changes, in plain language. Format based on
   not available yet) and "Reset all data".
 - English and German everywhere; German shows hotkeys as Strg+Alt+Umschalt.
 - The click-through dot is now visible over a service too.
+- Window mode shows the bar above the page, so buttons at the top of a site (like
+  "Log in") can be clicked; over a video the bar is only as wide as its buttons.
+- Service tiles: four per row, growing with the window; new tiles for Crunchyroll (with
+  "video only") and Apple TV.
+- RTL+: "Sign in with Amazon" stays inside floawty.
+- Netflix shows no page scrollbar while a title plays.
+- Dragging only the top or bottom edge of the overlay keeps the new height.
+- The overlay snaps right into corners and onto edges, without a gap.
+- "Video only" on YouTube also works in a large overlay, where YouTube uses a wider layout.
 - YouTube Shorts auto mode (▶ in the bar): each Short – and each ad between them –
   plays once in full, rests on its first frame for the chosen pause, then YouTube's
   own "next" button moves on. The mouse over floawty holds it (can be turned off).

@@ -8,7 +8,7 @@ export default defineConfig({
   reporter: 'list',
   workers: 1,
   projects: [
-    { name: 'app', testIgnore: '**/adapters/**' },
+    { name: 'app', testIgnore: ['**/adapters/**', '**/measure/**'] },
     {
       name: 'adapter',
       testMatch: '**/adapters/**/*.spec.ts',
