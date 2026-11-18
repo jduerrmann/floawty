@@ -18,6 +18,7 @@ pub struct Hotkeys {
     pub opacity_down: String,
     pub window_mode: String,
     pub play_pause: String,
+    pub video_only: String,
 }
 
 impl Default for Hotkeys {
@@ -29,6 +30,7 @@ impl Default for Hotkeys {
             opacity_down: "Ctrl+Alt+Shift+Down".into(),
             window_mode: "Ctrl+Alt+Shift+F".into(),
             play_pause: "Ctrl+Alt+Shift+Space".into(),
+            video_only: "Ctrl+Alt+Shift+V".into(),
         }
     }
 }
@@ -120,6 +122,8 @@ pub struct Settings {
     pub shorts: Shorts,
     /// Off by default; floawty only talks to GitHub once the user turns it on.
     pub update_check: bool,
+    /// One switch for all services; it only takes effect in the floaty view.
+    pub video_only: bool,
 }
 
 impl Default for Settings {
@@ -138,6 +142,7 @@ impl Default for Settings {
             language: Language::System,
             shorts: Shorts::default(),
             update_check: false,
+            video_only: false,
         }
     }
 }
@@ -263,6 +268,25 @@ mod tests {
         );
         assert_eq!(settings.floaty_portrait, None);
         assert!(!settings.update_check);
+    }
+
+    #[test]
+    fn a_file_without_video_only_has_it_off() {
+        let settings = parse(r#"{ "version": 1, "opacity": 0.5 }"#);
+        assert!(!settings.video_only);
+        assert_eq!(settings.hotkeys.video_only, "Ctrl+Alt+Shift+V");
+    }
+
+    #[test]
+    fn video_only_survives_a_round_trip() {
+        assert!(parse(r#"{ "videoOnly": true }"#).video_only);
+        let settings = Settings {
+            video_only: true,
+            ..Settings::default()
+        };
+        let written = to_json(&settings);
+        assert!(written.contains(r#""videoOnly": true"#), "{written}");
+        assert_eq!(parse(&written), settings);
     }
 
     #[test]

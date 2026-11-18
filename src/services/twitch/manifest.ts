@@ -7,4 +7,5 @@ export const twitch: ServiceManifest = {
   allowedDomains: ['twitch.tv'],
   brandColor: '#9146ff',
   symbol: 'twitch.svg',
+  videoOnly: true,
 };

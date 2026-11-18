@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Twitch channel fixture</title>
+    <style>
+      body {
+        margin: 0;
+      }
+      nav {
+        position: relative;
+        height: 50px;
+        z-index: 1000;
+      }
+      main.twilight-main {
+        position: relative;
+        z-index: 1;
+      }
+      .scrollable-area {
+        position: relative;
+        z-index: 0;
+        height: 2000px;
+      }
+      .tw-aspect {
+        position: relative;
+        padding-bottom: 56.25%;
+      }
+      .video-player {
+        position: absolute;
+        inset: 0;
+      }
+      .video-player__container {
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 100%;
+      }
+      .video-ref video {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .metadata {
+        position: relative;
+        z-index: 2;
+        margin-top: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <nav>Twitch</nav>
+    <main class="twilight-main">
+      <div class="scrollable-area">
+        <div
+          class="persistent-player"
+          style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 640px;
+            max-height: 300px;
+            overflow: hidden;
+            z-index: 1;
+            transform: scale(1);
+          "
+        >
+          <div class="tw-aspect">
+            <div class="video-player">
+              <div class="video-player__container" style="max-height: 300px">
+                <div class="video-ref"><video></video></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="metadata">Channel name and follow button</div>
+      </div>
+    </main>
+    <aside class="chat-shell">Chat</aside>
+  </body>
+</html>

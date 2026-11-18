@@ -9,4 +9,5 @@ export const youtube: ServiceManifest = {
   brandColor: '#ff0000',
   symbol: 'youtube.svg',
   shortsAutoMode: true,
+  videoOnly: true,
 };

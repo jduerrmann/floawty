@@ -40,7 +40,7 @@ page inside the main window.
 
 | File | Role | Tests |
 |---|---|---|
-| `src/services/<id>/manifest.ts` | id, name, start URL, allowed domains (incl. sign-in), brand colour, symbol, `shortsAutoMode` (YouTube, YouTube Shorts), `startsShortsAuto` (the Shorts tile turns the auto mode on before opening) | Vitest, Playwright |
+| `src/services/<id>/manifest.ts` | id, name, start URL, allowed domains (incl. sign-in), brand colour, symbol, `shortsAutoMode` (YouTube, YouTube Shorts), `videoOnly` (YouTube, YouTube Shorts, Twitch; [[tech-video-only]]), `startsShortsAuto` (the Shorts tile turns the auto mode on before opening) | Vitest, Playwright |
 | `src/services/manifest.ts` | manifest validation, `hostAllowed` | Vitest |
 | `src/custom-tiles.ts` | own pages: name and URL rules, https added, duplicates, allowed domain = host without `www.` | Vitest |
 | `src/tiles.ts`, `src/home.ts` | tiles, options menu (rename, remove), add/rename form, first-start notice | Playwright |

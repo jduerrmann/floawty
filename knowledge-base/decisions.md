@@ -2,7 +2,7 @@
 type: moc
 tags: [decisions]
 created: 2026-11-16
-updated: 2026-11-17
+updated: 2026-11-18
 source: conversation
 ---
 
@@ -24,6 +24,7 @@ One line per decision record in `decisions/`. Template: `templates/t-decision.md
 - [[shared-webview2-profile-in-mvp]] – one shared WebView2 profile until Tauri exposes per-service profiles
 - [[google-login-honest-user-agent-first]] – Google login is a must; honest user agent first, Chrome only if blocked
 - [[widevine-on-demand-with-notice]] – superseded: Widevine comes with WebView2
+- [[video-only-lays-player-over-page]] – "video only" covers the page with the player by styles; YouTube and Twitch only
 - [[page-scripts-polled-on-title-change]] – floawty asks the page script on title change; service pages never call floawty
 
 ## ui

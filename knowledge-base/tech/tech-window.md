@@ -4,7 +4,7 @@ area: window
 tags: [overlay, settings, hotkeys, logging]
 status: active
 created: 2026-11-17
-updated: 2026-11-17
+updated: 2026-11-18
 source: mvp-02 implementation, mvp-05
 ---
 
@@ -47,11 +47,11 @@ wiring talks to Tauri and Win32.
 | File | Role | Tests |
 |---|---|---|
 | `geometry.rs` | first placement (floaty: bottom right, 480 × 270, 16 px gap; window: centred 1280 × 720 or smaller to fit; scaled), per-axis snapping within 32 px, 16:9 / 9:16, restore on the monitor with the largest overlap | unit |
-| `settings.rs` | `Settings` v1 (opacity, geometry, hotkeys, tiles, language, Shorts, update check), tolerant `parse` (unknown language → system), opacity clamp 10–100 % and 10 % steps, Shorts pause 0–10 s | unit |
+| `settings.rs` | `Settings` v1 (opacity, geometry, hotkeys, tiles, language, Shorts, update check, video only), tolerant `parse` (unknown language → system), opacity clamp 10–100 % and 10 % steps, Shorts pause 0–10 s | unit |
 | `persistence.rs` | `%APPDATA%\floawty\settings.json`, atomic write (temp + rename), keeps broken files | unit (temp dir) |
 | `mode.rs` | `Mode` (floaty / window), switch and remember geometry per mode | unit |
 | `overlay.rs` | place and show in the saved mode, mode style (decorations, on top), layered-window opacity, click-through, hide/show, settle 250 ms after the last move/resize (floaty: snap, aspect; both: save) | Win32 check scripts |
-| `hotkeys.rs` | registers the hotkeys from the settings (default Ctrl+Alt+Shift + O / D / ↑ / ↓ / F / Space), changes one at once, pauses all while recording | unit, check scripts |
+| `hotkeys.rs` | registers the hotkeys from the settings (default Ctrl+Alt+Shift + O / D / ↑ / ↓ / F / Space / V), changes one at once, pauses all while recording | unit, check scripts |
 | `logbook.rs` | `%APPDATA%\floawty\logs\floawty.log`, UTC timestamps | unit |
 | `bar.rs`, `hover.rs`, `reset.rs` | the bar over the service, hover, reset all data | [[tech-bar-and-settings]] |
 
@@ -70,7 +70,8 @@ Settings file (v1):
     "opacityUp": "Ctrl+Alt+Shift+Up",
     "opacityDown": "Ctrl+Alt+Shift+Down",
     "windowMode": "Ctrl+Alt+Shift+F",
-    "playPause": "Ctrl+Alt+Shift+Space"
+    "playPause": "Ctrl+Alt+Shift+Space",
+    "videoOnly": "Ctrl+Alt+Shift+V"
   },
   "noticeAccepted": true,
   "customTiles": [],
@@ -78,7 +79,8 @@ Settings file (v1):
   "language": "system",
   "floatyPortrait": null,
   "shorts": { "auto": false, "pauseSeconds": 1, "holdOnHover": true, "portraitSize": "rotated" },
-  "updateCheck": false
+  "updateCheck": false,
+  "videoOnly": false
 }
 ```
 

@@ -2,7 +2,13 @@
 import { t, type Language } from './i18n';
 
 export type HotkeyAction =
-  'toggleVisible' | 'clickThrough' | 'opacityUp' | 'opacityDown' | 'windowMode' | 'playPause';
+  | 'toggleVisible'
+  | 'clickThrough'
+  | 'opacityUp'
+  | 'opacityDown'
+  | 'windowMode'
+  | 'playPause'
+  | 'videoOnly';
 
 export type Hotkeys = Record<HotkeyAction, string>;
 
@@ -13,6 +19,7 @@ export const HOTKEY_ACTIONS: readonly HotkeyAction[] = [
   'opacityDown',
   'windowMode',
   'playPause',
+  'videoOnly',
 ];
 
 export interface KeyPress {

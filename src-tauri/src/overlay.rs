@@ -12,7 +12,7 @@ use crate::bar;
 use crate::geometry::{self, Aspect, Rect};
 use crate::logbook;
 use crate::mode::{self, Mode};
-use crate::page;
+use crate::page::{self, Problem};
 use crate::persistence;
 use crate::service;
 use crate::settings::{self, Hotkeys, Language, Settings, Shorts};
@@ -31,7 +31,7 @@ pub struct Overlay {
     /// The landscape view before it turned upright, restored unless the user changed the upright one.
     before_turn: Mutex<Option<Rect>>,
     turned_to: Mutex<Option<Rect>>,
-    page_problem: Mutex<bool>,
+    page_problems: Mutex<Vec<Problem>>,
 }
 
 #[derive(Clone, serde::Serialize)]
@@ -46,7 +46,8 @@ pub struct OverlayState {
     pub language: Language,
     pub shorts: Shorts,
     pub update_check: bool,
-    pub page_problem: bool,
+    pub video_only: bool,
+    pub page_problems: Vec<Problem>,
 }
 
 impl Overlay {
@@ -60,7 +61,7 @@ impl Overlay {
             aspect: Mutex::new(Aspect::Landscape),
             before_turn: Mutex::new(None),
             turned_to: Mutex::new(None),
-            page_problem: Mutex::new(false),
+            page_problems: Mutex::new(Vec::new()),
         }
     }
 
@@ -80,9 +81,9 @@ impl Overlay {
         *self.settings_open.lock().unwrap() = open;
     }
 
-    /// Returns whether the problem state changed.
-    pub fn set_page_problem(&self, problem: bool) -> bool {
-        std::mem::replace(&mut *self.page_problem.lock().unwrap(), problem) != problem
+    /// Takes the page's current problems (sorted); returns whether they changed.
+    pub fn set_page_problems(&self, problems: Vec<Problem>) -> bool {
+        std::mem::replace(&mut *self.page_problems.lock().unwrap(), problems.clone()) != problems
     }
 
     fn aspect(&self) -> Aspect {
@@ -101,7 +102,8 @@ impl Overlay {
             language: settings.language,
             shorts: settings.shorts.clone(),
             update_check: settings.update_check,
-            page_problem: *self.page_problem.lock().unwrap(),
+            video_only: settings.video_only,
+            page_problems: self.page_problems.lock().unwrap().clone(),
         }
     }
 }
@@ -222,7 +224,16 @@ pub fn toggle_mode(app: &AppHandle) -> tauri::Result<()> {
     }
     apply_opacity(&window, effective_opacity(&settings))?;
     emit_state(app);
+    // The page shows video only in the floaty view alone, so it learns the new mode.
+    page::sync(app);
     Ok(())
+}
+
+/// Video only on or off for all services; the page applies it when it is next asked.
+pub fn toggle_video_only(app: &AppHandle) {
+    overlay(app).update(app, |s| s.video_only = !s.video_only);
+    emit_state(app);
+    page::sync(app);
 }
 
 fn current_area(window: &Window) -> tauri::Result<Option<(Rect, f64)>> {

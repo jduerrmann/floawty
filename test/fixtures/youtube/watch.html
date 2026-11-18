@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Watch fixture</title>
+    <style>
+      body {
+        margin: 0;
+      }
+      ytd-app {
+        position: absolute;
+        inset: 0 0 auto 0;
+      }
+      #masthead-container {
+        position: fixed;
+        inset: 0 0 auto 0;
+        height: 56px;
+        z-index: 2020;
+        background: #222;
+      }
+      #columns {
+        display: flex;
+        padding-top: 56px;
+      }
+      #player {
+        position: relative;
+        width: 640px;
+        height: 360px;
+      }
+      #movie_player {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
+      #secondary {
+        width: 300px;
+        height: 2000px;
+      }
+      #below {
+        position: relative;
+        height: 2000px;
+      }
+      #dialog {
+        position: fixed;
+        left: 10px;
+        bottom: 10px;
+        width: 100px;
+        height: 50px;
+        z-index: 2202;
+      }
+    </style>
+  </head>
+  <body>
+    <ytd-app>
+      <div id="masthead-container">YouTube</div>
+      <ytd-watch-flexy>
+        <div id="columns">
+          <div id="primary">
+            <div id="player">
+              <div id="movie_player"><video></video></div>
+            </div>
+            <div id="below">Title and comments</div>
+          </div>
+          <div id="secondary">Suggestions</div>
+        </div>
+      </ytd-watch-flexy>
+      <ytd-popup-container><div id="dialog" hidden>Continue watching?</div></ytd-popup-container>
+    </ytd-app>
+    <script>
+      window.__calls = [];
+    </script>
+  </body>
+</html>

@@ -1,5 +1,7 @@
 // YouTube page script: runs the Shorts auto mode and answers floawty's `__floawty.sync` calls.
-import { NEXT_CONTROL, SHORT_VIDEO } from './selectors';
+import { startBridge, type Problem, type Status } from '../bridge';
+import { createVideoOnly } from '../video-only';
+import { NEXT_CONTROL, SHORT_VIDEO, VIDEO_ONLY } from './selectors';
 import {
   initialShorts,
   step,
@@ -9,11 +11,6 @@ import {
   type ShortsState,
 } from './shorts';
 
-interface Status {
-  aspect: 'portrait' | 'landscape';
-  problem: null | 'controls-missing';
-}
-
 const SHORTS_PATH = '/shorts/';
 const PROBLEM_AFTER_MS = 2000;
 const MEDIA_EVENTS = ['timeupdate', 'ended', 'loadstart'];
@@ -21,12 +18,14 @@ const GESTURE_EVENTS = ['pointerdown', 'keydown'];
 
 let state: ShortsState = initialShorts();
 let hover = false;
+let videoOnly = false;
 let active = true;
 let problemVerdict = false;
 let seenPath = location.pathname;
 let pathChangedAt = Date.now();
 let advanceFoundNoControl = false;
 let timer: number | undefined;
+const applyVideoOnly = createVideoOnly(VIDEO_ONLY);
 
 function onShortsPath(): boolean {
   return location.pathname.startsWith(SHORTS_PATH);
@@ -128,12 +127,19 @@ function onGesture(event: Event): void {
   guarded(() => feed({ type: 'gesture', now: Date.now() }));
 }
 
-function isInput(
-  value: unknown,
-): value is { shorts: ShortsConfig; hover: boolean; active: boolean } {
+interface Input {
+  shorts: ShortsConfig;
+  hover: boolean;
+  active: boolean;
+  videoOnly: boolean;
+}
+
+function isInput(value: unknown): value is Input {
   if (typeof value !== 'object' || value === null) return false;
-  const { shorts, hover: hovered, active: isActive } = value as Record<string, unknown>;
+  const fields = value as Record<string, unknown>;
+  const { shorts, hover: hovered, active: isActive, videoOnly: wanted } = fields;
   if (typeof hovered !== 'boolean' || typeof isActive !== 'boolean') return false;
+  if (typeof wanted !== 'boolean') return false;
   if (typeof shorts !== 'object' || shorts === null) return false;
   const { auto, pauseSeconds, holdOnHover } = shorts as Record<string, unknown>;
   return (
@@ -165,6 +171,7 @@ function applyInput(input: unknown): void {
     active = input.active;
     feed({ type: 'active', active, now });
   }
+  videoOnly = input.videoOnly;
 }
 
 function status(): Status {
@@ -173,11 +180,10 @@ function status(): Status {
   // Keep the last verdict while the page settles, so the warning does not blink on every Short.
   if (!portrait) problemVerdict = false;
   else if (settled) problemVerdict = !shortVideo() || !document.querySelector(NEXT_CONTROL);
-  const problem = portrait && (advanceFoundNoControl || problemVerdict);
-  return {
-    aspect: portrait ? 'portrait' : 'landscape',
-    problem: problem ? 'controls-missing' : null,
-  };
+  const problems: Problem[] = [];
+  if (portrait && (advanceFoundNoControl || problemVerdict)) problems.push('controls-missing');
+  if (applyVideoOnly(videoOnly)) problems.push('player-missing');
+  return { aspect: portrait ? 'portrait' : 'landscape', problems };
 }
 
 function sync(input: unknown): Status {
@@ -186,27 +192,12 @@ function sync(input: unknown): Status {
     applyInput(input);
     return status();
   } catch {
-    return { aspect: 'landscape', problem: null };
+    return { aspect: 'landscape', problems: [] };
   }
 }
 
-function isYoutubeHost(): boolean {
-  const host = location.hostname;
-  return host === 'youtube.com' || host.endsWith('.youtube.com');
-}
-
-function expose(bridge: { sync: (input: unknown) => Status | null }): void {
-  Object.defineProperty(window, '__floawty', { value: Object.freeze(bridge) });
-}
-
-function install(): void {
+startBridge(['youtube.com'], () => {
   for (const type of MEDIA_EVENTS) document.addEventListener(type, onMedia, true);
   for (const type of GESTURE_EVENTS) document.addEventListener(type, onGesture, true);
-  expose({ sync });
-}
-
-if (window.top === window) {
-  // A no-op bridge keeps a page on another host from defining its own and receiving the settings.
-  if (isYoutubeHost()) install();
-  else expose({ sync: () => null });
-}
+  return sync;
+});

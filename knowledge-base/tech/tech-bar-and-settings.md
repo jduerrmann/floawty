@@ -53,7 +53,7 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
 | `src-tauri/src/hover.rs` | when the bar shows: delay, leave, idle | unit |
 | `src-tauri/src/reset.rs` | reset request and wipe at start | unit (temp dirs), Playwright |
 | `src-tauri/src/hotkeys.rs` | register, change one, pause all; action names | unit |
-| `src-tauri/src/commands.rs` | `toggle_click_through`, `set_settings_open`, `set_preferences`, `set_hotkey`, `set_hotkeys_paused`, `move_focus` (F6), `reset_all_data`, `quit` | Playwright |
+| `src-tauri/src/commands.rs` | `toggle_click_through`, `toggle_video_only`, `set_settings_open`, `set_preferences`, `set_hotkey`, `set_hotkeys_paused`, `move_focus` (F6), `reset_all_data`, `quit` | Playwright |
 | `src/state.ts` | `OverlayState`, start a page in its language, reload on change, `withShortsAuto` | Vitest |
 | `src/bar.ts`, `src/bar.css`, `src/click-through.ts` | controls, dot and hint | Playwright |
 | `src/settings-panel.ts`, `src/hotkey-list.ts` | panel, preferences, reset confirm, hotkey recording | Playwright |
@@ -63,14 +63,15 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
 Bar controls: ◀ back to the tiles (only with a service), opacity 10–100 %, ⇄
 click-through, ▶ Shorts auto mode (only for services whose manifest sets
 `shortsAutoMode`; an amber dot and another tooltip when the page script reports
-missing controls, [[tech-shorts]]), ⧉ window mode, ⚙ settings, ✕ close floawty. Opacity and
+missing controls, [[tech-shorts]]), ▣ video only (only for manifests with `videoOnly`;
+the dot when the player is missing, [[tech-video-only]]), ⧉ window mode, ⚙ settings, ✕ close floawty. Opacity and
 click-through are disabled in window mode. The empty parts of the strip drag the
 window. F6 moves between the bar and the page below; Esc leaves the bar and closes
 the settings.
 
 `OverlayState` (command `overlay_state`, event `overlay-state`): mode, opacity,
 clickThrough, serviceId, settingsOpen, hotkeys, language, shorts (auto, pauseSeconds,
-holdOnHover, portraitSize), updateCheck, pageProblem.
+holdOnHover, portraitSize), updateCheck, videoOnly, pageProblems.
 
 ## Working on X → read Y
 

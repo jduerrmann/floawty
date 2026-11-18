@@ -3,10 +3,41 @@
   <head>
     <meta charset="utf-8" />
     <title>Short fixture</title>
+    <style>
+      #masthead-container {
+        position: fixed;
+        inset: 0 0 auto 0;
+        height: 56px;
+        z-index: 2020;
+      }
+      #shorts-inner-container {
+        padding-top: 56px;
+      }
+      .reel {
+        position: relative;
+        display: flex;
+        width: 400px;
+        height: 600px;
+        contain: size layout;
+      }
+      #shorts-player {
+        position: relative;
+        z-index: 0;
+        width: 300px;
+        height: 560px;
+        overflow: hidden;
+      }
+    </style>
   </head>
   <body>
+    <div id="masthead-container">YouTube</div>
     <ytd-shorts>
-      <div id="shorts-player"><video loop></video></div>
+      <div id="shorts-inner-container">
+        <div class="reel">
+          <div id="shorts-player"><video loop></video></div>
+          <div id="actions">Like</div>
+        </div>
+      </div>
       <div id="ads-overlay" hidden></div>
       <div id="navigation-button-down"><button aria-label="Next"></button></div>
     </ytd-shorts>

@@ -61,6 +61,17 @@ body {
   cursor: pointer;
 }
 
+/* With all of YouTube's controls, the narrowest overlay would cut off ✕. */
+@media (width < 260px) {
+  .controls {
+    gap: 0;
+  }
+
+  .controls button {
+    width: 24px;
+  }
+}
+
 .controls button:hover,
 .controls button[aria-pressed='true'] {
   background: rgb(255 255 255 / 16%);

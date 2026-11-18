@@ -27,7 +27,7 @@ its status and turns the overlay. Decision: [[page-scripts-polled-on-title-chang
   automatic without playing (floawty paused the video). Hiding and the settings sync.
   A Short that starts while inactive (an advance sent just before hiding) is paused
   at its first sample.
-- The problem is logged once per opened service; the dot only changes with the verdict,
+- Each problem kind is logged once per opened service; the dot only changes with the verdict,
   which the page keeps while a new Short settles (2 s).
 - The script is `page/<id>.js` from floawty's own build, chosen by a validated id
   (`[a-z0-9-]`, ≤ 32). The asset resolver falls back to `index.html` for missing
@@ -63,8 +63,8 @@ the page unblocks, the next end advances.
 | `src-tauri/src/service.rs` | init script, title and page-load wake-ups | Playwright (`tests/shorts.spec.ts`, fixtures on routed youtube.com) |
 | `src-tauri/src/overlay.rs`, `geometry.rs`, `mode.rs` | turning the floaty view ([[tech-window]]) | unit |
 
-Status: `{ aspect: "portrait" | "landscape", problem: null | "controls-missing" }`.
-Input: `{ shorts: { auto, pauseSeconds, holdOnHover }, hover, active }`. On other
+Status: `{ aspect: "portrait" | "landscape", problems: ("controls-missing" | "player-missing")[] }`.
+Input: `{ shorts: { auto, pauseSeconds, holdOnHover }, hover, active, videoOnly }` ([[tech-video-only]]). On other
 hosts the top frame gets a frozen no-op bridge, so a page cannot catch the input.
 
 ## Known gaps

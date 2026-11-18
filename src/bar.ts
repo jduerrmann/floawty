@@ -1,4 +1,4 @@
-// The bar over the video: back to the tiles, opacity, click-through, Shorts, mode, settings, close.
+// The bar over the video: back to the tiles, opacity, click-through, Shorts, video only, mode, settings, close.
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { createClickThroughIndicator } from './click-through';
@@ -21,6 +21,10 @@ function offersShorts(serviceId: string | null): boolean {
   return services.some((service) => service.id === serviceId && service.shortsAutoMode);
 }
 
+function offersVideoOnly(serviceId: string | null): boolean {
+  return services.some((service) => service.id === serviceId && service.videoOnly);
+}
+
 function wire(language: Language, current: () => OverlayState): void {
   const opacity = document.getElementById('opacity') as HTMLInputElement;
   opacity.addEventListener('input', () => {
@@ -36,6 +40,7 @@ function wire(language: Language, current: () => OverlayState): void {
     const shorts = { ...preferences.shorts, auto: !preferences.shorts.auto };
     void invoke('set_preferences', { preferences: { ...preferences, shorts } });
   });
+  button('video-only').addEventListener('click', () => void invoke('toggle_video_only'));
   button('mode').addEventListener('click', () => void invoke('toggle_mode'));
   button('settings').addEventListener('click', () => {
     void invoke('set_settings_open', { open: !current().settingsOpen });
@@ -47,6 +52,7 @@ function wire(language: Language, current: () => OverlayState): void {
     ['back', 'backToTiles'],
     ['click-through', 'clickThroughOn'],
     ['shorts', 'shortsAuto'],
+    ['video-only', 'videoOnly'],
     ['settings', 'settings'],
     ['quit', 'quit'],
   ];
@@ -63,8 +69,14 @@ function showControls(language: Language, state: OverlayState): void {
   button('click-through').disabled = !floaty;
   button('shorts').hidden = !offersShorts(state.serviceId);
   button('shorts').setAttribute('aria-pressed', String(state.shorts.auto));
-  button('shorts').classList.toggle('problem', state.pageProblem);
-  label(button('shorts'), language, state.pageProblem ? 'shortsProblem' : 'shortsAuto');
+  const controlsMissing = state.pageProblems.includes('controls-missing');
+  button('shorts').classList.toggle('problem', controlsMissing);
+  label(button('shorts'), language, controlsMissing ? 'shortsProblem' : 'shortsAuto');
+  const playerMissing = state.pageProblems.includes('player-missing');
+  button('video-only').hidden = !offersVideoOnly(state.serviceId);
+  button('video-only').setAttribute('aria-pressed', String(state.videoOnly));
+  button('video-only').classList.toggle('problem', playerMissing);
+  label(button('video-only'), language, playerMissing ? 'videoOnlyProblem' : 'videoOnly');
   label(button('mode'), language, floaty ? 'toWindowMode' : 'toFloatyView');
   button('settings').setAttribute('aria-pressed', String(state.settingsOpen));
 }

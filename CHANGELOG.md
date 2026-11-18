@@ -31,3 +31,6 @@ User-facing changes, in plain language. Format based on
 - A "YouTube Shorts" tile opens the Shorts feed directly with the auto mode on.
 - If YouTube changes its page so the auto mode cannot work, Shorts simply loop as
   before and an amber dot on ▶ says so.
+- "Video only" (▣ in the bar or Ctrl+Alt+Shift+V): on YouTube, YouTube Shorts and
+  Twitch the video fills the overlay, the rest of the page is hidden beneath it. It
+  stays on until you switch it off; window mode always shows the whole page.

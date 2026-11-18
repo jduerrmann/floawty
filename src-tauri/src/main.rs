@@ -101,6 +101,7 @@ fn main() {
             commands::overlay_state,
             commands::set_opacity,
             commands::toggle_mode,
+            commands::toggle_video_only,
             commands::tiles_state,
             commands::accept_notice,
             commands::set_custom_tiles,

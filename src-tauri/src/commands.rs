@@ -40,6 +40,11 @@ pub fn toggle_mode(app: AppHandle) -> CommandResult {
 }
 
 #[tauri::command]
+pub fn toggle_video_only(app: AppHandle) {
+    overlay::toggle_video_only(&app);
+}
+
+#[tauri::command]
 pub fn set_opacity(app: AppHandle, value: f64) -> CommandResult {
     report(overlay::set_opacity(&app, value))
 }

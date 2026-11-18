@@ -3,7 +3,7 @@ type: plan
 tags: [package, mvp, performance, services]
 status: planned
 created: 2026-11-17
-updated: 2026-11-17
+updated: 2026-11-18
 source: conversation
 ---
 
@@ -32,6 +32,8 @@ decides whether the release pipeline (phase 3) starts.
       (tiles added for those that pass, [[drm-services-in-first-release]]).
 - [ ] Sign-in flows and pop-ups of every service work with the navigation guard
       (moved from mvp-04).
+- [ ] Netflix, Prime Video, Disney+, RTL+: playback shows only the player, so "video
+      only" needs no rules there (moved from mvp-07, [[tech-video-only]]).
 - [ ] Results note under `research/` linked from the index.
 
 ## Checks

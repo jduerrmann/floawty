@@ -19,6 +19,7 @@ const defaults: Hotkeys = {
   opacityDown: 'Ctrl+Alt+Shift+Down',
   windowMode: 'Ctrl+Alt+Shift+F',
   playPause: 'Ctrl+Alt+Shift+Space',
+  videoOnly: 'Ctrl+Alt+Shift+V',
 };
 
 describe('hotkeyFromKey', () => {
@@ -62,6 +63,7 @@ describe('hotkeyFromKey', () => {
 describe('findConflict', () => {
   it('names the action that already uses the combination', () => {
     expect(findConflict(defaults, 'opacityUp', 'Ctrl+Alt+Shift+D')).toBe('clickThrough');
+    expect(findConflict(defaults, 'opacityUp', 'Ctrl+Alt+Shift+V')).toBe('videoOnly');
   });
 
   it('compares spellings, not text', () => {

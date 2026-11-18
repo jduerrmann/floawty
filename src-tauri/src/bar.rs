@@ -226,7 +226,8 @@ mod tests {
             language: settings.language,
             shorts: settings.shorts,
             update_check: settings.update_check,
-            page_problem: false,
+            video_only: false,
+            page_problems: Vec::new(),
         }
     }
 

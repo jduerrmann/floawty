@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Home with the last watch page kept hidden</title>
+    <style>
+      ytd-watch-flexy[hidden] {
+        display: none;
+      }
+      #grid {
+        height: 2000px;
+      }
+    </style>
+  </head>
+  <body>
+    <ytd-app>
+      <div id="masthead-container">YouTube</div>
+      <ytd-browse><div id="grid">Recommendations</div></ytd-browse>
+      <ytd-watch-flexy hidden>
+        <div id="movie_player"><video></video></div>
+      </ytd-watch-flexy>
+    </ytd-app>
+    <script>
+      window.__calls = [];
+    </script>
+  </body>
+</html>

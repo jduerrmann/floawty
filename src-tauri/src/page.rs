@@ -1,5 +1,6 @@
 //! Page scripts: floawty asks the service page's adapter script; the page never calls floawty.
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::Mutex;
 use std::thread;
 use std::time::Duration;
 
@@ -8,12 +9,14 @@ use tauri::{AppHandle, Manager};
 
 use crate::geometry::Aspect;
 use crate::logbook;
+use crate::mode::Mode;
 use crate::overlay::{self, Overlay};
 use crate::service;
+use crate::settings::Settings;
 
 /// After a title change the page needs a moment before its controls can be judged.
 const PROBLEM_CHECK_DELAY: Duration = Duration::from_secs(3);
-/// A status is two short fields; anything longer did not come from floawty's script.
+/// A status is a short aspect and a few problems; anything longer did not come from floawty's script.
 const MAX_ANSWER_LEN: usize = 128;
 const MAX_ID_LEN: usize = 32;
 
@@ -24,8 +27,8 @@ pub struct Page {
     generation: AtomicU64,
     /// Rises with every wake-up, so only the newest delayed check runs.
     wakes: AtomicU64,
-    /// The problem is logged once per opened service, however often the page reports it.
-    logged: AtomicBool,
+    /// Each problem is logged once per opened service, however often the page reports it.
+    logged: Mutex<Vec<Problem>>,
     hover: AtomicBool,
 }
 
@@ -35,6 +38,7 @@ struct SyncInput {
     shorts: SyncShorts,
     hover: bool,
     active: bool,
+    video_only: bool,
 }
 
 #[derive(Serialize)]
@@ -49,7 +53,7 @@ struct SyncShorts {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct Status {
     aspect: StatusAspect,
-    problem: Option<Problem>,
+    problems: Vec<Problem>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Deserialize)]
@@ -59,10 +63,21 @@ enum StatusAspect {
     Landscape,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Deserialize)]
+/// What the page script cannot find; the bar warns about it.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
-enum Problem {
+pub enum Problem {
     ControlsMissing,
+    PlayerMissing,
+}
+
+impl Problem {
+    fn log_line(self) -> &'static str {
+        match self {
+            Self::ControlsMissing => "page script: the service's controls are missing",
+            Self::PlayerMissing => "page script: video only cannot find the player",
+        }
+    }
 }
 
 fn page(app: &AppHandle) -> tauri::State<'_, Page> {
@@ -95,8 +110,8 @@ pub fn script(app: &AppHandle, service_id: &str) -> Option<String> {
 pub fn reset(app: &AppHandle, scripted: bool) {
     page(app).generation.fetch_add(1, Ordering::SeqCst);
     page(app).scripted.store(scripted, Ordering::SeqCst);
-    page(app).logged.store(false, Ordering::SeqCst);
-    app.state::<Overlay>().set_page_problem(false);
+    page(app).logged.lock().unwrap().clear();
+    app.state::<Overlay>().set_page_problems(Vec::new());
     overlay::set_aspect(app, Aspect::Landscape);
 }
 
@@ -144,9 +159,14 @@ pub fn sync(app: &AppHandle) {
 
 fn input(app: &AppHandle, hover: bool) -> String {
     let overlay = app.state::<Overlay>();
-    let shorts = overlay.settings().shorts;
-    let state = overlay.state();
     let shown = overlay::main_window(app).is_visible().unwrap_or(false);
+    let active = shown && !overlay.state().settings_open;
+    sync_input(&overlay.settings(), hover, active)
+}
+
+/// Video only works in the floaty view only; window mode shows the whole page.
+fn sync_input(settings: &Settings, hover: bool, active: bool) -> String {
+    let shorts = &settings.shorts;
     let input = SyncInput {
         shorts: SyncShorts {
             auto: shorts.auto,
@@ -154,7 +174,8 @@ fn input(app: &AppHandle, hover: bool) -> String {
             hold_on_hover: shorts.hold_on_hover,
         },
         hover,
-        active: shown && !state.settings_open,
+        active,
+        video_only: settings.video_only && settings.mode == Mode::Floaty,
     };
     serde_json::to_string(&input).expect("the sync input always serializes")
 }
@@ -171,9 +192,12 @@ fn parse(answer: &str) -> Option<Status> {
     if answer.len() > MAX_ANSWER_LEN {
         return None;
     }
-    serde_json::from_str::<Option<Status>>(answer)
+    let mut status = serde_json::from_str::<Option<Status>>(answer)
         .ok()
-        .flatten()
+        .flatten()?;
+    status.problems.sort();
+    status.problems.dedup();
+    Some(status)
 }
 
 fn apply(app: &AppHandle, generation: u64, answer: &str) {
@@ -189,12 +213,24 @@ fn apply(app: &AppHandle, generation: u64, answer: &str) {
         StatusAspect::Landscape => Aspect::Landscape,
     };
     overlay::set_aspect(app, aspect);
-    let missing = status.problem == Some(Problem::ControlsMissing);
-    if !app.state::<Overlay>().set_page_problem(missing) {
+    if !app
+        .state::<Overlay>()
+        .set_page_problems(status.problems.clone())
+    {
         return;
     }
-    if missing && !state.logged.swap(true, Ordering::SeqCst) {
-        logbook::write(app, "page script: the service's controls are missing");
+    let new: Vec<Problem> = {
+        let mut logged = state.logged.lock().unwrap();
+        let new: Vec<Problem> = status
+            .problems
+            .into_iter()
+            .filter(|p| !logged.contains(p))
+            .collect();
+        logged.extend(&new);
+        new
+    };
+    for problem in new {
+        logbook::write(app, problem.log_line());
     }
     overlay::emit_state(app);
 }
@@ -206,18 +242,29 @@ mod tests {
     #[test]
     fn reads_a_portrait_status() {
         assert_eq!(
-            parse(r#"{"aspect":"portrait","problem":null}"#),
+            parse(r#"{"aspect":"portrait","problems":[]}"#),
             Some(Status {
                 aspect: StatusAspect::Portrait,
-                problem: None
+                problems: vec![]
             })
         );
     }
 
     #[test]
-    fn reads_a_missing_control() {
-        let status = parse(r#"{"aspect":"landscape","problem":"controls-missing"}"#);
-        assert_eq!(status.unwrap().problem, Some(Problem::ControlsMissing));
+    fn reads_each_problem_and_both() {
+        let problems = |answer: &str| parse(answer).unwrap().problems;
+        assert_eq!(
+            problems(r#"{"aspect":"landscape","problems":["controls-missing"]}"#),
+            vec![Problem::ControlsMissing]
+        );
+        assert_eq!(
+            problems(r#"{"aspect":"landscape","problems":["player-missing"]}"#),
+            vec![Problem::PlayerMissing]
+        );
+        assert_eq!(
+            problems(r#"{"aspect":"landscape","problems":["controls-missing","player-missing"]}"#),
+            vec![Problem::ControlsMissing, Problem::PlayerMissing]
+        );
     }
 
     #[test]
@@ -228,18 +275,32 @@ mod tests {
 
     #[test]
     fn unknown_values_and_fields_are_ignored() {
-        assert_eq!(parse(r#"{"aspect":"square","problem":null}"#), None);
+        assert_eq!(parse(r#"{"aspect":"square","problems":[]}"#), None);
         assert_eq!(
-            parse(r#"{"aspect":"portrait","problem":null,"url":"x"}"#),
+            parse(r#"{"aspect":"portrait","problems":[],"url":"x"}"#),
             None
         );
-        assert_eq!(parse(r#"{"aspect":"portrait","problem":"other"}"#), None);
+        assert_eq!(parse(r#"{"aspect":"portrait","problems":["other"]}"#), None);
+    }
+
+    #[test]
+    fn the_old_single_problem_shape_is_ignored() {
+        assert_eq!(parse(r#"{"aspect":"portrait","problem":null}"#), None);
+    }
+
+    #[test]
+    fn problems_come_sorted_and_once_each() {
+        let answer = r#"{"aspect":"portrait","problems":["player-missing","controls-missing","player-missing"]}"#;
+        assert_eq!(
+            parse(answer).unwrap().problems,
+            vec![Problem::ControlsMissing, Problem::PlayerMissing]
+        );
     }
 
     #[test]
     fn an_overlong_answer_is_ignored() {
         let long = format!(
-            r#"{{"aspect":"portrait","problem":null{}}}"#,
+            r#"{{"aspect":"portrait","problems":[]{}}}"#,
             " ".repeat(200)
         );
         assert_eq!(parse(&long), None);
@@ -258,5 +319,31 @@ mod tests {
     fn the_sync_script_embeds_the_input_as_json() {
         let script = sync_script(r#"{"hover":true}"#);
         assert!(script.contains(r#"page.sync({"hover":true})"#));
+    }
+
+    #[test]
+    fn video_only_reaches_the_page_only_in_the_floaty_view() {
+        let input = |video_only: bool, mode: Mode| {
+            let settings = Settings {
+                video_only,
+                mode,
+                ..Settings::default()
+            };
+            sync_input(&settings, false, true)
+        };
+        let on = r#""videoOnly":true"#;
+        assert!(input(true, Mode::Floaty).contains(on));
+        assert!(input(true, Mode::Window).contains(r#""videoOnly":false"#));
+        assert!(input(false, Mode::Floaty).contains(r#""videoOnly":false"#));
+        assert!(input(false, Mode::Window).contains(r#""videoOnly":false"#));
+    }
+
+    #[test]
+    fn the_input_has_the_fields_the_page_script_expects() {
+        let input = sync_input(&Settings::default(), true, false);
+        assert_eq!(
+            input,
+            r#"{"shorts":{"auto":false,"pauseSeconds":1.0,"holdOnHover":true},"hover":true,"active":false,"videoOnly":false}"#
+        );
     }
 }

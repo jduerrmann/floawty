@@ -10,7 +10,7 @@ const PAUSE_MS = 300;
 
 interface Status {
   aspect: 'portrait' | 'landscape';
-  problem: null | 'controls-missing';
+  problems: ('controls-missing' | 'player-missing')[];
 }
 interface Call {
   name: 'pause' | 'play' | 'advance';
@@ -57,7 +57,7 @@ function config(
   hover = false,
   active = true,
 ) {
-  return { shorts: { auto, pauseSeconds, holdOnHover }, hover, active };
+  return { shorts: { auto, pauseSeconds, holdOnHover }, hover, active, videoOnly: false };
 }
 
 function calls(page: Page): Promise<Call[]> {
@@ -185,10 +185,10 @@ test('a missing next control is reported after 2 s and the page stays usable', a
   const errors: Error[] = [];
   page.on('pageerror', (error) => errors.push(error));
   await open(page, 'shorts-no-next.html');
-  expect(await sync(page, config(true, 0))).toEqual({ aspect: 'portrait', problem: null });
+  expect(await sync(page, config(true, 0))).toEqual({ aspect: 'portrait', problems: [] });
   await expect
     .poll(() => sync(page, config(true, 0)), { timeout: 8000 })
-    .toEqual({ aspect: 'portrait', problem: 'controls-missing' });
+    .toEqual({ aspect: 'portrait', problems: ['controls-missing'] });
   expect(await page.title()).toBe('Short without next control');
   expect(errors).toEqual([]);
 });
@@ -199,11 +199,11 @@ test('a problem verdict stays across a path change until the page has settled ag
   await open(page, 'shorts-no-next.html');
   await expect
     .poll(() => sync(page, config(true, 0)), { timeout: 8000 })
-    .toEqual({ aspect: 'portrait', problem: 'controls-missing' });
+    .toEqual({ aspect: 'portrait', problems: ['controls-missing'] });
   await page.evaluate(() => history.pushState({}, '', '/shorts/short1'));
   expect(await sync(page, config(true, 0))).toEqual({
     aspect: 'portrait',
-    problem: 'controls-missing',
+    problems: ['controls-missing'],
   });
 });
 
@@ -213,14 +213,14 @@ test('a failed advance reports the problem at once until the next media start', 
   await open(page, 'shorts-no-next.html');
   await sync(page, config(true, 0));
   await loopJump(page);
-  expect((await sync(page, config(true, 0))).problem).toBe('controls-missing');
+  expect((await sync(page, config(true, 0))).problems).toEqual(['controls-missing']);
   await page.evaluate(() => document.querySelector('video')?.dispatchEvent(new Event('loadstart')));
-  expect((await sync(page, config(true, 0))).problem).toBeNull();
+  expect((await sync(page, config(true, 0))).problems).toEqual([]);
 });
 
 test('a watch page is landscape and ignores a loop jump', async ({ page }) => {
   await open(page, 'shorts.html', 'https://www.youtube.com/watch?v=abc');
-  expect(await sync(page, config(true, 0))).toEqual({ aspect: 'landscape', problem: null });
+  expect(await sync(page, config(true, 0))).toEqual({ aspect: 'landscape', problems: [] });
   await loopJump(page);
   expect(await callNames(page)).toEqual([]);
 });
@@ -303,7 +303,7 @@ test('garbage input returns a status and keeps the previous config', async ({ pa
     { shorts: { auto: false, pauseSeconds: 0, holdOnHover: true }, hover: false },
   ];
   for (const input of garbage) {
-    expect(await sync(page, input)).toEqual({ aspect: 'portrait', problem: null });
+    expect(await sync(page, input)).toEqual({ aspect: 'portrait', problems: [] });
   }
   await loopJump(page);
   await expect.poll(() => callNames(page)).toEqual(['advance']);

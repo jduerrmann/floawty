@@ -57,6 +57,11 @@ describe('service manifests', () => {
       'youtube',
       'youtube-shorts',
     ]);
+    expect(services.filter((s) => s.videoOnly).map((s) => s.id)).toEqual([
+      'youtube',
+      'youtube-shorts',
+      'twitch',
+    ]);
     expect(services.filter((s) => s.startsShortsAuto).map((s) => s.id)).toEqual(['youtube-shorts']);
   });
 });

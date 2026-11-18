@@ -24,8 +24,11 @@ export interface OverlayState extends Preferences {
   serviceId: string | null;
   settingsOpen: boolean;
   hotkeys: Hotkeys;
-  pageProblem: boolean;
+  videoOnly: boolean;
+  pageProblems: PageProblem[];
 }
+
+export type PageProblem = 'controls-missing' | 'player-missing';
 
 /** The preferences with the Shorts auto mode on, as the Shorts tile opens. */
 export function withShortsAuto(preferences: Preferences): Preferences {
