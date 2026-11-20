@@ -21,6 +21,7 @@ const defaults: Hotkeys = {
   playPause: 'Ctrl+Alt+Shift+Space',
   videoOnly: 'Ctrl+Alt+Shift+V',
   zoom: 'Ctrl+Alt+Shift+Z',
+  alwaysOnTop: 'Ctrl+Alt+Shift+T',
 };
 
 describe('hotkeyFromKey', () => {

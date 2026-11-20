@@ -63,3 +63,7 @@ User-facing changes, in plain language. Format based on
 - Settings: "Use graphics acceleration" (on at first). Turning it off makes floawty
   restart without the graphics card, like the same switch in Edge; it needs more CPU,
   and services with copy protection may play in lower quality.
+- "Always on top" can be switched off (🖈 in the bar or Ctrl+Alt+Shift+T), so other
+  windows can cover floawty; floawty remembers the choice. Click-through keeps floawty
+  on top while it is on. While floawty is not kept on top, Ctrl+Alt+Shift+O first brings
+  it to the front (also when minimized), a second press hides it.

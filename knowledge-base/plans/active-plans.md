@@ -17,4 +17,4 @@ Single resume entry for multi-session work. Rules: [[planning]].
 | short-feeds | Wheel paging for Shorts under video only; TikTok tile with auto mode; sign-in window (in 0.1.0) | [[plan-short-feeds]] |
 
 Archived: stack spike ([[plan-stack-spike]]), done 2026-11-17; MVP ([[plan-mvp]]), done
-2026-11-20.
+2026-11-20; always on top as a switch ([[plan-on-top]]), done 2026-11-20.

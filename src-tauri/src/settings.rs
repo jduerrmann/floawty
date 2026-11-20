@@ -3,9 +3,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::geometry::Rect;
 use crate::mode::Mode;
+use crate::opacity;
 
 pub const CURRENT_VERSION: u32 = 1;
-const MIN_OPACITY: f64 = 0.1;
 const DEFAULT_SHORTS_PAUSE: f64 = 1.0;
 const MAX_SHORTS_PAUSE: f64 = 10.0;
 
@@ -20,6 +20,7 @@ pub struct Hotkeys {
     pub play_pause: String,
     pub video_only: String,
     pub zoom: String,
+    pub always_on_top: String,
 }
 
 impl Default for Hotkeys {
@@ -33,6 +34,7 @@ impl Default for Hotkeys {
             play_pause: "Ctrl+Alt+Shift+Space".into(),
             video_only: "Ctrl+Alt+Shift+V".into(),
             zoom: "Ctrl+Alt+Shift+Z".into(),
+            always_on_top: "Ctrl+Alt+Shift+T".into(),
         }
     }
 }
@@ -130,6 +132,8 @@ pub struct Settings {
     pub zoom: bool,
     /// Off starts WebView2 without its GPU; it takes effect at the next start.
     pub graphics_acceleration: bool,
+    /// Off lets other windows cover the floaty view; click-through keeps it on top anyway.
+    pub always_on_top: bool,
 }
 
 impl Default for Settings {
@@ -151,6 +155,7 @@ impl Default for Settings {
             video_only: false,
             zoom: false,
             graphics_acceleration: true,
+            always_on_top: true,
         }
     }
 }
@@ -160,7 +165,7 @@ pub fn parse(text: &str) -> Settings {
     let mut settings: Settings = serde_json::from_str(text).unwrap_or_default();
     // Version 1 is the first format; files without a version are read as version 1.
     settings.version = CURRENT_VERSION;
-    settings.opacity = clamp_opacity(settings.opacity);
+    settings.opacity = opacity::clamp(settings.opacity);
     settings.shorts.pause_seconds = clamp_shorts_pause(settings.shorts.pause_seconds);
     settings
 }
@@ -179,24 +184,11 @@ pub fn to_json(settings: &Settings) -> String {
     serde_json::to_string_pretty(settings).expect("settings always serialize")
 }
 
-pub fn clamp_opacity(value: f64) -> f64 {
-    if value.is_nan() {
-        return 1.0;
-    }
-    value.clamp(MIN_OPACITY, 1.0)
-}
-
 fn clamp_shorts_pause(seconds: f64) -> f64 {
     if seconds.is_nan() {
         return DEFAULT_SHORTS_PAUSE;
     }
     seconds.clamp(0.0, MAX_SHORTS_PAUSE)
-}
-
-/// Moves opacity by whole 10 % steps and keeps it on the step grid.
-pub fn step_opacity(current: f64, steps: i32) -> f64 {
-    let tenths = (current * 10.0).round() as i32 + steps;
-    clamp_opacity(f64::from(tenths) / 10.0)
 }
 
 #[cfg(test)]
@@ -317,6 +309,23 @@ mod tests {
     }
 
     #[test]
+    fn a_file_without_always_on_top_keeps_floawty_on_top() {
+        let settings = parse(r#"{ "version": 1, "opacity": 0.5 }"#);
+        assert!(settings.always_on_top);
+        assert_eq!(settings.hotkeys.always_on_top, "Ctrl+Alt+Shift+T");
+    }
+
+    #[test]
+    fn always_on_top_off_survives_a_round_trip() {
+        let off = Settings {
+            always_on_top: false,
+            ..Settings::default()
+        };
+        assert!(to_json(&off).contains(r#""alwaysOnTop": false"#));
+        assert_eq!(parse(&to_json(&off)), off);
+    }
+
+    #[test]
     fn an_unknown_language_follows_windows_and_keeps_the_rest() {
         let settings = parse(r#"{ "opacity": 0.5, "language": "klingon" }"#);
         assert_eq!(settings.language, Language::System);
@@ -406,7 +415,7 @@ mod tests {
 
     #[test]
     fn out_of_range_opacity_is_clamped_on_load() {
-        assert_eq!(parse(r#"{ "opacity": 0.01 }"#).opacity, MIN_OPACITY);
+        assert_eq!(parse(r#"{ "opacity": 0.01 }"#).opacity, opacity::MIN);
         assert_eq!(parse(r#"{ "opacity": 7 }"#).opacity, 1.0);
     }
 
@@ -425,21 +434,6 @@ mod tests {
         let text = to_json(&settings);
         assert!(text.contains("\"version\": 1"), "{text}");
         assert_eq!(parse(&text), settings);
-    }
-
-    #[test]
-    fn opacity_never_leaves_10_to_100_percent() {
-        assert_eq!(clamp_opacity(0.05), MIN_OPACITY);
-        assert_eq!(clamp_opacity(1.2), 1.0);
-        assert_eq!(clamp_opacity(0.55), 0.55);
-    }
-
-    #[test]
-    fn opacity_steps_stay_on_the_10_percent_grid() {
-        assert_eq!(step_opacity(0.55, 1), 0.7);
-        assert_eq!(step_opacity(1.0, 1), 1.0);
-        assert_eq!(step_opacity(0.2, -1), 0.1);
-        assert_eq!(step_opacity(0.1, -1), 0.1);
     }
 
     #[test]

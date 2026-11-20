@@ -56,6 +56,11 @@ pub fn toggle_zoom(app: AppHandle) {
 }
 
 #[tauri::command]
+pub fn toggle_always_on_top(app: AppHandle) -> CommandResult {
+    report(overlay::toggle_always_on_top(&app))
+}
+
+#[tauri::command]
 pub fn set_opacity(app: AppHandle, value: f64) -> CommandResult {
     report(overlay::set_opacity(&app, value))
 }

@@ -1,4 +1,5 @@
-// The bar over the video: back to the tiles, opacity, click-through, Shorts, video only, zoom, mode, settings, close.
+// The bar over the video: back to the tiles, opacity, click-through, always on top, Shorts, video only, zoom,
+// mode, settings, close.
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { createClickThroughIndicator } from './click-through';
@@ -44,6 +45,9 @@ function wire(language: Language, current: () => OverlayState): void {
   button('click-through').addEventListener('click', (event) =>
     keysBack(event, invoke('toggle_click_through')),
   );
+  button('on-top').addEventListener('click', (event) =>
+    keysBack(event, invoke('toggle_always_on_top')),
+  );
   button('shorts').addEventListener('click', (event) => {
     const preferences = preferencesOf(current());
     const shorts = { ...preferences.shorts, auto: !preferences.shorts.auto };
@@ -63,6 +67,7 @@ function wire(language: Language, current: () => OverlayState): void {
   const labels: [string, MessageKey][] = [
     ['back', 'backToTiles'],
     ['click-through', 'clickThroughOn'],
+    ['on-top', 'alwaysOnTop'],
     ['shorts', 'shortsAuto'],
     ['video-only', 'videoOnly'],
     ['zoom', 'zoom'],
@@ -80,6 +85,8 @@ function showControls(language: Language, state: OverlayState): void {
   opacity.value = String(Math.round(state.opacity * 100));
   opacity.disabled = !floaty;
   button('click-through').disabled = !floaty;
+  button('on-top').disabled = !floaty;
+  button('on-top').setAttribute('aria-pressed', String(floaty && state.alwaysOnTop));
   button('shorts').hidden = !offersShorts(state.serviceId);
   button('shorts').setAttribute('aria-pressed', String(state.shorts.auto));
   const controlsMissing = state.pageProblems.includes('controls-missing');

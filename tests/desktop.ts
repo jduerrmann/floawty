@@ -1,6 +1,6 @@
 // Real mouse and keyboard input: the bar reacts to where Windows sees the cursor, global
 // hotkeys to real key presses. Using the mouse yourself while these tests run makes them fail.
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawn, type ChildProcess } from 'node:child_process';
 
 const SCRIPT = `
 param([int]$ProcessId, [double]$Fx, [double]$Fy)
@@ -129,4 +129,92 @@ export function dragBy(pid: number, dx: number, dy: number): { x: number; y: num
 /** Resizes floawty's window in screen pixels, as Windows does for a drag on its border. */
 export function resizeWindow(pid: number, width: number, height: number): void {
   windowCall(pid, 'resize', width, height);
+}
+
+// Found by title: once floawty's window is hidden, the process's MainWindowHandle names another one.
+const FLAGS = `
+param([int]$ProcessId, [string]$Title, [string]$Action)
+Add-Type @"
+using System; using System.Runtime.InteropServices; using System.Text;
+public static class Flags {
+  public delegate bool Visit(IntPtr h, IntPtr p);
+  [DllImport("user32.dll")] public static extern bool EnumWindows(Visit visit, IntPtr p);
+  [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
+  [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetWindowTextW(IntPtr h, StringBuilder text, int max);
+  [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr h);
+  [DllImport("user32.dll")] public static extern bool IsIconic(IntPtr h);
+  [DllImport("user32.dll")] public static extern IntPtr GetWindowLongPtrW(IntPtr h, int index);
+  [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+  [DllImport("user32.dll")] public static extern bool GetLayeredWindowAttributes(IntPtr h, out uint key, out byte alpha, out uint flags);
+  [DllImport("user32.dll")] public static extern bool PostMessageW(IntPtr h, uint msg, IntPtr w, IntPtr l);
+}
+"@
+$global:found = [IntPtr]::Zero
+[Flags]::EnumWindows({ param($h, $p)
+  $owner = 0; [Flags]::GetWindowThreadProcessId($h, [ref]$owner) | Out-Null
+  $text = New-Object System.Text.StringBuilder 256; [Flags]::GetWindowTextW($h, $text, 256) | Out-Null
+  if ($owner -eq $ProcessId -and $text.ToString() -eq $Title) { $global:found = $h; return $false }
+  return $true }, [IntPtr]::Zero) | Out-Null
+$h = $global:found
+if ($h -eq [IntPtr]::Zero) { 'missing'; return }
+# WM_SYSCOMMAND with SC_MINIMIZE, as the taskbar button sends it.
+if ($Action -eq 'minimize') { [Flags]::PostMessageW($h, 0x112, [IntPtr]0xF020, [IntPtr]::Zero) | Out-Null }
+$topmost = ([Flags]::GetWindowLongPtrW($h, -20).ToInt64() -band 8) -ne 0
+$key = 0; $alpha = 255; $mode = 0
+if (-not [Flags]::GetLayeredWindowAttributes($h, [ref]$key, [ref]$alpha, [ref]$mode)) { $alpha = 255 }
+"$([Flags]::IsWindowVisible($h)) $topmost $([Flags]::GetForegroundWindow() -eq $h) $([Flags]::IsIconic($h)) $alpha"
+`;
+
+export interface WindowFlags {
+  visible: boolean;
+  topmost: boolean;
+  foreground: boolean;
+  minimized: boolean;
+  /** Layered-window alpha, 0–255. */
+  alpha: number;
+}
+
+function flagsCall(pid: number, title: string, action: string): WindowFlags {
+  const command = `& {${FLAGS}} ${pid} '${title}' ${action}`;
+  const out = execFileSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', command], {
+    encoding: 'utf8',
+  }).trim();
+  if (out === 'missing') throw new Error(`no window "${title}" in process ${pid}`);
+  const [visible, topmost, foreground, minimized, alpha] = out.split(' ');
+  return {
+    visible: visible === 'True',
+    topmost: topmost === 'True',
+    foreground: foreground === 'True',
+    minimized: minimized === 'True',
+    alpha: Number(alpha),
+  };
+}
+
+/** A process's window with this title: visible, always on top, active, minimized, opacity. */
+export function windowFlags(pid: number, title = 'floawty'): WindowFlags {
+  return flagsCall(pid, title, 'read');
+}
+
+/** Minimizes floawty's window the way its taskbar button does. */
+export function minimize(pid: number): void {
+  flagsCall(pid, 'floawty', 'minimize');
+}
+
+/** The title of the window `openOtherWindow` opens. */
+export const OTHER_TITLE = 'floawty test window';
+
+// On top, so it never opens behind a maximized window and the click always lands on it.
+const OTHER_WINDOW = `Add-Type -AssemblyName System.Windows.Forms
+$form = New-Object System.Windows.Forms.Form
+$form.Text = '${OTHER_TITLE}'
+$form.TopMost = $true
+$form.StartPosition = 'Manual'
+$form.Location = New-Object System.Drawing.Point(80, 80)
+$form.Size = New-Object System.Drawing.Size(320, 200)
+[System.Windows.Forms.Application]::Run($form)`;
+
+/** Opens a plain window of another app at the top left, to take the foreground from floawty. */
+export function openOtherWindow(): ChildProcess {
+  // windowsHide would hide the form as well, not only the console.
+  return spawn('powershell', ['-NoProfile', '-NonInteractive', '-Command', OTHER_WINDOW]);
 }

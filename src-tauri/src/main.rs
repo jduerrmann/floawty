@@ -9,6 +9,7 @@ mod hover;
 mod logbook;
 mod mode;
 mod navigation;
+mod opacity;
 mod overlay;
 mod page;
 mod paths;
@@ -111,6 +112,7 @@ fn main() {
             commands::toggle_mode,
             commands::toggle_video_only,
             commands::toggle_zoom,
+            commands::toggle_always_on_top,
             commands::set_bar_width,
             commands::tiles_state,
             commands::accept_notice,

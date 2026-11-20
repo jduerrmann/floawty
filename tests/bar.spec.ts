@@ -188,7 +188,7 @@ test('the service follows the window size and fills it again in the floaty view'
   }
 });
 
-test('the bar fits all eight controls at the minimum width and grows back when wider', async () => {
+test('the bar fits all nine controls at the minimum width and grows back when wider', async () => {
   const app = await launch(freshProfile());
   try {
     // YouTube's id offers ▶ and ▣ too, ⤢ is always there; the page stays on example.com.

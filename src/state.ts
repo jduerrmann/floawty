@@ -27,6 +27,7 @@ export interface OverlayState extends Preferences {
   hotkeys: Hotkeys;
   videoOnly: boolean;
   zoom: boolean;
+  alwaysOnTop: boolean;
   pageProblems: PageProblem[];
 }
 

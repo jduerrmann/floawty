@@ -9,11 +9,12 @@ use tauri::{AppHandle, Emitter, Manager, PhysicalPosition, PhysicalSize, Window}
 use crate::bar;
 use crate::geometry::{self, Aspect, Rect};
 use crate::logbook;
-use crate::mode::{self, Mode};
+use crate::mode::{self, Mode, ShowHide};
+use crate::opacity;
 use crate::page::{self, Problem};
 use crate::persistence;
 use crate::service;
-use crate::settings::{self, Hotkeys, Language, Settings, Shorts};
+use crate::settings::{Hotkeys, Language, Settings, Shorts};
 
 mod settle;
 pub use settle::settle_later;
@@ -49,6 +50,7 @@ pub struct OverlayState {
     pub graphics_acceleration: bool,
     pub video_only: bool,
     pub zoom: bool,
+    pub always_on_top: bool,
     pub page_problems: Vec<Problem>,
 }
 
@@ -108,6 +110,7 @@ impl Overlay {
             graphics_acceleration: settings.graphics_acceleration,
             video_only: settings.video_only,
             zoom: settings.zoom,
+            always_on_top: settings.always_on_top,
             page_problems: self.page_problems.lock().unwrap().clone(),
         }
     }
@@ -175,10 +178,16 @@ fn target_rect(window: &Window, settings: &Settings) -> tauri::Result<Rect> {
     }
 }
 
-/// Window mode is a normal window; the floaty view is frameless and stays on top.
-fn apply_mode_style(window: &Window, mode: Mode) -> tauri::Result<()> {
-    window.set_decorations(mode == Mode::Window)?;
-    window.set_always_on_top(mode == Mode::Floaty)
+/// Window mode is a normal window; the floaty view is frameless and stays on top unless switched off.
+fn apply_mode_style(app: &AppHandle, window: &Window) -> tauri::Result<()> {
+    window.set_decorations(overlay(app).settings().mode == Mode::Window)?;
+    window.set_always_on_top(on_top_now(app))
+}
+
+fn on_top_now(app: &AppHandle) -> bool {
+    let settings = overlay(app).settings();
+    let click_through = *overlay(app).click_through.lock().unwrap();
+    mode::stays_on_top(settings.mode, settings.always_on_top, click_through)
 }
 
 fn effective_opacity(settings: &Settings) -> f64 {
@@ -192,7 +201,7 @@ fn effective_opacity(settings: &Settings) -> f64 {
 pub fn place_and_show(app: &AppHandle) -> tauri::Result<()> {
     let window = main_window(app);
     let settings = overlay(app).settings();
-    apply_mode_style(&window, settings.mode)?;
+    apply_mode_style(app, &window)?;
     set_rect(&window, target_rect(&window, &settings)?)?;
     window.show()?;
     // Showing the window resets its layered style, so opacity comes after.
@@ -222,7 +231,7 @@ pub fn toggle_mode(app: &AppHandle) -> tauri::Result<()> {
     if settings.mode == Mode::Window && click_through_on {
         toggle_click_through_now(app, &window)?;
     }
-    apply_mode_style(&window, settings.mode)?;
+    apply_mode_style(app, &window)?;
     set_rect(&window, target_rect(&window, &settings)?)?;
     if settings.mode == Mode::Floaty && overlay(app).aspect() == Aspect::Portrait {
         turn(app, &window, &settings, Aspect::Portrait)?;
@@ -247,6 +256,20 @@ pub fn toggle_zoom(app: &AppHandle) {
     overlay(app).update(app, |s| s.zoom = !s.zoom);
     emit_state(app);
     page::push_zoom(app);
+}
+
+/// Always on top on or off; only the floaty view has it, so window mode ignores the switch.
+pub fn toggle_always_on_top(app: &AppHandle) -> tauri::Result<()> {
+    if overlay(app).settings().mode == Mode::Window {
+        return Ok(());
+    }
+    overlay(app).update(app, |s| s.always_on_top = !s.always_on_top);
+    let window = main_window(app);
+    window.set_always_on_top(on_top_now(app))?;
+    // Changing the window style can reset the layered attributes.
+    apply_opacity(&window, effective_opacity(&overlay(app).settings()))?;
+    emit_state(app);
+    Ok(())
 }
 
 fn current_area(window: &Window) -> tauri::Result<Option<(Rect, f64)>> {
@@ -336,7 +359,7 @@ pub fn emit_state(app: &AppHandle) {
 }
 
 pub fn set_opacity(app: &AppHandle, value: f64) -> tauri::Result<()> {
-    let opacity = settings::clamp_opacity(value);
+    let opacity = opacity::clamp(value);
     overlay(app).update(app, |s| s.opacity = opacity);
     apply_opacity(
         &main_window(app),
@@ -348,7 +371,7 @@ pub fn set_opacity(app: &AppHandle, value: f64) -> tauri::Result<()> {
 
 pub fn step_opacity(app: &AppHandle, steps: i32) -> tauri::Result<()> {
     let current = overlay(app).settings().opacity;
-    set_opacity(app, settings::step_opacity(current, steps))
+    set_opacity(app, opacity::step(current, steps))
 }
 
 /// Click-through only exists in the floaty view; window mode is a normal window.
@@ -359,6 +382,16 @@ pub fn toggle_click_through(app: &AppHandle) -> tauri::Result<()> {
     toggle_click_through_now(app, &main_window(app))
 }
 
+// A page dialog floawty owns counts as floawty; the service page itself is a child, not the foreground.
+fn is_active(window: &Window) -> tauri::Result<bool> {
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        GetAncestor, GetForegroundWindow, GA_ROOTOWNER,
+    };
+    let hwnd = window.hwnd()?.0 as windows_sys::Win32::Foundation::HWND;
+    // SAFETY: only reads which top-level window has the foreground and who owns it.
+    Ok(unsafe { GetAncestor(GetForegroundWindow(), GA_ROOTOWNER) } == hwnd)
+}
+
 fn toggle_click_through_now(app: &AppHandle, window: &Window) -> tauri::Result<()> {
     let enabled = {
         let state = overlay(app);
@@ -367,20 +400,38 @@ fn toggle_click_through_now(app: &AppHandle, window: &Window) -> tauri::Result<(
         *click_through
     };
     window.set_ignore_cursor_events(enabled)?;
+    window.set_always_on_top(on_top_now(app))?;
     // Changing the cursor handling can reset the layered attributes.
     apply_opacity(window, effective_opacity(&overlay(app).settings()))?;
     emit_state(app);
     Ok(())
 }
 
+/// Hides or shows floawty; a floaty view other windows may cover comes to the front first.
 pub fn toggle_visible(app: &AppHandle) -> tauri::Result<()> {
     let window = main_window(app);
-    if window.is_visible()? {
-        service::pause(app);
-        window.hide()?;
-    } else {
-        window.show()?;
-        apply_opacity(&window, effective_opacity(&overlay(app).settings()))?;
+    let mode = overlay(app).settings().mode;
+    match mode::show_hide_step(
+        window.is_visible()?,
+        mode,
+        on_top_now(app),
+        is_active(&window)?,
+    ) {
+        ShowHide::Raise => {
+            // A minimized window ignores the focus request.
+            if window.is_minimized()? {
+                window.unminimize()?;
+            }
+            return window.set_focus();
+        }
+        ShowHide::Hide => {
+            service::pause(app);
+            window.hide()?;
+        }
+        ShowHide::Show => {
+            window.show()?;
+            apply_opacity(&window, effective_opacity(&overlay(app).settings()))?;
+        }
     }
     emit_state(app);
     page::sync(app);

@@ -35,6 +35,7 @@ One line per decision record in `decisions/`. Template: `templates/t-decision.md
 
 - [[mvp-scope-and-controls]] – MVP scope, bar over the video, window mode ↔ floaty view, Ctrl+Alt+Shift hotkeys, click-through dot
 - [[settings-export-without-logins]] – export/import carries settings, own tiles and hotkeys, never logins or profile files
+- [[always-on-top-switch]] – 🖈 and Ctrl+Alt+Shift+T switch the floaty view's always on top; stored; click-through keeps it on top
 - [[bar-hover-by-cursor-look]] – the bar notices hovering by a 100 ms cursor look while a service is open
 - [[overlay-shape-free-with-zoom]] – any overlay shape (magnets 16:9, 12:5); zoom switch fills a wide overlay
 - [[overlay-snaps-flush]] – the overlay snaps flush to corners and edges, no 16 px margin

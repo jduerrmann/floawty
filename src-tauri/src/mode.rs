@@ -12,6 +12,28 @@ pub enum Mode {
     Window,
 }
 
+/// Only the floaty view stays on top: by its switch, or while click-through is on.
+pub fn stays_on_top(mode: Mode, switch: bool, click_through: bool) -> bool {
+    mode == Mode::Floaty && (switch || click_through)
+}
+
+/// What the show/hide hotkey does.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ShowHide {
+    Show,
+    Hide,
+    /// A floaty view that others may cover comes to the front first.
+    Raise,
+}
+
+pub fn show_hide_step(visible: bool, mode: Mode, on_top: bool, active: bool) -> ShowHide {
+    match (visible, mode == Mode::Floaty && !on_top && !active) {
+        (false, _) => ShowHide::Show,
+        (true, true) => ShowHide::Raise,
+        (true, false) => ShowHide::Hide,
+    }
+}
+
 /// Saved geometry of a mode; `None` means "place it by default".
 pub fn geometry_of(settings: &Settings, mode: Mode) -> Option<Rect> {
     match mode {
@@ -205,6 +227,51 @@ mod tests {
         remember_turned(&mut settings, PORTRAIT, LANDSCAPE);
         assert_eq!(settings.floaty, Some(LANDSCAPE));
         assert_eq!(settings.floaty_portrait, Some(PORTRAIT));
+    }
+
+    #[test]
+    fn only_the_floaty_view_stays_on_top_by_its_switch_or_click_through() {
+        assert!(stays_on_top(Mode::Floaty, true, false));
+        assert!(!stays_on_top(Mode::Floaty, false, false));
+        assert!(stays_on_top(Mode::Floaty, false, true));
+        assert!(!stays_on_top(Mode::Window, true, false));
+        assert!(!stays_on_top(Mode::Window, true, true));
+    }
+
+    #[test]
+    fn the_show_hide_hotkey_hides_when_on_top_active_or_in_window_mode() {
+        assert_eq!(
+            show_hide_step(true, Mode::Floaty, true, false),
+            ShowHide::Hide
+        );
+        assert_eq!(
+            show_hide_step(true, Mode::Floaty, false, true),
+            ShowHide::Hide
+        );
+        assert_eq!(
+            show_hide_step(true, Mode::Window, false, false),
+            ShowHide::Hide
+        );
+    }
+
+    #[test]
+    fn the_show_hide_hotkey_brings_a_floaty_view_not_on_top_and_not_active_to_the_front() {
+        assert_eq!(
+            show_hide_step(true, Mode::Floaty, false, false),
+            ShowHide::Raise
+        );
+    }
+
+    #[test]
+    fn the_show_hide_hotkey_shows_a_hidden_window() {
+        assert_eq!(
+            show_hide_step(false, Mode::Floaty, false, false),
+            ShowHide::Show
+        );
+        assert_eq!(
+            show_hide_step(false, Mode::Window, false, true),
+            ShowHide::Show
+        );
     }
 
     #[test]

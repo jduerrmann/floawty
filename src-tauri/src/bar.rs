@@ -306,6 +306,7 @@ mod tests {
             graphics_acceleration: settings.graphics_acceleration,
             video_only: false,
             zoom: false,
+            always_on_top: settings.always_on_top,
             page_problems: Vec::new(),
         }
     }
