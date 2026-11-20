@@ -4,7 +4,7 @@ area: services
 tags: [webview2, gpu, drm, settings]
 status: active
 created: 2026-11-18
-updated: 2026-11-18
+updated: 2026-11-20
 source: conversation
 ---
 
@@ -41,5 +41,6 @@ browser arguments are fixed when the shared environment starts.
 
 ## Consequences
 - Without the GPU, PlayReady services (Netflix 1080p) fall back to Widevine and may
-  play in lower quality; the maintainer checks the services with the switch off.
+  play in lower quality; with the switch off, the maintainer saw Crunchyroll in a
+  Discord stream and all DRM services play (2026-11-20).
 - Any new webview must take `service::browser_args`, or WebView2 refuses it.

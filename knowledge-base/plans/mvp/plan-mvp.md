@@ -3,7 +3,7 @@ type: plan
 tags: [plan-map, mvp]
 status: active
 created: 2026-11-17
-updated: 2026-11-18
+updated: 2026-11-20
 source: visual plan "MVP-Planung", approved 2026-11-17
 ---
 
@@ -41,5 +41,5 @@ Decisions: [[mvp-scope-and-controls]], [[bundled-service-logos]],
 | 10 | [[mvp-10-free-aspect-and-zoom]] | Free overlay shape, zoom over bars baked into the picture | 08 |
 | 11 | [[mvp-11-graphics-acceleration]] | Graphics acceleration can be switched off, like in Edge | 10 |
 
-01–10 done and archived, plus the "YouTube Shorts" tile. In progress: 11 (graphics
-acceleration setting), then the release pipeline (phase 3).
+01–11 done and archived, plus the "YouTube Shorts" tile. Next: the release pipeline
+(phase 3).

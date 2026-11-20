@@ -1,9 +1,9 @@
 ---
 type: plan
 tags: [package, mvp, window, services]
-status: active
+status: done
 created: 2026-11-18
-updated: 2026-11-18
+updated: 2026-11-20
 source: visual plan "mvp-11 Grafikbeschleunigung", round 1, answered 2026-11-18
 ---
 
@@ -45,7 +45,7 @@ off, e.g. so a Discord screen share shows Crunchyroll, which stays black with th
 - [x] Main, bar and service webviews start with `--disable-gpu` when it is off (one
       source, `service::browser_args`; `tauri.conf.json` sets none).
 - [x] Bar visible and usable without the GPU; opacity and click-through work.
-- [ ] Maintainer: Crunchyroll visible in a Discord stream; Netflix, Prime Video,
+- [x] Maintainer: Crunchyroll visible in a Discord stream; Netflix, Prime Video,
       Disney+, RTL+ checked without the GPU (quality noted).
 - [x] Decision recorded ([[graphics-acceleration-switch]]); notes, CHANGELOG;
       measurement; independent review.
@@ -72,10 +72,9 @@ off, e.g. so a Discord screen share shows Crunchyroll, which stays black with th
   `settings.rs` over 400 lines → tests merged (397); question not tied to buttons →
   `role="group"` with `aria-labelledby`; stale docs → fixed.
 
+- Maintainer check with the switch off (2026-11-20): Crunchyroll visible in a Discord
+  stream; Netflix, Prime Video, Disney+ and RTL+ play without problems (quality not
+  noted separately).
+
 ## Resume here
-Branch `feat/mvp-11-graphics-acceleration`, built and reviewed, not committed. Left:
-the maintainer's check with the switch off (Crunchyroll in a Discord stream; Netflix,
-Prime Video, Disney+, RTL+ play and in what quality), then commit and archive the
-package. Open question 6 (single instance) is independent. The maintainer runs
-floawty from `%LOCALAPPDATA%\floawty-app\floawty.exe` (copy of the release build);
-app tests and `npm run measure` need it closed (global hotkeys, real mouse).
+Done 2026-11-20 and archived. Open question 6 (single instance) stays independent.
