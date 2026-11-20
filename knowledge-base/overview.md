@@ -3,7 +3,7 @@ type: note
 tags: [product, scope]
 status: active
 created: 2026-11-16
-updated: 2026-11-17
+updated: 2026-11-20
 source: conversation
 ---
 
@@ -43,7 +43,7 @@ Scope and out-of-scope list: root `AGENTS.md` rule 9. Principles that never chan
 |---|---|---|
 | 0 | Repository, license, rules, knowledge base | done |
 | 1 | Stack spike: Electron (castlabs) vs. Tauri → Tauri ([[stack-by-spike]]) | done |
-| 2 | MVP: overlay + window mode, hover bar, tiles, settings, hotkeys, Shorts auto mode, "video only", EN/DE → [[plan-mvp]] | next |
-| 3 | Release pipeline: CI, portable + installer, checksums, update check | |
+| 2 | MVP: overlay + window mode, hover bar, tiles, settings, hotkeys, Shorts auto mode, "video only", EN/DE → [[plan-mvp]] | done |
+| 3 | Release pipeline: CI, portable + installer, checksums, updates, settings export → [[plan-release]] | next |
 | – | **First public release** after phase 3, with all services | |
 | later | SignPath signing, macOS and Linux builds, more services | |

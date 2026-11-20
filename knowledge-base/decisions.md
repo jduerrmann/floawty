@@ -2,7 +2,7 @@
 type: moc
 tags: [decisions]
 created: 2026-11-16
-updated: 2026-11-18
+updated: 2026-11-20
 source: conversation
 ---
 
@@ -33,6 +33,7 @@ One line per decision record in `decisions/`. Template: `templates/t-decision.md
 ## ui
 
 - [[mvp-scope-and-controls]] – MVP scope, bar over the video, window mode ↔ floaty view, Ctrl+Alt+Shift hotkeys, click-through dot
+- [[settings-export-without-logins]] – export/import carries settings, own tiles and hotkeys, never logins or profile files
 - [[bar-hover-by-cursor-look]] – the bar notices hovering by a 100 ms cursor look while a service is open
 - [[overlay-shape-free-with-zoom]] – any overlay shape (magnets 16:9, 12:5); zoom switch fills a wide overlay
 - [[overlay-snaps-flush]] – the overlay snaps flush to corners and edges, no 16 px margin
@@ -44,3 +45,5 @@ One line per decision record in `decisions/`. Template: `templates/t-decision.md
 ## dist
 
 - [[unsigned-first-then-signpath]] – unsigned releases with checksums first, SignPath Foundation signing later
+- [[release-pipeline]] – CI checks every PR; a tag after local checks publishes setup, portable and SHA256SUMS at once
+- [[updates-by-tauri-updater]] – updates by click or, if turned on, automatically on quit; portable only links to the release

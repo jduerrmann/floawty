@@ -2,7 +2,7 @@
 type: moc
 tags: [index]
 created: 2026-11-16
-updated: 2026-11-18
+updated: 2026-11-20
 source: conversation
 ---
 
@@ -18,18 +18,18 @@ Vault conventions and budgets: `CLAUDE.md` in this folder.
 | Any code change | [[engineering-standards]] (§1 test first, §3–5 code, §7 resources) |
 | Window, settings, hotkeys | [[tech-window]] |
 | Services, tiles, navigation | [[tech-services]] |
-| Bar, settings panel, languages, reset | [[tech-bar-and-settings]], [[bar-hover-by-cursor-look]] |
+| Bar, settings panel, languages, reset, export | [[tech-bar-and-settings]], [[bar-hover-by-cursor-look]], [[settings-export-without-logins]] |
 | Multi-session work, resuming | [[active-plans]], [[planning]] |
 | A product or scope question | [[overview]], [[core-principles]], [[open-questions]] |
 | Stack, DRM, budgets | [[stack-by-spike]], [[stack-spike-results]], [[drm-in-desktop-webviews]], [[mvp-measurements]] |
 | Privacy, network | [[webview2-diagnostics-disclosed]], [[webview2-component-updates-disclosed]] |
 | WebView2 profile | [[shared-webview2-profile-in-mvp]] |
-| MVP work, next package | [[plan-mvp]], [[active-plans]] |
+| Release pipeline, next package | [[plan-release]], [[active-plans]] |
 | Shorts auto mode, page scripts | [[tech-shorts]], [[page-scripts-polled-on-title-change]] |
 | "Video only" | [[tech-video-only]], [[video-only-lays-player-over-page]] |
 | Overlay UI, hotkeys, tiles, Shorts behavior | [[mvp-scope-and-controls]], [[own-service-symbols]], [[overlay-controls]] |
 | Logins, DRM download, network | [[google-login-honest-user-agent-first]], [[widevine-on-demand-with-notice]] |
-| Releases, signing | [[unsigned-first-then-signpath]] |
+| Releases, signing, updates | [[release-pipeline]], [[updates-by-tauri-updater]], [[unsigned-first-then-signpath]] |
 | Delegating work, independent review | root `CLAUDE.md`, [[advisor-and-coder-subagents]] |
 | Writing a note | `CLAUDE.md` in this folder, `templates/` |
 

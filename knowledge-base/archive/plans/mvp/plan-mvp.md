@@ -1,7 +1,7 @@
 ---
 type: plan
 tags: [plan-map, mvp]
-status: active
+status: done
 created: 2026-11-17
 updated: 2026-11-20
 source: visual plan "MVP-Planung", approved 2026-11-17
