@@ -5,7 +5,17 @@ import tseslint from 'typescript-eslint';
 const sizeLimits = { skipBlankLines: true, skipComments: true };
 
 export default tseslint.config(
-  { ignores: ['dist/', 'node_modules/', 'src-tauri/target/', 'src-tauri/gen/', 'spikes/'] },
+  {
+    // .claude/ holds git worktrees of other branches, each with its own tsconfig.
+    ignores: [
+      'dist/',
+      'node_modules/',
+      'src-tauri/target/',
+      'src-tauri/gen/',
+      'spikes/',
+      '.claude/',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.strict,
   {

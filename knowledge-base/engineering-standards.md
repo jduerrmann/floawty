@@ -4,7 +4,7 @@ area: process
 tags: [rules, testing, code-quality, performance]
 status: active
 created: 2026-11-16
-updated: 2026-11-16
+updated: 2026-11-20
 source: conversation; adapted from configuratorCore, varchy and processRecorder standards
 ---
 
@@ -101,7 +101,8 @@ floawty runs next to other work on an ordinary PC.
   | CPU idle and hidden | ≈ 0 % | 0.00 % |
 
 - Changes to window handling, page scripts or startup are measured before and
-  after; a regression beyond budget blocks a merge.
+  after (app runs, asked for as AGENTS.md rule 10 says); a regression beyond budget
+  blocks a merge.
 
 ## 8. Security baseline for web content
 

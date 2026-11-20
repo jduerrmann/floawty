@@ -3,7 +3,7 @@ type: research
 tags: [mvp, performance, network, services]
 status: active
 created: 2026-11-18
-updated: 2026-11-18
+updated: 2026-11-20
 source: npm run measure and maintainer checks, 2026-11-18
 ---
 
@@ -31,7 +31,9 @@ Budgets: [[stack-by-spike]]; spike values: [[stack-spike-results]].
 - YouTube played 1080p at 61.9 fps with 3 dropped frames in the 480 × 270 overlay
   (checked in the page by the driver), fresh profile, cookie banner rejected.
 - Start and idle run without the debug port; YouTube and hidden with it. The port's
-  cost at idle was within noise (four runs: 200, 228, 206, 202 MB).
+  cost at idle was within noise (four runs: 200, 228, 206, 202 MB). Since 2026-11-20
+  the YouTube and hidden runs are muted (`--mute-audio` in `tests/app.ts`); compare
+  the next run against the values above.
 - Idle RAM is ~35 MB above the spike, YouTube ~50 MB: the bar webview and the page
   scripts. Both stay within budget.
 

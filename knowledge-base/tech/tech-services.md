@@ -4,7 +4,7 @@ area: services
 tags: [tiles, services, webview, navigation, privacy]
 status: active
 created: 2026-11-17
-updated: 2026-11-18
+updated: 2026-11-20
 source: mvp-04 implementation, mvp-05
 ---
 
@@ -57,7 +57,8 @@ Settings gain `noticeAccepted`, `customTiles`, `lastService` (id, URL, allowed
 domains) and the hotkey `playPause` (Ctrl+Alt+Shift+Space).
 
 Tests run the release build with `FLOAWTY_DATA_DIR` and `WEBVIEW2_USER_DATA_FOLDER`
-set to fresh temporary folders (`tests/app.ts`), so they never touch the user's data.
+set to fresh temporary folders (`tests/app.ts`), so they never touch the user's data,
+and with `--mute-audio`, so they stay silent.
 
 ## Known gaps
 

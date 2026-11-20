@@ -18,6 +18,7 @@ One line per decision record in `decisions/`. Template: `templates/t-decision.md
 - [[webview2-component-updates-disclosed]] – WebView2's component updater (DRM module) stays on and is disclosed too
 - [[rules-and-knowledge-base]] – AGENTS.md as single rule source, knowledge base for everything else
 - [[advisor-and-coder-subagents]] – main session leads, coder implements bounded slices, advisor reviews every package
+- [[app-tests-ask-first]] – app tests only after the maintainer's yes, muted, one agent at a time; `npm run check` while working
 
 ## services
 

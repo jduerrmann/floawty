@@ -11,6 +11,8 @@ const CDP_PORT = 9334;
 const BROWSER_ARGS = [
   '--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection',
   '--disable-background-networking',
+  // Tests run on the maintainer's PC; videos stay silent.
+  '--mute-audio',
   `--remote-debugging-port=${CDP_PORT}`,
 ].join(' ');
 

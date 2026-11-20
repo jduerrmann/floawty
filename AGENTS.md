@@ -137,16 +137,26 @@ delay, pause on hover). It never likes, subscribes, comments or skips ads.
 
 ## 10. Verify before reporting completion
 
-- `npm run verify` must pass: types, lint, format, unit tests (Vitest and
-  `cargo test`), `cargo clippy`, Playwright smoke test, build.
-- Verify yourself – run the app, drive it with Playwright or the built-in browser –
-  instead of handing the maintainer a checklist. Leave only what needs their eyes or
-  accounts (e.g. a logged-in Netflix check), and name it.
+- `npm run verify` must pass: `npm run check` (types, lint, format, Vitest, adapter
+  tests, `cargo clippy`, `cargo test`), build, Playwright smoke test.
+- App tests take over the maintainer's mouse, keyboard and screen: `npm run smoke`
+  and `verify`, any spec in the Playwright app project, `npm run measure`, and live
+  probes (which start floawty through `launch()` in `tests/app.ts`, so they are muted
+  and use a fresh profile). Ask the maintainer before each run; one yes covers one
+  run, a re-run after a failure asks again. Never two agents at once. While working,
+  use `npm run check` and single unit or adapter tests
+  (`npm run test:adapters -- <file>`). Normally a package needs one app run, after
+  the review fixes and before the commit proposal; a new app test's red run may be a
+  run of its own.
+- Within these limits, verify yourself – run the app, drive it with Playwright or the
+  built-in browser – instead of handing the maintainer a checklist. Leave only what
+  needs their eyes or accounts (e.g. a logged-in Netflix check), and name it.
 - Changes touching window handling, page scripts or startup: measure resources.
 - Report what was verified and what was not; never call an unrun check passed.
 
-Completion order: checks (10) → tech notes and CHANGELOG (11) → decisions and open
-questions (11, 3) → final diff review → independent review (14) → commit proposal (12).
+Completion order: `npm run check` (10) → tech notes and CHANGELOG (11) → decisions
+and open questions (11, 3) → final diff review → independent review (14) → app run
+after the maintainer's yes (10) → commit proposal (12).
 
 ## 11. Keep the knowledge current
 

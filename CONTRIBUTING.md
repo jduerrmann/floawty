@@ -42,8 +42,10 @@ You need Node.js 24+, the Rust toolchain 1.90+ (`rustup`) and the WebView2 runti
 ```powershell
 npm install
 npm run dev       # app with hot reload
-npm run verify    # everything CI will check: types, lint, format, Vitest, cargo fmt,
-                  # clippy, cargo test, release build, Playwright smoke test
+npm run check     # quiet checks while you work: types, lint, format, Vitest,
+                  # adapter tests, cargo fmt, clippy, cargo test
+npm run verify    # check + release build + Playwright smoke test, which moves your
+                  # mouse and opens windows for a few minutes
 ```
 
 | Path | What |

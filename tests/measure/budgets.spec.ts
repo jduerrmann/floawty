@@ -1,5 +1,5 @@
 // Measures floawty against the budgets of decisions/stack-by-spike.md with spikes/measure.
-// Start and idle run without the debug port; YouTube and hidden are set up over it.
+// Start and idle run without the debug port; YouTube and hidden are set up over it, muted.
 import { execFileSync, spawn, type ChildProcess } from 'node:child_process';
 import { mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
