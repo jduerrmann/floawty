@@ -4,14 +4,15 @@ area: services
 tags: [video-only, page-script, youtube, twitch]
 status: active
 created: 2026-11-18
-updated: 2026-11-18
+updated: 2026-11-20
 source: mvp-07 implementation
 ---
 
 # "Video only"
 
-The page script lays the service's player over its own page. Decision:
-[[video-only-lays-player-over-page]]; bridge and wake-ups: [[tech-shorts]].
+The page script lays the service's player over its own page – on YouTube Shorts the whole
+list of Shorts. Decisions: [[video-only-lays-player-over-page]],
+[[shorts-video-only-fills-with-the-list]]; bridge and wake-ups: [[tech-shorts]].
 
 ## Invariants
 
@@ -30,16 +31,18 @@ The page script lays the service's player over its own page. Decision:
   is still missing 2 s after the last path change; the ▣ button gets the warning dot,
   the log one fixed line per opened service.
 - Garbage input keeps the previous setting; the answer is always a valid status.
-- Ad Shorts play in full; YouTube's "Sponsored" badge sits outside the player and is
-  covered ([[video-only-lays-player-over-page]]).
-- Under video only, Shorts keep click to pause, `m` to mute and ↓ to move on (live 2026-11-18).
+- Ads play in full. On watch pages ad slots beside the player are covered
+  ([[video-only-lays-player-over-page]]); on Shorts `#ads-overlay` stays drawn – YouTube's ad card with advertiser, text, call to action and, in its ad
+  layout, like/comment/share ([[shorts-video-only-fills-with-the-list]]).
+- Under video only, Shorts keep click to pause, `m` to mute and ↓ to move on (live 2026-11-20),
+  and the wheel or a swipe pages with YouTube's own animation and thumbnail (live 2026-11-20).
 
 ## Rules per adapter (`selectors.ts`)
 
 | Adapter | Player pages | Player | Extra overrides |
 |---|---|---|---|
 | YouTube | `www.youtube.com/watch` | `ytd-watch-flexy:not([hidden]) #movie_player` | the hidden watch page stays in the DOM elsewhere; the wider layout names `#player-container` for view transitions (a stacking context), so every ancestor of the player gets `view-transition-name: none` |
-| YouTube | `www.youtube.com/shorts/…` | `ytd-shorts #shorts-player` | `contain: none` on the Short boxes, which trap fixed children |
+| YouTube | `www.youtube.com/shorts/…` | the Short boxes `[class*=reel-video-in-sequence]` of the list `ytd-shorts #shorts-container` | the list is fixed at 2200; its Short boxes and the nested renderer, player containers, `ytd-player` and `#shorts-player` are window-sized; on each level everything beside the way to the player gets `content-visibility: hidden` and `pointer-events: none` – YouTube's overlay parts set their own visibility, so `visibility: hidden` did not hold (live 2026-11-20) |
 | Twitch | `www.twitch.tv`: one path part not in a list of Twitch's own pages, `/videos/<id>` | `.persistent-player .video-player` | box: no transform, overflow or max-height; `main` lifted over the nav |
 | Crunchyroll | `www.crunchyroll.com/[lang/]watch/…` | `.video-player-wrapper` (Bitmovin player in the page, no iframe) | layer 200: above header (100) and layout overlay (99); `#player-container` fills, no padding |
 
@@ -58,6 +61,12 @@ Status: `{ aspect, problems: ("controls-missing" | "player-missing")[] }`, at mo
 
 ## Known gaps
 
+- YouTube Shorts: switching video only on or off (also by window mode) changes the size
+  of the list, and YouTube then lands on the neighbouring Short. Resizing the window does
+  the same on YouTube's own page without floawty, and toggling the class without
+  floawty's `resize` event jumped too (live 2026-11-20).
+- The ad card stays visible only while YouTube keeps it in `#ads-overlay`; under another
+  name it is skipped like the other overlays, without a warning dot.
 - Netflix, Prime Video, Disney+ and RTL+ show only their player while playing (maintainer,
   2026-11-18); Netflix's page scrollbar is removed by its own script ([[tech-services]]).
 - Twitch's channel list (`NOT_CHANNELS`) is hand-made; a missed page of Twitch's own

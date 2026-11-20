@@ -10,15 +10,27 @@
         height: 56px;
         z-index: 2020;
       }
-      #shorts-inner-container {
-        padding-top: 56px;
+      /* Like YouTube, the list of Shorts scrolls and snaps one Short at a time. */
+      #shorts-container {
+        margin-top: 56px;
+        height: 600px;
+        overflow-y: scroll;
+        scroll-snap-type: y mandatory;
       }
       .reel {
         position: relative;
         display: flex;
         width: 400px;
         height: 600px;
+        margin-bottom: 16px;
+        scroll-snap-align: start;
         contain: size layout;
+      }
+      /* Overlays lie over the whole Short, as YouTube's buttons and titles do. */
+      .reel .cover {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
       }
       #shorts-player {
         position: relative;
@@ -32,13 +44,59 @@
   <body>
     <div id="masthead-container">YouTube</div>
     <ytd-shorts>
-      <div id="shorts-inner-container">
-        <div class="reel">
-          <div id="shorts-player"><video loop></video></div>
-          <div id="actions">Like</div>
+      <div id="shorts-container">
+        <!-- As on YouTube (2026-11-20): helpers that never snap around the snapping Short boxes. -->
+        <div id="shorts-inner-container">
+          <div id="initial-player-container"></div>
+          <dom-repeat></dom-repeat>
+          <!-- The nesting of a Short as on YouTube; each level holds overlays beside the player. -->
+          <div class="reel-video-in-sequence-new reel">
+            <div class="reel-video-in-sequence-thumbnail"></div>
+            <div id="reel-overlay-container">
+              <ytd-reel-video-renderer>
+                <div id="short-video-container">
+                  <div id="sticker-layer" class="cover"></div>
+                  <div class="player-wrapper">
+                    <div id="player-container">
+                      <ytd-player
+                        ><div id="shorts-player"><video loop></video></div
+                      ></ytd-player>
+                      <div class="player-controls cover">Play</div>
+                    </div>
+                    <div id="scrubber" class="cover"></div>
+                  </div>
+                </div>
+                <div id="experiment-overlay" class="cover">
+                  <!-- YouTube's overlay parts set their own visibility, undoing a hidden parent. -->
+                  <div
+                    id="self-visible"
+                    class="cover"
+                    style="visibility: visible; pointer-events: auto"
+                  >
+                    Comments
+                  </div>
+                </div>
+              </ytd-reel-video-renderer>
+              <div id="actions" class="cover">Share</div>
+              <!-- On ad Shorts YouTube shows its ad card here, beside the player. -->
+              <div
+                id="ads-overlay"
+                hidden
+                style="position: absolute; left: 8px; bottom: 8px; z-index: 1"
+              >
+                <span id="ad-card">Sponsored</span>
+              </div>
+            </div>
+          </div>
+          <div class="reel-video-in-sequence-new reel"></div>
+          <div class="reel-video-in-sequence-new reel"></div>
+          <div class="reel-video-in-sequence-new reel"></div>
+          <div id="overlay-initial-container" style="height: 40px"></div>
         </div>
       </div>
-      <div id="ads-overlay" hidden></div>
+      <ytd-popup-container>
+        <div id="dialog" hidden style="position: fixed; inset: 20%; z-index: 2202">Dialog</div>
+      </ytd-popup-container>
       <div id="navigation-button-down"><button aria-label="Next"></button></div>
     </ytd-shorts>
     <script>

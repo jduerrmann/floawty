@@ -144,7 +144,7 @@ function advance(state: ShortsState, now: number): StepResult {
 function onTimer(state: ShortsState, now: number): StepResult {
   if (state.dueAt === null || now < state.dueAt) return unchanged(state);
   if (state.phase === 'waiting') return advance(state, now);
-  // YouTube ignores scripted navigation until the user's first real click.
+  // A click that brought no new Short (seen before the user's first real click) waits for one.
   if (state.phase === 'advancing') {
     return { state: { ...state, phase: 'blocked', dueAt: null }, actions: [{ type: 'play' }] };
   }

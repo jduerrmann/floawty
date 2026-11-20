@@ -4,7 +4,7 @@ area: shorts
 tags: [shorts, youtube, page-script]
 status: active
 created: 2026-11-17
-updated: 2026-11-18
+updated: 2026-11-20
 source: mvp-06 implementation
 ---
 
@@ -41,6 +41,8 @@ its status and turns the overlay. Decision: [[page-scripts-polled-on-title-chang
   keys, URLs, likes or skips.
 - Hover = the cursor anywhere over floawty (`Sample.inside`), false in click-through,
   while the settings are open or the window is hidden.
+- Under video only the Shorts list fills the window ([[tech-video-only]]), so the wheel
+  and swipes reach YouTube's own list and page as on YouTube; floawty adds no wheel code.
 
 ## Flow
 
@@ -50,7 +52,8 @@ hover during the pause plays on. YouTube calls `play()` at every loop, so a paus
 during the loop seek is undone at once: the pause waits for `seeked` (live-checked).
 Playing on during the pause never cancels the advance. No new media within 3 s → blocked (YouTube ignores
 scripted clicks before the user's first real click); the user's next click or key in
-the page unblocks, the next end advances.
+the page unblocks, the next end advances. In the release app on 2026-11-20 the page was
+activated from the start and the scripted click paged, so the blocked phase is a fallback.
 
 ## Structure
 
@@ -69,4 +72,5 @@ hosts the top frame gets a frozen no-op bridge, so a page cannot catch the input
 
 ## Known gaps
 
-- Selectors are checked live on 2026-11-17 only; ads were seen without sign-in.
+- Selectors are checked live on 2026-11-17, the Shorts list on 2026-11-20; ads were seen
+  without sign-in.

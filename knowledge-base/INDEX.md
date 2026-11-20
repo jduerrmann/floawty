@@ -25,8 +25,8 @@ Vault conventions and budgets: `CLAUDE.md` in this folder.
 | Privacy, network | [[webview2-diagnostics-disclosed]], [[webview2-component-updates-disclosed]] |
 | WebView2 profile | [[shared-webview2-profile-in-mvp]] |
 | Release pipeline, next package | [[plan-release]], [[active-plans]] |
-| Shorts auto mode, page scripts | [[tech-shorts]], [[page-scripts-polled-on-title-change]] |
-| "Video only" | [[tech-video-only]], [[video-only-lays-player-over-page]] |
+| Shorts auto mode, page scripts, TikTok | [[tech-shorts]], [[page-scripts-polled-on-title-change]], [[tiktok-as-short-feed]], [[plan-short-feeds]] |
+| "Video only" | [[tech-video-only]], [[video-only-lays-player-over-page]], [[shorts-video-only-fills-with-the-list]] |
 | Overlay UI, hotkeys, tiles, Shorts behavior | [[mvp-scope-and-controls]], [[own-service-symbols]], [[overlay-controls]] |
 | Logins, DRM download, network | [[google-login-honest-user-agent-first]], [[widevine-on-demand-with-notice]] |
 | Releases, signing, updates | [[release-pipeline]], [[updates-by-tauri-updater]], [[unsigned-first-then-signpath]] |
