@@ -14,6 +14,7 @@ note or decision. Numbers are not reused.
 
 | # | Question | Answered by | Blocks |
 |---|---|---|---|
+| 9 | TikTok: TikTok's ad label beside the video under video only – stay visible like YouTube's ad card on Shorts, or may it be covered? | maintainer | sf-03 |
 | 6 | Allow only one running floawty (single-instance guard, new dependency `tauri-plugin-single-instance`)? A second instance with another graphics-acceleration setting cannot start (logged) | maintainer | rel-04 |
 
 Answered: #7 principle 3 wording and #8 export fields → [[updates-by-tauri-updater]],
