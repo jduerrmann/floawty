@@ -21,6 +21,8 @@ and README, CHANGELOG and the notes describe the released state.
   [[mvp-measurements]], the minimum tested WebView2 version ([[stack-by-spike]]
   "Risk: Microsoft updates WebView2").
 - Non-goals: signing (rel-08), new features. PRIVACY is owned by rel-03.
+- Waits for: rel-04 to rel-06 and the short-feeds packages sf-01 to sf-04
+  ([[plan-short-feeds]]), which ship in 0.1.0.
 - Read first: [[release-pipeline]], [[unsigned-first-then-signpath]],
   [[webview2-diagnostics-disclosed]].
 
@@ -40,4 +42,4 @@ and README, CHANGELOG and the notes describe the released state.
 - `npm run verify`, `npm run measure`, fresh-Windows run, live checks (maintainer).
 
 ## Resume here
-Not started; waits for rel-04 to rel-06.
+Not started; waits for rel-04 to rel-06 and sf-01 to sf-04.

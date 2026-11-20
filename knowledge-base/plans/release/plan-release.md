@@ -59,9 +59,14 @@ Decisions: [[release-pipeline]], [[updates-by-tauri-updater]],
 | 04 | [[rel-04-automatic-updates]] | Automatic check, background download, install on quit | 03 |
 | 05 | [[rel-05-settings-export]] | Settings move by file; newer settings never silently lost | – |
 | 06 | [[rel-06-release-workflow]] | A tag builds, checks and publishes the release | 01, 02, 03 |
-| 07 | [[rel-07-first-release]] | 0.1.0 is public after rc → rc updates proved | 04, 05, 06 |
+| 07 | [[rel-07-first-release]] | 0.1.0 is public after rc → rc updates proved | 04, 05, 06, sf-01–04 |
 | 08 | [[rel-08-signpath]] | Releases are signed through SignPath Foundation | 07 |
 
 Order: 01, 02 and 05 can start; 03 after 02, 04 after 03.
 02, 03 and 05 share `main.rs` and the settings files, so they run one after another,
 not as parallel writers. 08 waits for SignPath's acceptance.
+
+0.1.0 also ships [[plan-short-feeds]] (sf-01 to sf-04, maintainer, 2026-11-20). Shared
+ground: the AGENTS.md rule 9 line (rel-05; sf-02 and sf-04 add items), `OpenService`
+in `settings.rs` (sf-04 adds `signInHosts`; rel-05 owns compatibility), `src/i18n.ts`,
+`capabilities/main.json` (rel-03).
