@@ -67,6 +67,10 @@
         display: block;
         height: 100%;
       }
+      /* TikTok shapes the card like a near-portrait video and fills it, cropping (live 2026-11-21). */
+      section[data-e2e='feed-video'] :is(video, img) {
+        object-fit: cover;
+      }
     </style>
   </head>
   <body>
@@ -80,6 +84,7 @@
         <!-- TikTok's overlay of a video (2026-11-21): its parts carry generated classes only. -->
         <div class="css-0a-7937d88b--DivContentFlexLayout">
           <section data-e2e="feed-video">
+            <img id="poster" alt="" />
             <video id="first"></video>
             <div class="css-1o-7937d88b--DivMediaCardOverlay">
               <div class="css-1t-7937d88b--DivMediaCardOverlayTop">

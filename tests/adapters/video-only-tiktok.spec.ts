@@ -67,6 +67,18 @@ test.describe('TikTok', () => {
     }
   });
 
+  test('videos and their posters keep their whole picture in the window', async ({ page }) => {
+    await open(page, TIKTOK, 'foryou.html', '/foryou');
+    await sync(page, input(true));
+    for (const id of ['#first', '#poster']) {
+      const fit = await page.evaluate((s) => {
+        const element = document.querySelector(s);
+        return element && getComputedStyle(element).objectFit;
+      }, id);
+      expect(fit, id).toBe('contain');
+    }
+  });
+
   test('a wheel over the video reaches the feed list, one item per window height', async ({
     page,
   }) => {

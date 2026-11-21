@@ -67,7 +67,8 @@ User-facing changes, in plain language. Format based on
   control (the slider opens over the speaker) and ⋮ menu appear right above it.
 - With "video only" on, TikTok shows just the video on its feeds and video pages, and the
   mouse wheel moves to the next or previous video as on TikTok. TikTok's progress bar runs
-  along the bottom, its volume control sits low on the left; TikTok's small labels stay on
+  along the bottom, its volume control sits low on the left; videos of another shape show
+  whole, with bars; TikTok's small labels stay on
   the video. Video pages (`/@…/video/…`) now count as TikTok's feed too: upright and with
   the auto mode.
 - Settings: "Use graphics acceleration" (on at first). Turning it off makes floawty

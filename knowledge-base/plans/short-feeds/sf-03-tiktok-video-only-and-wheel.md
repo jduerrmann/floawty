@@ -68,7 +68,8 @@ the wheel over it pages as on TikTok's own page, as for Shorts (sf-01).
       tests; built-in browser on `/foryou` and a video page).
 - [x] TikTok's own volume control and progress bar sit in the window, at the bottom, never
       under floawty's bar (adapter test; floawty probe). Using them: maintainer's test.
-- [ ] Wheel: one video per gesture both ways as on TikTok, no double paging (live).
+- [x] Wheel: one video per gesture as on TikTok, no double paging (maintainer, floawty,
+      2026-11-21).
 - [x] Guest dialogs appear above the video (adapter test; built-in browser). A captcha's
       layer is not yet seen.
 - [ ] Ad items: video plays in full; TikTok's ad label stays visible (deny list; not seen
@@ -104,7 +105,13 @@ the wheel over it pages as on TikTok's own page, as for Shorts (sf-01).
 - Low: `right: auto`, card taller than the window in the fixture, negative path test,
   sturdier wheel assertion, comments, stale plan-map line, package status → done.
 
+## Maintainer test (floawty, signed in, after 35c79f1, 2026-11-21)
+- One wheel notch pages exactly one video.
+- Near-portrait videos (3:4, 1:1) lost their sides: TikTok sets `object-fit: cover` for them
+  (`contain` only for landscape, 21 items live) → video and poster `contain` under video
+  only; fixture crops like TikTok, test red first, green; built-in browser 800×1300: a 1:1
+  video shows whole with bars. Own review only (one obvious rule, rule 14).
+
 ## Resume here
-Review resolved; verify green and the width fix seen in floawty (2026-11-21). Next: commit
-after the maintainer's OK; the maintainer's own test signed in (one wheel notch both ways,
-volume and seek by hand, an ad if one comes) closes the package.
+Wheel accepted. Next: commit the cropping fix after the maintainer's OK, the maintainer's
+look at it in floawty, volume and seek by hand, an ad if one comes; then close the package.

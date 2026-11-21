@@ -23,6 +23,9 @@ after 65 px.
   the page at layer 1000 (above TikTok's header at 100, below its dialogs from 2100), and
   each item and its media card are as big as the window. TikTok scrolls, snaps and plays
   the item in view itself; floawty adds no wheel code and no data attribute.
+- Every video and poster shows whole (`object-fit: contain`): TikTok crops near-portrait
+  videos (3:4, 1:1) to a card of their own shape, which the window is not (maintainer's
+  test, 2026-11-21). Videos of another shape than the window get black bars.
 - Under video only only TikTok's volume control, its progress bar and its labels stay on
   the video (maintainer); the action bar beside the video, the creator name, description,
   music and the ⋯ menu are hidden. The volume moves from the top to the bottom left,

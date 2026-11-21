@@ -28,6 +28,8 @@ const BESIDE_THE_VIDEO = `${MEDIA_CARD} ~ section`;
 const ON_THE_VIDEO = `${MEDIA_CARD} :is([class*="-DivCreatorInfoContainer"],
   [class*="-DivMediaCardDescriptionContainer"], [class*="-DivMusicInfoContainer"],
   [data-e2e="more-menu-icon"])`;
+// TikTok crops near-portrait videos to a card of their own shape; the window is another shape.
+const PICTURE = `${MEDIA_CARD} :is(video, img)`;
 // TikTok's volume sits at the top under floawty's bar; it moves above TikTok's label chips.
 const VOLUME = `${MEDIA_CARD} [class*="-DivVolumeControlContainer"]`;
 // Above TikTok's header (100), below its dialogs (2100 and up, live 2026-11-21).
@@ -48,6 +50,7 @@ export const VIDEO_ONLY: VideoOnlyRules = {
     html.floawty-video-only ${ITEM} { ${WINDOW_SIZED} }
     html.floawty-video-only ${ITEM} > * { ${WINDOW_SIZED} }
     html.floawty-video-only ${MEDIA_CARD} { ${WINDOW_SIZED} }
+    html.floawty-video-only ${PICTURE} { object-fit: contain !important; }
     html.floawty-video-only :is(${BESIDE_THE_VIDEO}, ${ON_THE_VIDEO}) { display: none !important; }
     html.floawty-video-only ${VOLUME} {
       position: absolute !important; top: auto !important; bottom: 48px !important;
