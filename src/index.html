@@ -3,22 +3,25 @@
   <head>
     <meta charset="utf-8" />
     <title>floawty</title>
+    <link rel="stylesheet" href="./tokens.css" />
     <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="./tiles.css" />
+    <link rel="stylesheet" href="./settings.css" />
   </head>
   <body>
     <main id="home" class="home" data-tauri-drag-region>
       <section id="notice" class="notice" hidden>
         <p id="notice-text"></p>
-        <button id="notice-ok" type="button"></button>
+        <button id="notice-ok" type="button" class="button primary"></button>
       </section>
-      <ul id="tiles" class="tiles"></ul>
+      <div class="tiles-area" data-tauri-drag-region><ul id="tiles" class="tiles"></ul></div>
       <form id="tile-form" class="tile-form" hidden>
         <label><span id="tile-name-label"></span><input id="tile-name" maxlength="80" /></label>
         <label><span id="tile-url-label"></span><input id="tile-url" inputmode="url" /></label>
         <p id="tile-error" class="tile-error" role="alert"></p>
         <div class="tile-form-actions">
-          <button id="tile-cancel" type="button"></button>
-          <button id="tile-save" type="submit"></button>
+          <button id="tile-cancel" type="button" class="button"></button>
+          <button id="tile-save" type="submit" class="button primary"></button>
         </div>
       </form>
       <p id="about" class="about" data-tauri-drag-region>floawty</p>

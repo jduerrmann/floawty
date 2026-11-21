@@ -6,7 +6,8 @@ export const tiktok: ServiceManifest = {
   name: 'TikTok',
   startUrl: 'https://www.tiktok.com/foryou',
   allowedDomains: ['tiktok.com'],
-  brandColor: '#010101',
+  // TikTok's cyan, not its black: a black tint would leave the glass tile without colour.
+  brandColor: '#25f4ee',
   symbol: 'tiktok.svg',
   shortsAutoMode: true,
   startsShortsAuto: true,

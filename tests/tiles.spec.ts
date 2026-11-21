@@ -70,6 +70,31 @@ test('the WebView2 notice is shown once', async () => {
   }
 });
 
+test('all eleven tiles fit the default 480 × 270 overlay without scrolling', async () => {
+  const app = await launch(freshProfile());
+  try {
+    // A fresh profile opens the overlay at its default 480 × 270.
+    await app.home.locator('#notice-ok').click();
+    await expect(app.home.locator('#tiles > li')).toHaveCount(SERVICE_NAMES.length + 1);
+    await expect
+      .poll(() =>
+        app.home.evaluate(() => {
+          const area = document.querySelector('.tiles-area') as HTMLElement;
+          const page = document.getElementById('home') as HTMLElement;
+          return [
+            innerWidth,
+            innerHeight,
+            area.scrollHeight <= area.clientHeight,
+            page.scrollHeight <= page.clientHeight,
+          ];
+        }),
+      )
+      .toEqual([480, 270, true, true]);
+  } finally {
+    await app.stop();
+  }
+});
+
 test('an own page becomes a tile, survives a restart and can be removed', async () => {
   const profile = freshProfile();
   const first = await launch(profile);

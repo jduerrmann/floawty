@@ -6,6 +6,7 @@ export const appletv: ServiceManifest = {
   name: 'Apple TV',
   startUrl: 'https://tv.apple.com/',
   allowedDomains: ['apple.com'],
-  brandColor: '#1c1c1e',
+  // Silver instead of Apple's near-black: a black tint would leave the glass tile without colour.
+  brandColor: '#c7c7d1',
   symbol: 'appletv.svg',
 };

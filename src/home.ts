@@ -55,6 +55,7 @@ export async function startHome(language: Language): Promise<void> {
     error.textContent = '';
     form.hidden = false;
     name.focus();
+    form.scrollIntoView({ block: 'end' });
   };
   const render = () =>
     renderTiles(list, language, tiles, {

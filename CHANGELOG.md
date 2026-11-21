@@ -6,6 +6,8 @@ User-facing changes, in plain language. Format based on
 
 ## [Unreleased]
 
+- New look for the start screen: tiles of coloured glass, light or dark like Windows,
+  with names that stay easy to read; the notice and the add-page form match.
 - Small window that stays on top: bottom right at first, snaps to corners and edges,
   remembers where it was.
 - Adjustable transparency, click-through with a dot in the corner, hide/show – all

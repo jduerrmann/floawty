@@ -5,6 +5,7 @@ export const disney: ServiceManifest = {
   name: 'Disney+',
   startUrl: 'https://www.disneyplus.com/',
   allowedDomains: ['disneyplus.com', 'disney.com'],
-  brandColor: '#0e2a73',
+  // Lighter than Disney+'s navy so the glass tile shows its colour on the dark ground.
+  brandColor: '#3d7bff',
   symbol: 'disney.svg',
 };

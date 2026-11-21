@@ -5,7 +5,7 @@ export interface ServiceManifest {
   startUrl: string;
   /** Top-level navigation stays on these domains and their subdomains (incl. sign-in). */
   allowedDomains: string[];
-  /** Tile background. */
+  /** Tints the tile's glass; the name sits on a darker shade of it (tile-colors.ts). */
   brandColor: string;
   /** floawty's own SVG in src/assets/symbols/; never an imitation of the service's logo. */
   symbol: string;

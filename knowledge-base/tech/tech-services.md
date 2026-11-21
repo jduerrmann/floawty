@@ -57,6 +57,16 @@ page inside the main window.
 - The last service is reopened **after** setup (async task): adding the webview
   during setup crashes WebView2.
 - Tiles never use the services' logos ([[own-service-symbols]]).
+- Tiles are colour glass ([[glass-design-follows-windows-theme]]): `brandColor` tints the
+  tile, the name sits on `labelShade(brandColor)`, the lightest shade of it that keeps
+  white text at WCAG AA (Vitest for every manifest). Light and dark follow Windows.
+- At 480 × 270 eleven tiles fit in four columns without scrolling: rows take the
+  height left (`.tiles-area` is a size container), at most 16:9, at least 52 px; below
+  that the tile area scrolls (first-start notice, small windows). Symbol and name size
+  follow the tile's width and height (size container), so the name stays below the
+  shade's 60 % stop in any overlay shape.
+- The release CSS targets Chrome 123 (`build.cssTarget`), so `light-dark()` stays
+  native and a part can pin its colour scheme; WebView2 is evergreen.
 - The bar webview lies above the service; opening a service raises it again
   ([[tech-bar-and-settings]]). While the settings are open the service is paused and
   hidden (`service::cover`).
@@ -68,7 +78,9 @@ page inside the main window.
 | `src/services/<id>/manifest.ts` | id, name, start URL, allowed domains (incl. sign-in), `signInHosts` (TikTok), brand colour, symbol, `shortsAutoMode` (YouTube, YouTube Shorts, TikTok), `videoOnly` (YouTube, YouTube Shorts, TikTok, Twitch, Crunchyroll; [[tech-video-only]]), `startsShortsAuto` (the Shorts and TikTok tiles turn the auto mode on before opening) | Vitest, Playwright |
 | `src/services/manifest.ts` | manifest validation (`signInHosts` bare hosts), `hostAllowed` | Vitest |
 | `src/custom-tiles.ts` | own pages: name and URL rules, https added, duplicates, allowed domain = host without `www.` | Vitest |
-| `src/tiles.ts`, `src/home.ts` | tiles, options menu (rename, remove), add/rename form, first-start notice | Playwright |
+| `src/tiles.ts`, `src/home.ts` | tiles, options menu (rename, remove; a popover in the top layer, placed by the ⋯ button and kept inside the window), add/rename form, first-start notice | Playwright |
+| `src/tile-colors.ts` | `labelShade`, `contrastWithWhite`, the own-page colour | Vitest |
+| `src/tokens.css`, `src/style.css`, `src/tiles.css` | design values as `light-dark()` pairs, page and glass cards, tiles | Playwright (fit), screenshots |
 | `src/assets/symbols/*.svg` | floawty's own symbols; Vite emits them as files (`assetsInlineLimit: 0`) so the CSP needs no `data:` | Vitest (files exist) |
 | `src-tauri/src/service.rs` | open/close the service webview, navigation guard, pause on hide, play/pause, cover for the settings, focus | Playwright, check scripts |
 | `src-tauri/src/navigation.rs` | stay or open in the browser | unit |

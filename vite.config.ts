@@ -8,6 +8,8 @@ export default defineConfig({
     outDir: '../dist',
     emptyOutDir: true,
     target: 'es2022',
+    // WebView2 is evergreen; keep light-dark() native so a part can pin its colour scheme.
+    cssTarget: 'chrome123',
     assetsInlineLimit: 0,
     rollupOptions: { input: { main: 'src/index.html', bar: 'src/bar.html' } },
   },
