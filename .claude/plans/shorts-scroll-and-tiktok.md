@@ -1,72 +1,74 @@
 ---
-round: 4
+round: 5
 title: Shorts-Scrollen und TikTok
 ---
-# Shorts-Scrollen und TikTok – Spulen in „Video only“
-Problem: In „Video only“ gibt es bei Shorts keinen Balken, um an eine Stelle im Video zu springen. YouTubes eigener Fortschrittsbalken liegt unter dem Player und ist verdeckt.
-Ziel: In Shorts (und TikTok) kann man in floawty an jede Stelle des Videos springen.
+# Lautstärke und Spulen in „Video only“
+Problem: In „Video only“ blendet floawty bei Shorts alle Knöpfe neben dem Video aus, auch YouTubes Lautstärkeregler und den Fortschrittsbalken. Man kann weder die Lautstärke einstellen noch an eine Stelle springen.
+Ziel: Lautstärke und Spulen gehen in „Video only“ bei YouTube Shorts und TikTok, ohne dass die Knöpfe ständig im Bild sind.
 Fertig, wenn:
-- [ ] In „Video only“ ist bei Shorts ein Balken zum Spulen sichtbar und bedienbar
-- [ ] Werbung lässt sich nicht überspringen, wenn YouTube es nicht erlaubt
-- [ ] Tests, Notizen, CHANGELOG; du hast es live getestet
+- [ ] Lautsprecher-Knopf, der beim Darüberfahren einen Regler aufklappt
+- [ ] Ein Balken zum Spulen
+- [ ] Beides nur sichtbar, solange die Maus über dem Video ist
+- [ ] Nichts überlagert floawtys eigene Leiste
 
-Vorher: mock: block"Short füllt das Fenster" line"(kein Balken)"
-Nachher: mock: block"Short füllt das Fenster" bar"━━━━●──────"!
+Vorher: mock: block"Short füllt das Fenster" line"(keine Knöpfe)"
+Nachher: mock: bar"floawty-Leiste (bei Hover)" block"Short" bar"▶  🔊━━●   ⋮"! bar"━━━━●──────"!
 
-## Geändert seit Runde 3
-- Mausrad bei Shorts gebaut und live geprüft; es scrollt YouTubes Liste (deine Wahl).
-- Neu: dein Wunsch nach einem Spul-Balken; diese Runde klärt nur ihn.
-- Fehler „Seite taucht beim Scrollen auf“ klären wir im Chat, er hängt nicht von dieser Runde ab.
+![YouTubes eigene Leiste, in „Video only“ wieder sichtbar (Probe im eingebauten Browser)](shots/yt-controls.jpg)
+
+## Geändert seit Runde 4
+- Shorts füllen jetzt mit YouTubes eigener Liste das Fenster; dabei waren alle Knöpfe ausgeblendet.
+- Neu: dein Wunsch nach einem Lautstärkeregler. Runde 4 (Spulen) ist hier aufgegangen.
+- Probe: YouTubes eigene Leiste lässt sich wieder zeigen – mit Abspielen, Lautsprecher (Regler klappt bei Hover auf) und „⋮ Mehr Aktionen“.
 
 ## Entschieden
-- Mausrad scrollt YouTubes Shorts-Liste um einen Short, beide Richtungen, nur in „Video only“
-- Alles Weitere aus Runde 1–3 gilt unverändert
+- Shorts in „Video only“: YouTubes Liste füllt das Fenster, YouTube wischt selbst
+- TikTok-Kachel mit Automodus ist aufgenommen (dein Test)
 
 ## Was ich annehme
-### YouTube hat bei Shorts einen eigenen Spul-Balken, der in „Video only“ verdeckt ist {#assume-yt-bar}
-flow: Short in „Video only“ -> Player liegt fest über der Seite -> YouTubes Balken liegt darunter, unsichtbar
-Live 20.11.: `yt-progress-bar` liegt im Short außerhalb von `#shorts-player`, unter dem Video (y = 626 bei 586 px Fensterhöhe). Er gehört zu YouTube und folgt YouTubes Regeln, auch bei Werbung.
+### YouTubes Leiste sitzt oben im Video, genau unter floawtys eigener Leiste {#assume-overlap}
+flow: Maus über floawty -> floawty-Leiste oben (40 px) -> YouTubes Knöpfe bei 16–64 px darunter
+floawtys Leiste ist 40 px hoch (\`bar.rs\`); YouTubes Abspiel- und Lautsprecher-Knopf liegen bei y = 16–64 px. Beide erscheinen bei Hover.
 
 ## Entscheidungen
-### Welcher Balken soll das Spulen in Shorts übernehmen? {#which-bar}
-- [rec] A · YouTubes eigener Balken | floawty holt ihn über das Video | S
-    mock: block"Short" bar"━━━━●────── (YouTubes Balken)"!
-    + YouTube entscheidet selbst, was bei Werbung geht (Grundsatz 7)
-    + kein eigenes Spulen in floawty
-    - sieht aus wie bei YouTube, hängt an YouTubes Seitenaufbau
-    Technik: CSS hebt `yt-progress-bar` des aktiven Shorts fest an den unteren Rand, über den Player
-- B · Eigener Regler in floawtys Leiste | gleich für alle Dienste | M
-    mock: bar"◀ ━━●━━ ▶ ▣ ⚙ ✕"! block"Short"
+### Welcher Lautstärkeregler soll es sein? {#which-volume}
+- [rec] A · YouTubes und TikToks eigener | floawty lässt ihn durch | S
+    mock: bar"▶  🔊━━●   ⋮"! block"Short"
+    + genau der Regler aus deinem Bild, klappt bei Hover auf
+    + Lautstärke bleibt beim Dienst gespeichert
+    - sieht bei YouTube und TikTok etwas verschieden aus
+    Technik: Ausnahme für \`.player-controls\` in der Ausblend-Regel
+- B · floawtys eigener in der Leiste | gleich für alle Dienste | M
+    mock: bar"◀ 🔊━● ▶ ▣ ⚙ ✕"! block"Short"
     + gleiche Bedienung überall
-    - floawty spult selbst und muss Werbung erkennen und sperren
-    - mehr Code, Risiko für Grundsatz 7
+    - floawty muss die Lautstärke selbst setzen und abgleichen
+    - die Leiste wird noch breiter
 
-### Wann ist der Balken zu sehen? {#when-visible}
-- [rec] A · Wenn die Maus über floawty ist | wie floawtys Leiste | S
-    flow: Maus über floawty -> Balken erscheint unten -> Maus weg -> nur das Video
-    + das Video bleibt sonst frei
-    - zum Spulen erst die Maus aufs Fenster
-- B · Immer | dünne Linie am unteren Rand | S
-    flow: Short läuft -> Balken immer sichtbar
-    + man sieht stets, wie weit der Short ist
-    - liegt dauerhaft über dem Bild
+### Wo sitzt YouTubes Leiste in „Video only“? {#where-controls}
+- [rec] A · Unten, über dem Spul-Balken | nichts überlagert floawtys Leiste | S
+    mock: bar"floawty-Leiste" block"Short" bar"▶  🔊━━●   ⋮"! bar"━━━●────"
+    Technik: CSS setzt \`.player-controls\` an den unteren Rand
+- B · Oben, wie bei YouTube | floawtys Leiste liegt bei Hover darüber | XS
+    mock: bar"floawty-Leiste über ▶ 🔊"! block"Short"
+    - Abspielen und Lautstärke oft verdeckt
 
-### Soll TikTok den Spul-Balken auch bekommen? {#tiktok-bar}
-- [rec] A · Ja, im TikTok-Paket | auf dieselbe Art | S
-    flow: TikTok in „Video only“ -> TikToks eigener Balken sichtbar
-    Technik: in sf-03; vorher prüfen, ob TikToks Balken im Player liegt
-- B · Nur Shorts | TikTok bleibt ohne | XS
+### Soll der Spul-Balken mitkommen? {#seek-bar}
+- [rec] A · Ja, YouTubes eigener | dünn unten, wird bei Hover dicker | S
+    mock: block"Short" bar"━━━━●──────"!
+    + YouTube entscheidet, ob man bei Werbung spulen darf
+- B · Nein, nur Lautstärke | XS
 
 ## Voreinstellungen
 Gilt, wenn du nicht widersprichst.
-- Eigenes Paket sf-05 nach sf-01 | sf-01 bleibt klein und wird zuerst committet {#package}
-- Bei Werbung tut floawty nichts Eigenes | YouTubes Balken bestimmt, ob man spulen kann {#ads}
+- „⋮ Mehr Aktionen“ und Abspielen kommen mit | gehören zu YouTubes Leiste {#more-actions}
+- TikTok bekommt dasselbe im Paket sf-03 | TikToks eigener Regler und Balken {#tiktok}
+- Eigenes Paket sf-05 für YouTube | sf-02 wird vorher committet {#package}
 
 ## Blinde Flecken
-### YouTube zeigt seinen Balken eventuell nur beim Überfahren seiner eigenen Fläche {#risk-hover impact=mittel}
-Diese Fläche liegt in „Video only“ unter dem Player. Dann muss floawty den Balken selbst einblenden; das prüfe ich zuerst live.
+### Die Leiste blendet YouTube selbst ein und aus {#risk-hover impact=gering}
+YouTube zeigt sie nur bei Hover über dem Video. Klappt das unter „Video only“ nicht zuverlässig, blendet floawty sie bei Hover über floawty ein.
 
 ## Plan-Skizze nach Freigabe
-1. sf-01 committen (nach deinem Live-Test und der Klärung des Scroll-Fehlers)
-2. sf-05: YouTubes Spul-Balken in „Video only“, Test zuerst
-3. TikTok-Balken in sf-03 mitnehmen
+1. sf-02 abschließen: Prüfung, App-Lauf, Commit
+2. sf-05: YouTubes Leiste und Spul-Balken in „Video only“, Test zuerst
+3. TikToks Regler und Balken in sf-03

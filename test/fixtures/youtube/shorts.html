@@ -61,9 +61,42 @@
                       <ytd-player
                         ><div id="shorts-player"><video loop></video></div
                       ></ytd-player>
-                      <div class="player-controls cover">Play</div>
+                      <!-- As live (2026-11-21): YouTube's row over the video's top, its seek bar below the Short. -->
+                      <div
+                        class="player-controls"
+                        style="
+                          position: absolute;
+                          top: 25px;
+                          left: -23px;
+                          width: 446px;
+                          height: 72px;
+                          z-index: 1;
+                        "
+                      >
+                        <button id="yt-play" style="height: 48px">Pause</button
+                        ><button id="yt-mute" style="height: 48px">Mute</button
+                        ><input id="volume-input" type="range" /><button
+                          id="yt-more"
+                          style="height: 48px"
+                        >
+                          More
+                        </button>
+                      </div>
+                      <div id="beside-player" class="cover">
+                        <span id="beside-player-text">Beside</span>
+                      </div>
                     </div>
-                    <div id="scrubber" class="cover"></div>
+                    <div
+                      id="scrubber"
+                      style="position: absolute; top: 100%; left: -23px; width: 446px; height: 3px"
+                    >
+                      <yt-progress-bar
+                        style="display: block; position: relative; top: -14px; height: 24px"
+                      ></yt-progress-bar>
+                    </div>
+                    <div id="beside-wrapper" class="cover">
+                      <span id="beside-wrapper-text">Beside</span>
+                    </div>
                   </div>
                 </div>
                 <div id="experiment-overlay" class="cover">
@@ -82,13 +115,27 @@
               <div
                 id="ads-overlay"
                 hidden
-                style="position: absolute; left: 8px; bottom: 8px; z-index: 1"
+                style="position: absolute; left: 8px; bottom: 8px; width: 200px; height: 120px"
               >
                 <span id="ad-card">Sponsored</span>
               </div>
             </div>
           </div>
-          <div class="reel-video-in-sequence-new reel"></div>
+          <!-- A Short the player has left keeps YouTube's row and bar at their own places. -->
+          <div class="reel-video-in-sequence-new reel">
+            <div id="reel-overlay-container">
+              <ytd-reel-video-renderer>
+                <div id="short-video-container">
+                  <div class="player-wrapper">
+                    <div id="player-container">
+                      <div class="player-controls"><button id="left-play">Pause</button></div>
+                    </div>
+                    <div id="scrubber"><yt-progress-bar id="left-bar">bar</yt-progress-bar></div>
+                  </div>
+                </div>
+              </ytd-reel-video-renderer>
+            </div>
+          </div>
           <div class="reel-video-in-sequence-new reel"></div>
           <div class="reel-video-in-sequence-new reel"></div>
           <div id="overlay-initial-container" style="height: 40px"></div>

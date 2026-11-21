@@ -38,6 +38,9 @@ Decisions: [[sign-in-window-for-popups]], [[tiktok-as-short-feed]],
   nothing (host-only log line); the feed keeps running behind it.
 - AGENTS.md rule 9 names the auto mode for Shorts and TikTok and the sign-in window;
   coordinated with [[rel-05-settings-export]], which edits the same line.
+- Volume and seeking under video only (round 5, 2026-11-21): the service's own controls –
+  YouTube's row (play, speaker with hover slider, ⋮) at the bottom above its own seek bar,
+  shown on hover; never under floawty's bar. TikTok's own in sf-03.
 
 ## Constraints
 - New service: the TikTok tile is accepted only after the maintainer's live test
@@ -59,6 +62,8 @@ Decisions: [[sign-in-window-for-popups]], [[tiktok-as-short-feed]],
 | 02 | [[sf-02-tiktok-tile-and-auto-mode]] | TikTok tile and symbol, shared feed module, auto mode, portrait, "Auto mode" labels | 01 |
 | 03 | [[sf-03-tiktok-video-only-and-wheel]] | Video only and the wheel on TikTok | 02 |
 | 04 | [[sf-04-sign-in-window]] | Sign-in pop-ups of a service open a small owned window in the shared profile | – |
+| 05 | [[sf-05-shorts-controls-in-video-only]] | Under video only YouTube's own volume, play and seek bar for Shorts, at the bottom | 01 |
 
-01 done and archived (2026-11-20). 02 → 03 in order; 04 is independent but shares TikTok's manifest with 02 (04
-writes `signInHosts`). Next: sf-02.
+01 done and archived (2026-11-20); 02 done and archived (0bfa1dc, 2026-11-21). 02 → 03 in order;
+04 is independent but shares TikTok's manifest with 02 (04 writes `signInHosts`); 05 is
+independent of 02–04. Next: sf-05.

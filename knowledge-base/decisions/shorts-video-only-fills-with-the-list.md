@@ -4,7 +4,7 @@ area: services
 tags: [video-only, shorts, youtube, wheel]
 status: active
 created: 2026-11-20
-updated: 2026-11-20
+updated: 2026-11-21
 source: maintainer live test and choice, 2026-11-20 (package sf-01)
 ---
 
@@ -44,6 +44,9 @@ the page flashed through (live 2026-11-20). The maintainer wanted YouTube's own 
   warning dot or, at worst, buttons over the video – never a broken page. A renamed
   `#ads-overlay` would hide the ad card again, without a dot.
 - TikTok checks the same approach first ([[tiktok-as-short-feed]], sf-03).
+- YouTube's own control row and seek bar are exempt from the hiding and sit at the bottom
+  ([[service-own-controls-in-video-only]], [[sf-05-shorts-controls-in-video-only]]): volume and seeking
+  stay the service's own, as YouTube allows them, also on ads.
 - Supersedes for Shorts the "player over the page" part of
   [[video-only-lays-player-over-page]] and its ruling that the Shorts "Sponsored" badge
   may be covered; watch pages keep both.

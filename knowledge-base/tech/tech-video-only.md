@@ -4,7 +4,7 @@ area: services
 tags: [video-only, page-script, youtube, twitch]
 status: active
 created: 2026-11-18
-updated: 2026-11-20
+updated: 2026-11-21
 source: mvp-07 implementation
 ---
 
@@ -36,6 +36,13 @@ list of Shorts. Decisions: [[video-only-lays-player-over-page]],
   layout, like/comment/share ([[shorts-video-only-fills-with-the-list]]).
 - Under video only, Shorts keep click to pause, `m` to mute and ↓ to move on (live 2026-11-20),
   and the wheel or a swipe pages with YouTube's own animation and thumbnail (live 2026-11-20).
+- The playing Short keeps YouTube's own control row (`#player-container > .player-controls`:
+  play, speaker with its volume slider, ⋮) and seek bar (`.player-wrapper > #scrubber`):
+  both are exempt from the hiding (only in the box holding `#shorts-player`) and fixed at
+  the bottom across the window – the bar's line 8 px above the edge, the row right above
+  its 24 px hit area – clear of floawty's bar at the top. YouTube shows the bar always and
+  the row only on hover, by itself (live 2026-11-21)
+  ([[service-own-controls-in-video-only]]).
 
 ## Rules per adapter (`selectors.ts`)
 
@@ -52,7 +59,7 @@ list of Shorts. Decisions: [[video-only-lays-player-over-page]],
 |---|---|---|
 | `src/services/video-only.ts` | class, style, settle time, missing check | Playwright adapter |
 | `src/services/bridge.ts` | frozen `__floawty.sync` in the top frame on the adapter's hosts | Playwright adapter |
-| `src/services/youtube/page.ts` | wires the rules into its `sync` | `tests/adapters/video-only.spec.ts` |
+| `src/services/youtube/page.ts` | wires the rules into its `sync` | `tests/adapters/video-only.spec.ts`, Shorts in `video-only-shorts.spec.ts` |
 | `src/services/twitch/page.ts`, `crunchyroll/page.ts` | `startVideoOnlyPage(hosts, rules)`: video only is their whole script | `tests/adapters/video-only.spec.ts` |
 | `src-tauri/src/page.rs` | input `videoOnly`, status `problems` | unit |
 | `src/bar.ts` | ▣ for manifests with `videoOnly` | `tests/video-only.spec.ts` |
@@ -66,7 +73,14 @@ Status: `{ aspect, problems: ("controls-missing" | "player-missing")[] }`, at mo
   the same on YouTube's own page without floawty, and toggling the class without
   floawty's `resize` event jumped too (live 2026-11-20).
 - The ad card stays visible only while YouTube keeps it in `#ads-overlay`; under another
-  name it is skipped like the other overlays, without a warning dot.
+  name it is skipped like the other overlays, without a warning dot. It is lifted above
+  the control row and seek bar (`z-index: 2`), which needs the card to be positioned;
+  not yet seen live on an ad Short with the row hovered.
+- A renamed `.player-controls` or `#scrubber` is skipped like the other overlays: volume
+  and seeking are gone under video only, without a warning dot.
+- The row and bar are `position: fixed`; YouTube's Short boxes (`contain: size layout`,
+  live 2026-11-21) hold them, so they move with their Short. Whether the wheel over the
+  row pages like over the video is not settled live.
 - Netflix, Prime Video, Disney+ and RTL+ show only their player while playing (maintainer,
   2026-11-18); Netflix's page scrollbar is removed by its own script ([[tech-services]]).
 - Twitch's channel list (`NOT_CHANNELS`) is hand-made; a missed page of Twitch's own

@@ -1,98 +1,23 @@
 // Adapter tests: "video only" lays the player over the page in the YouTube, Twitch and
-// Crunchyroll scripts.
-import { existsSync } from 'node:fs';
+// Crunchyroll scripts; YouTube Shorts in video-only-shorts.spec.ts.
 import path from 'node:path';
-import { expect, test, type Page } from '@playwright/test';
-
-const ROOT = path.join(import.meta.dirname, '..', '..');
-const SETTLE_TIMEOUT = 8000;
-
-interface Status {
-  aspect: 'portrait' | 'landscape';
-  problems: string[];
-}
-
-interface Site {
-  script: string;
-  origin: string;
-  fixtures: string;
-}
-
-const YOUTUBE: Site = { script: 'youtube', origin: 'https://www.youtube.com', fixtures: 'youtube' };
-const TWITCH: Site = { script: 'twitch', origin: 'https://www.twitch.tv', fixtures: 'twitch' };
-const CRUNCHYROLL: Site = {
-  script: 'crunchyroll',
-  origin: 'https://www.crunchyroll.com',
-  fixtures: 'crunchyroll',
-};
-const EPISODE = '/de/watch/G0000000/episode';
-
-async function open(page: Page, site: Site, fixture: string, pathname: string): Promise<void> {
-  const script = path.join(ROOT, 'dist', 'page', `${site.script}.js`);
-  if (!existsSync(script)) throw new Error(`${script} is missing: run npm run build:ui`);
-  await page.addInitScript({ path: script });
-  await page.route(`${site.origin}/**`, (route) =>
-    route.fulfill({
-      path: path.join(ROOT, 'test', 'fixtures', site.fixtures, fixture),
-      contentType: 'text/html',
-    }),
-  );
-  await page.goto(site.origin + pathname);
-}
-
-function input(videoOnly: boolean) {
-  return {
-    shorts: { auto: false, pauseSeconds: 1, holdOnHover: true },
-    hover: false,
-    active: true,
-    videoOnly,
-  };
-}
-
-function sync(page: Page, value: unknown): Promise<Status> {
-  return page.evaluate(
-    (inputValue) =>
-      (window as unknown as { __floawty: { sync: (input: unknown) => Status } }).__floawty.sync(
-        inputValue,
-      ),
-    value,
-  );
-}
-
-/** Whether the topmost element at each point (fractions of the viewport) lies in `selector`. */
-function covers(page: Page, selector: string, points: [number, number][]): Promise<boolean[]> {
-  return page.evaluate(
-    ([inside, list]) =>
-      list.map(
-        ([x, y]) =>
-          document.elementFromPoint(x * innerWidth, y * innerHeight)?.closest(inside) != null,
-      ),
-    [selector, points] as const,
-  );
-}
-
-function rectOf(page: Page, selector: string) {
-  return page.evaluate((s) => {
-    const rect = document.querySelector(s)?.getBoundingClientRect();
-    return rect && { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
-  }, selector);
-}
-
-function viewport(page: Page) {
-  return page.evaluate(() => ({ x: 0, y: 0, width: innerWidth, height: innerHeight }));
-}
-
-/** Whether the user can scroll the page; scripts could still scroll it either way. */
-function scrollLocked(page: Page): Promise<boolean> {
-  return page.evaluate(() => getComputedStyle(document.documentElement).overflowY === 'hidden');
-}
-
-const CORNERS: [number, number][] = [
-  [0.02, 0.02],
-  [0.5, 0.05],
-  [0.98, 0.5],
-  [0.5, 0.95],
-];
+import { expect, test } from '@playwright/test';
+import {
+  ROOT,
+  SETTLE_TIMEOUT,
+  YOUTUBE,
+  TWITCH,
+  CRUNCHYROLL,
+  EPISODE,
+  open,
+  input,
+  sync,
+  covers,
+  rectOf,
+  viewport,
+  scrollLocked,
+  CORNERS,
+} from './video-only-helpers';
 
 test.describe('YouTube watch page', () => {
   test('video only lays the player over the whole page', async ({ page }) => {
@@ -230,107 +155,6 @@ test('leaving the watch page for the home page gives the normal page back', asyn
   await sync(page, input(true));
   expect(await covers(page, '#masthead-container', [[0.5, 0.02]])).toEqual([true]);
   expect(await scrollLocked(page)).toBe(false);
-});
-
-test.describe('YouTube Shorts', () => {
-  test('video only lays the Shorts list over the page, one Short fills the window', async ({
-    page,
-  }) => {
-    await open(page, YOUTUBE, 'shorts.html', '/shorts/short0');
-    expect(await sync(page, input(true))).toEqual({ aspect: 'portrait', problems: [] });
-    expect(await rectOf(page, '#shorts-container')).toEqual(await viewport(page));
-    expect(await rectOf(page, '#shorts-player')).toEqual(await viewport(page));
-    expect(await covers(page, '#shorts-player', CORNERS)).toEqual([true, true, true, true]);
-    expect(await scrollLocked(page)).toBe(true);
-    // YouTube's buttons set their own visibility and take clicks; they must not be drawn at all.
-    expect(
-      await page.evaluate(() => document.querySelector('#self-visible')?.checkVisibility()),
-    ).toBe(false);
-  });
-
-  test('on an ad Short the ad card stays visible over the video', async ({ page }) => {
-    await open(page, YOUTUBE, 'shorts.html', '/shorts/short0');
-    await page.evaluate(() => document.querySelector('#ads-overlay')?.removeAttribute('hidden'));
-    await sync(page, input(true));
-    // The card's text, not its box: a skipped content still leaves the box visible.
-    expect(await page.evaluate(() => document.querySelector('#ad-card')?.checkVisibility())).toBe(
-      true,
-    );
-  });
-
-  test('a renamed level on the way to the player never hides the video', async ({ page }) => {
-    await open(page, YOUTUBE, 'shorts.html', '/shorts/short0');
-    await page.evaluate(() => document.querySelector('#player-container')?.removeAttribute('id'));
-    await sync(page, input(true));
-    expect(
-      await page.evaluate(() => document.querySelector('#shorts-player')?.checkVisibility()),
-    ).toBe(true);
-  });
-
-  test('a wheel over the video reaches the Shorts list, one box per window height', async ({
-    page,
-  }) => {
-    await open(page, YOUTUBE, 'shorts.html', '/shorts/short0');
-    await sync(page, input(true));
-    const { width, height } = await viewport(page);
-    await page.mouse.move(width / 2, height / 2);
-    // Headless Edge sends wheel turns like a touchpad; a turn of one window height reaches the next box.
-    await page.mouse.wheel(0, height);
-    await expect
-      .poll(() => page.evaluate(() => document.querySelector('#shorts-container')?.scrollTop))
-      .toBe(height);
-  });
-
-  test('a YouTube dialog stays above the Shorts list', async ({ page }) => {
-    await open(page, YOUTUBE, 'shorts.html', '/shorts/short0');
-    await sync(page, input(true));
-    await page.evaluate(() => document.querySelector('#dialog')?.removeAttribute('hidden'));
-    expect(await covers(page, '#dialog', [[0.5, 0.5]])).toEqual([true]);
-  });
-
-  test('without video only the Shorts page stays as it is', async ({ page }) => {
-    await open(page, YOUTUBE, 'shorts.html', '/shorts/short0');
-    expect(await sync(page, input(false))).toEqual({ aspect: 'portrait', problems: [] });
-    expect(await covers(page, '#masthead-container', [[0.5, 0.02]])).toEqual([true]);
-    expect(await scrollLocked(page)).toBe(false);
-  });
-
-  test('renamed Short boxes leave the page as it is and report the missing player', async ({
-    page,
-  }) => {
-    await open(page, YOUTUBE, 'shorts.html', '/shorts/short0');
-    await page.evaluate(() => {
-      for (const box of document.querySelectorAll('.reel')) box.className = 'reel';
-    });
-    await expect
-      .poll(() => sync(page, input(true)), { timeout: SETTLE_TIMEOUT })
-      .toEqual({ aspect: 'portrait', problems: ['player-missing'] });
-    expect(await scrollLocked(page)).toBe(false);
-  });
-
-  test('without the Shorts list, video only reports the missing player', async ({ page }) => {
-    await open(page, YOUTUBE, 'shorts.html', '/shorts/short0');
-    await page.evaluate(() => document.querySelector('#shorts-container')?.removeAttribute('id'));
-    await expect
-      .poll(() => sync(page, input(true)), { timeout: SETTLE_TIMEOUT })
-      .toEqual({ aspect: 'portrait', problems: ['player-missing'] });
-  });
-
-  test('the auto mode still moves on through the covered next control', async ({ page }) => {
-    await open(page, YOUTUBE, 'shorts.html', '/shorts/short0');
-    await sync(page, {
-      ...input(true),
-      shorts: { auto: true, pauseSeconds: 0, holdOnHover: true },
-    });
-    await page.evaluate(() => document.querySelector('video')?.dispatchEvent(new Event('ended')));
-    await expect
-      .poll(() =>
-        page.evaluate(() =>
-          (window as unknown as { __calls: { name: string }[] }).__calls.map((c) => c.name),
-        ),
-      )
-      .toContain('advance');
-  });
 });
 
 test.describe('Twitch', () => {

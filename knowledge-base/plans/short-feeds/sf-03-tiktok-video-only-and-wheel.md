@@ -3,7 +3,7 @@ type: plan
 tags: [package, tiktok, video-only]
 status: planned
 created: 2026-11-20
-updated: 2026-11-20
+updated: 2026-11-21
 source: visual plan "Shorts-Scrollen und TikTok", 2026-11-20; advisor plan check
 ---
 
@@ -39,6 +39,8 @@ the wheel over it moves one video per gesture, as for Shorts (sf-01).
 ## Acceptance criteria
 - [ ] Video only on `/foryou`, `/following` and `/@user/video/<id>` shows only the
       current video; sound and picture always belong to the same item.
+- [ ] TikTok's own volume control and seek bar stay usable under video only, on hover,
+      never under floawty's bar (round 5, as in [[sf-05-shorts-controls-in-video-only]]).
 - [ ] Paging by TikTok's controls, the auto mode or the wheel moves the mark along.
 - [ ] Wheel: one video per gesture both ways, Ctrl+wheel never, no double paging by
       native scroll (live criterion).

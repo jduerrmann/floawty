@@ -59,7 +59,9 @@ User-facing changes, in plain language. Format based on
   video in the middle of the window (or the page's only video), so on TikTok it never
   starts a neighbouring video. Hiding floawty also pauses a slideshow's music.
 - With "video only" on, YouTube Shorts show just the video, and the mouse wheel or a
-  swipe moves to the next or previous Short with YouTube's own animation.
+  swipe moves to the next or previous Short with YouTube's own animation. YouTube's own
+  seek bar runs along the bottom; with the mouse over the video, its play button, volume
+  control (the slider opens over the speaker) and ⋮ menu appear right above it.
 - Settings: "Use graphics acceleration" (on at first). Turning it off makes floawty
   restart without the graphics card, like the same switch in Edge; it needs more CPU,
   and services with copy protection may play in lower quality.

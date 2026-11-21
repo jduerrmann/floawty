@@ -1,7 +1,7 @@
 ---
 type: plan
 tags: [package, tiktok, shorts]
-status: in-progress
+status: done
 created: 2026-11-20
 updated: 2026-11-21
 source: visual plan "Shorts-Scrollen und TikTok", 2026-11-20; advisor plan check
@@ -65,15 +65,15 @@ own next control. The auto mode runs from one feed module that YouTube Shorts al
 - `npm run check` green (68 unit, 83 adapter, 107 Rust).
 
 ## Acceptance criteria
-- [ ] Tile with "T in an upright frame" after YouTube Shorts; opens `/foryou` portrait,
+- [x] Tile with "T in an upright frame" after YouTube Shorts; opens `/foryou` portrait,
       auto mode on.
-- [ ] After a video's full run (incl. ads) the next one starts; pause and hold on
+- [x] After a video's full run (incl. ads) the next one starts; pause and hold on
       hover behave as for Shorts; a photo series moves on after one round of its pictures
       or its music, whichever is first; LIVE items stay.
-- [ ] Bar button and settings read "Auto mode" / "Automodus" and "Shorts and TikTok"
+- [x] Bar button and settings read "Auto mode" / "Automodus" and "Shorts and TikTok"
       in EN and DE; YouTube Shorts behave exactly as before (existing tests green).
-- [ ] Missing next control → `controls-missing` warning, video loops as usual.
-- [ ] Guest dialogs and captchas stay untouched.
+- [x] Missing next control → `controls-missing` warning, video loops as usual.
+- [x] Guest dialogs and captchas stay untouched.
 - [x] Maintainer live test of the TikTok tile (the admission test for a new service):
       passed 2026-11-20.
 
@@ -179,5 +179,5 @@ own next control. The auto mode runs from one feed module that YouTube Shorts al
   photo series.
 
 ## Resume here
-Code, tests, notes and the app run done on `main`, uncommitted. Next: the commit after
-the maintainer's OK, then "sf-02 committed" to the on-top session.
+Done: committed as 0bfa1dc (2026-11-21) after verify, measure, four advisor reviews and the
+maintainer's live tests; archived.
