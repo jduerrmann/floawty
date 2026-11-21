@@ -45,6 +45,10 @@ page inside the main window.
   the webview's container, so a thread polls `IsWindow` on it (300 ms) and destroys the
   window ([[sign-in-window-for-popups]]). TikTok lists `accounts.google.com`,
   `appleid.apple.com`, `www.facebook.com` (live 2026-11-21: each flow stayed on its host).
+- **floawty's own pages never load in a frame:** the CSP contains
+  `frame-ancestors 'none'`, because app commands from floawty's origin skip the ACL
+  (no app manifest). The CSP has no `connect-src` for `ipc.localhost`, so floawty's
+  UI uses Tauri's postMessage IPC; keep it so ([[floawty-ui-never-framed]]).
 - Top-level navigation stays on the service's `allowedDomains` and their subdomains;
   `about:`, `blob:` and `data:` stay; http(s)/mailto elsewhere open in the default
   browser, other schemes (e.g. `file:`) are dropped. Only the host is logged.
@@ -84,6 +88,11 @@ set to fresh temporary folders (`tests/app.ts`), so they never touch the user's 
 and with `--mute-audio`, so they stay silent.
 
 ## Known gaps
+
+- A custom tile `http://tauri.localhost/` shows floawty's home page top-level in the
+  service webview, where app commands work; accepted. The sign-in window cannot show it
+  (https on its hosts only, no pop-ups), so the app manifest stays unneeded
+  ([[floawty-ui-never-framed]]).
 
 - A tile id is also its page-script key (`page/<id>.js`): `youtube-shorts` has its own
   entry that imports the YouTube script. Per-service profiles must give it the

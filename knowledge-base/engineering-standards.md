@@ -4,7 +4,7 @@ area: process
 tags: [rules, testing, code-quality, performance]
 status: active
 created: 2026-11-16
-updated: 2026-11-20
+updated: 2026-11-21
 source: conversation; adapted from configuratorCore, varchy and processRecorder standards
 ---
 
@@ -109,4 +109,5 @@ floawty runs next to other work on an ordinary PC.
 Tauri capabilities grant commands only to floawty's own UI; service pages get no
 IPC access at all. Navigation restricted to the service's allowed domains, external
 links in the default browser, no `eval` in floawty's UI, no remote code, strict CSP
-for floawty's own UI. WebView2 starts with `--disable-background-networking`.
+for floawty's own UI that forbids framing it (`frame-ancestors 'none'`,
+[[floawty-ui-never-framed]]). WebView2 starts with `--disable-background-networking`.
