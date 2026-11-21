@@ -2,13 +2,16 @@
 type: decision
 area: ui
 tags: [tiles, symbols, trademarks, license]
-status: active
+status: archived
 created: 2026-11-17
-updated: 2026-11-17
+updated: 2026-11-21
 source: conversation (mvp-04, logo sources checked 2026-11-17)
 ---
 
 # Service tiles show floawty's own SVG symbols, not the services' logos
+
+**Superseded by [[redrawn-service-logos]]** (2026-11-21): the tiles show redrawn
+logos of the services.
 
 Supersedes [[bundled-service-logos]].
 

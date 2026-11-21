@@ -26,7 +26,7 @@ only for the independent review
 |---|---|---|---|
 | Lead | main session | Opus 5.5 | scope, questions, briefs, integration, diff review, verification, report |
 | Worker | `coder` | Sonnet 5.5, effort high, cannot spawn agents | one bounded package or slice: code, tests, assigned docs |
-| Adviser and reviewer | `advisor` | Fable 5.2, effort max, read-only | second opinion and independent review |
+| Adviser and reviewer | `advisor` | Fable 5.2, effort high, read-only | second opinion and independent review |
 
 - `coder` assignments within the current task need no extra OK. They never authorize
   adjacent features, new dependencies, commits or publishing.
@@ -42,13 +42,14 @@ only for the independent review
   the app tests, after asking the maintainer (AGENTS.md rule 10).
 - Call `advisor` only: before a hard-to-reverse decision (stored formats, IPC and
   capabilities, navigation guard, adapter contract, dependencies, rules), to check a
-  plan map before multi-package work, when a diagnosis is stuck after a failed
-  attempt, and for the independent review (AGENTS.md rule 14). If it contradicts the
-  chosen path, tell the maintainer.
+  plan map before multi-package work when the plan contains such a hard-to-reverse
+  part, when a diagnosis is stuck after a failed attempt, and for the independent
+  review (AGENTS.md rule 14). If it contradicts the chosen path, tell the maintainer.
 - Review: `advisor` has no shell, so write the diff (`git diff main -- <files>`) plus
   the full text of new, untracked files (`git ls-files --others --exclude-standard`)
   to a file in the scratchpad and name it in the brief, with the package ID, intended
-  outcome, risks to examine and the return format. Treat its output as findings to
+  outcome, risks to examine and the return format. Keep the brief narrow: the diff,
+  the few files it needs, no dependency sources. Treat its output as findings to
   verify, not as acceptance.
 - Record delegated slices and the review (who, how, resolution) where rule 14 says. New or changed agent files take effect in a new session.
 

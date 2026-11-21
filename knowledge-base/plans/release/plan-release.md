@@ -3,7 +3,7 @@ type: plan
 tags: [plan-map, release, dist]
 status: active
 created: 2026-11-20
-updated: 2026-11-20
+updated: 2026-11-21
 source: visual plan "Phase 3 – Release-Pipeline", rounds 1–2, approved 2026-11-20
 ---
 
@@ -40,6 +40,9 @@ Decisions: [[release-pipeline]], [[updates-by-tauri-updater]],
   GitHub pre-releases. README names the measured download size.
 
 ## Constraints
+- The glass design ([[plan-glass]]) ships before 0.1.0 (maintainer, 2026-11-21):
+  rel-03's update button goes into the settings' General card, rel-05's export and
+  import into the Data card next to reset.
 - Rules 5 (dependencies need OK: `tauri-plugin-updater` approved 2026-11-20, Rust
   side only; any other new dependency asks first), 10, 12 (releases only from GitHub
   Actions, push only on explicit request), 13 (visible text in `src/i18n.ts`; the
@@ -59,7 +62,7 @@ Decisions: [[release-pipeline]], [[updates-by-tauri-updater]],
 | 04 | [[rel-04-automatic-updates]] | Automatic check, background download, install on quit | 03 |
 | 05 | [[rel-05-settings-export]] | Settings move by file; newer settings never silently lost | – |
 | 06 | [[rel-06-release-workflow]] | A tag builds, checks and publishes the release | 01, 02, 03 |
-| 07 | [[rel-07-first-release]] | 0.1.0 is public after rc → rc updates proved | 04, 05, 06, sf-01–04 |
+| 07 | [[rel-07-first-release]] | 0.1.0 is public after rc → rc updates proved | 04, 05, 06, sf-01–04, gl-02 |
 | 08 | [[rel-08-signpath]] | Releases are signed through SignPath Foundation | 07 |
 
 Order: 01, 02 and 05 can start; 03 after 02, 04 after 03.

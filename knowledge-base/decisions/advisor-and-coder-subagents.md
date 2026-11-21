@@ -4,11 +4,14 @@ area: process
 tags: [agents, review, delegation]
 status: active
 created: 2026-11-17
-updated: 2026-11-17
+updated: 2026-11-21
 source: conversation (after mvp-05)
 ---
 
 # The main session leads; `coder` implements bounded slices, `advisor` reviews
+
+**Amended by [[leaner-reviews]]** (2026-11-21): advisor at effort high, one review
+per UI plan.
 
 ## Context
 

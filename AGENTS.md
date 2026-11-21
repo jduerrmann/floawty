@@ -199,11 +199,15 @@ one i18n file; no visible text is hard-coded in components.
   acceptance – the main session reads the diff and runs the checks itself.
 - Every work package and every other change to code, tests, build configuration or
   these rules gets an independent read-only review of its diff by a second agent
-  before the commit proposal. Pure execution (rename, typo, one obvious fix) and
-  changes only to notes or the CHANGELOG need none. Resolve each material finding –
-  fix and re-check, or reject it with evidence – and record reviewer and resolution
-  in the package's evidence, or for work outside a package in the report and the
-  commit message. If no reviewer is available, say so and record your own review.
+  before the commit proposal. Exception: in a multi-package plan, a package that
+  touches only the UI layer (styles, markup, icons, texts, DOM code; no IPC, Rust,
+  stored formats, service adapters, page scripts, dependencies or rules) gets the
+  main session's recorded own review; the plan's last package then gets one
+  independent review of all the plan's changes since `main`. Pure execution (rename,
+  typo, one obvious fix) and changes only to notes or the CHANGELOG need none.
+  Resolve each material finding – fix and re-check, or reject it with evidence – and
+  record reviewer and resolution in the package's evidence, or for work outside a
+  package in the report and the commit message. If no reviewer is available, say so and record your own review.
 - Runtime-specific roles and models: `CLAUDE.md` for Claude.
 - Use MCP servers only when the maintainer asks for them; built-in client tools
   (browser pane, desktop control) are not MCP servers in this sense.

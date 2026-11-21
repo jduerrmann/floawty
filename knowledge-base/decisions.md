@@ -18,6 +18,7 @@ One line per decision record in `decisions/`. Template: `templates/t-decision.md
 - [[webview2-component-updates-disclosed]] – WebView2's component updater (DRM module) stays on and is disclosed too
 - [[rules-and-knowledge-base]] – AGENTS.md as single rule source, knowledge base for everything else
 - [[advisor-and-coder-subagents]] – main session leads, coder implements bounded slices, advisor reviews every package
+- [[leaner-reviews]] – advisor at effort high with a reading budget; one independent review per UI plan, plan check only if hard to reverse
 - [[app-tests-ask-first]] – app tests only after the maintainer's yes, muted, one agent at a time; `npm run check` while working
 
 ## services
@@ -41,7 +42,9 @@ One line per decision record in `decisions/`. Template: `templates/t-decision.md
 - [[overlay-shape-free-with-zoom]] – any overlay shape (magnets 16:9, 12:5); zoom switch fills a wide overlay
 - [[overlay-snaps-flush]] – the overlay snaps flush to corners and edges, no 16 px margin
 - [[bar-leaves-the-page-clickable]] – bar above the page in window mode, only as wide as its controls over a service
-- [[own-service-symbols]] – tiles show floawty's own SVG symbols on the brand colour
+- [[own-service-symbols]] – superseded: own SVG symbols on the brand colour
+- [[redrawn-service-logos]] – tiles show redrawn service logos with glass effects; trademarks kept apart from GPL, NOTICE
+- [[glass-design-follows-windows-theme]] – one glass design for home, settings and bar; follows Windows light/dark; cyan accent
 - [[bundled-service-logos]] – superseded: official logos
 - [[overlay-controls]] – hover bar, tiles, settings, hide pauses, Shorts after one run (partly superseded)
 
