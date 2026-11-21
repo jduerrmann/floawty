@@ -1,7 +1,7 @@
 ---
 type: plan
 tags: [plan-map, shorts, tiktok]
-status: active
+status: done
 created: 2026-11-20
 updated: 2026-11-21
 source: visual plan "Shorts-Scrollen und TikTok", rounds 1–3, 2026-11-20; advisor plan check
@@ -65,5 +65,5 @@ Decisions: [[sign-in-window-for-popups]], [[tiktok-as-short-feed]],
 | 04 | [[sf-04-sign-in-window]] | Sign-in pop-ups of a service open a small owned window in the shared profile | – |
 | 05 | [[sf-05-shorts-controls-in-video-only]] | Under video only YouTube's own volume, play and seek bar for Shorts, at the bottom | 01 |
 
-01 done and archived (2026-11-20); 02 (0bfa1dc), 04 and 05 (4b6f60b) done and archived
-(2026-11-21). Next: sf-03.
+01 done 2026-11-20; 02 (0bfa1dc), 04, 05 (4b6f60b) and 03 (35c79f1, bcc061b) done 2026-11-21.
+All packages done and archived.

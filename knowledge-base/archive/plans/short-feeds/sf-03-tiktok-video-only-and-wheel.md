@@ -1,7 +1,7 @@
 ---
 type: plan
 tags: [package, tiktok, video-only]
-status: in-progress
+status: done
 created: 2026-11-20
 updated: 2026-11-21
 source: visual plan "Shorts-Scrollen und TikTok", 2026-11-20; advisor plan check; maintainer, 2026-11-21
@@ -67,15 +67,15 @@ the wheel over it pages as on TikTok's own page, as for Shorts (sf-01).
       (`/following` not observed); TikTok plays the item in view, so sound and picture match (adapter
       tests; built-in browser on `/foryou` and a video page).
 - [x] TikTok's own volume control and progress bar sit in the window, at the bottom, never
-      under floawty's bar (adapter test; floawty probe). Using them: maintainer's test.
+      under floawty's bar and work by hand (adapter test; floawty probe; maintainer).
 - [x] Wheel: one video per gesture as on TikTok, no double paging (maintainer, floawty,
       2026-11-21).
 - [x] Guest dialogs appear above the video (adapter test; built-in browser). A captcha's
       layer is not yet seen.
-- [ ] Ad items: video plays in full; TikTok's ad label stays visible (deny list; not seen
+- [ ] Ad items (known gap, maintainer closed without it, 2026-11-21): video plays in full; TikTok's ad label stays visible (deny list; not seen
       live).
 - [x] Missing list or card after 2 s → warning dot, page untouched (adapter test).
-- [ ] Maintainer live test.
+- [x] Maintainer live test (wheel, cropping fix, volume, seek; 2026-11-21).
 
 ## Tests first
 - `tests/adapters/video-only-tiktok.spec.ts`: list and card fill the window, next item one
@@ -111,7 +111,10 @@ the wheel over it pages as on TikTok's own page, as for Shorts (sf-01).
   (`contain` only for landscape, 21 items live) → video and poster `contain` under video
   only; fixture crops like TikTok, test red first, green; built-in browser 800×1300: a 1:1
   video shows whole with bars. Own review only (one obvious rule, rule 14).
+- After bcc061b: near-portrait videos show whole; volume and seeking work by hand
+  (maintainer, floawty, 2026-11-21).
 
 ## Resume here
-Wheel accepted. Next: commit the cropping fix after the maintainer's OK, the maintainer's
-look at it in floawty, volume and seek by hand, an ad if one comes; then close the package.
+Done: committed as 35c79f1 and bcc061b (2026-11-21) after check, verify, the advisor review,
+two floawty probes and the maintainer's live tests; archived. Not seen live: an ad item –
+if its label sits in a hidden part, the deny list changes ([[tech-video-only]] Known gaps).
