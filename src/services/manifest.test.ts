@@ -33,6 +33,21 @@ describe('service manifests', () => {
     );
   });
 
+  it('sign-in hosts are bare lower-case host names', () => {
+    expect(manifestProblems({ ...valid, signInHosts: ['accounts.google.com'] })).toEqual([]);
+    for (const host of [
+      'https://accounts.google.com',
+      'accounts.google.com/o',
+      '',
+      'Accounts.Google.com',
+      'localhost',
+    ]) {
+      expect(manifestProblems({ ...valid, signInHosts: [host] }), host).toContain(
+        'signInHosts must be bare host names',
+      );
+    }
+  });
+
   it('rejects plain http and missing fields', () => {
     const problems = manifestProblems({ ...valid, startUrl: 'http://example.com', name: ' ' });
     expect(problems).toContain('startUrl must use https');
@@ -70,6 +85,10 @@ describe('service manifests', () => {
     expect(services.filter((s) => s.startsShortsAuto).map((s) => s.id)).toEqual([
       'youtube-shorts',
       'tiktok',
+    ]);
+    // Only TikTok signs in through pop-ups (live 2026-11-20); all others need none.
+    expect(services.filter((s) => s.signInHosts).map((s) => [s.id, s.signInHosts])).toEqual([
+      ['tiktok', ['accounts.google.com', 'appleid.apple.com', 'www.facebook.com']],
     ]);
   });
 });

@@ -17,6 +17,8 @@ mod persistence;
 mod reset;
 mod service;
 mod settings;
+mod sign_in;
+mod sign_in_window;
 
 use tauri::{AppHandle, Manager, WebviewWindowBuilder, WindowEvent};
 

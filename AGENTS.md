@@ -123,7 +123,8 @@ its own geometry; hover bar over the video; click-through with a corner dot and 
 hotkey to leave it; configurable global hotkeys (default Ctrl+Alt+Shift); app tiles
 with own SVG symbols ([own-service-symbols](knowledge-base/decisions/own-service-symbols.md))
 and custom URL tiles; first-start notice about WebView2; best-effort "video only"
-view; auto mode for YouTube Shorts and TikTok; UI in English and German. Service tiles: YouTube,
+view; auto mode for YouTube Shorts and TikTok; a small sign-in window for a service's
+sign-in pop-ups (Google, Apple, Facebook); UI in English and German. Service tiles: YouTube,
 Twitch, Netflix, Prime Video, Disney+, RTL+; further services once they pass a
 maintainer test. Windows 10/11 only.
 

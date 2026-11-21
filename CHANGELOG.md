@@ -55,6 +55,9 @@ User-facing changes, in plain language. Format based on
   The ▶ button is called "Auto mode", its settings "Shorts and TikTok".
   Without a TikTok account, TikTok shows its sign-in prompt every few videos and the
   feed waits until you deal with it; floawty leaves the prompt alone.
+- "Continue with Google / Apple / Facebook" on TikTok opens the provider's page in a small
+  floawty window (titled with the provider's address); after the sign-in TikTok is signed
+  in and the window closes. Other pop-ups stay blocked.
 - Ctrl+Alt+Shift+Space pauses whatever plays, also a slideshow's music, or plays the
   video in the middle of the window (or the page's only video), so on TikTok it never
   starts a neighbouring video. Hiding floawty also pauses a slideshow's music.

@@ -55,6 +55,9 @@ pub struct OpenService {
     pub id: String,
     pub url: String,
     pub allowed_domains: Vec<String>,
+    /// Hosts whose sign-in pop-up opens in floawty's sign-in window; older files have none.
+    #[serde(default)]
+    pub sign_in_hosts: Vec<String>,
 }
 
 /// The language of floawty's own UI; `System` follows Windows.
@@ -238,10 +241,23 @@ mod tests {
                 id: "netflix".into(),
                 url: "https://www.netflix.com/browse".into(),
                 allowed_domains: vec!["netflix.com".into()],
+                sign_in_hosts: vec!["accounts.google.com".into()],
             }),
             ..Settings::default()
         };
         assert_eq!(parse(&to_json(&settings)), settings);
+    }
+
+    #[test]
+    fn an_open_service_from_before_sign_in_windows_keeps_everything_else() {
+        let settings = parse(
+            r#"{ "version": 1, "opacity": 0.5, "lastService": { "id": "tiktok",
+            "url": "https://www.tiktok.com/foryou", "allowedDomains": ["tiktok.com"] } }"#,
+        );
+        let service = settings.last_service.expect("the open service survives");
+        assert_eq!(service.allowed_domains, vec!["tiktok.com".to_string()]);
+        assert!(service.sign_in_hosts.is_empty());
+        assert_eq!(settings.opacity, 0.5);
     }
 
     #[test]

@@ -4,7 +4,7 @@ area: services
 tags: [sign-in, popup, security, tiktok]
 status: active
 created: 2026-11-20
-updated: 2026-11-20
+updated: 2026-11-21
 source: visual plan "Shorts-Scrollen und TikTok", rounds 2–3, 2026-11-20; advisor check
 ---
 
@@ -21,8 +21,9 @@ word. Email, phone and QR code work inside tiktok.com.
   pop-up whose first URL is https on one of them opens. All other pop-ups stay denied.
 - The pop-up opens as one window labelled `sign-in`, in the opener's WebView2
   environment (shared profile, opener and postMessage intact), owned by floawty's main
-  window (not topmost), with a fixed size centred over floawty and the title
-  "floawty – Sign in" / "floawty – Anmelden". It opens only while floawty's main window
+  window (not topmost), 480 × 640 at the start (resizable), centred over floawty, and the title
+  "floawty – <host>" of the page shown (maintainer, 2026-11-21, after the spike and the
+  review; first decided as "floawty – Sign in" / "floawty – Anmelden"). It opens only while floawty's main window
   is visible and in the foreground, and only one at a time.
 - Its own navigation rule: stay on `signInHosts` ∪ the service's `allowedDomains`;
   anything else is cancelled, never opened in the browser (an OAuth redirect must not
@@ -45,7 +46,9 @@ word. Email, phone and QR code work inside tiktok.com.
 ## Consequences
 - Rule 9 of AGENTS.md lists the sign-in window in scope; [[tech-services]] documents it.
 - A sign-in made here is in the shared profile, so a Google session is also YouTube's
-  ([[shared-webview2-profile-in-mvp]]).
+  ([[shared-webview2-profile-in-mvp]]); a Facebook or Apple session stays until "Reset all
+  data" – PRIVACY.md and the README say so.
 - Any frame of an allowed service page can request the pop-up; the host list, https and
-  the foreground check bound it. WebView2 passes no user-gesture flag.
+  the foreground check bound it. WebView2 knows whether a request is user-initiated
+  (`IsUserInitiated`), but wry does not pass it on.
 - Implemented by [[sf-04-sign-in-window]]; the spike there may refine the close handling.

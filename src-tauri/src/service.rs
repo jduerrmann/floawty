@@ -10,6 +10,7 @@ use crate::navigation::{self, Decision};
 use crate::overlay::{self, Overlay};
 use crate::page;
 use crate::settings::OpenService;
+use crate::sign_in_window;
 
 pub const LABEL: &str = "service";
 const BROWSER_ARGS: &str =
@@ -48,7 +49,8 @@ pub fn open(app: &AppHandle, service: OpenService) -> tauri::Result<()> {
         .on_navigation(navigation_guard(
             app.clone(),
             service.allowed_domains.clone(),
-        ));
+        ))
+        .on_new_window(sign_in_window::handler(app.clone(), &service));
     let script = page::script(app, &service.id);
     let scripted = script.is_some();
     page::reset(app, scripted);
@@ -123,6 +125,8 @@ pub fn close(app: &AppHandle) -> tauri::Result<()> {
 }
 
 fn close_webview(app: &AppHandle) -> tauri::Result<()> {
+    sign_in_window::wait_for_build();
+    sign_in_window::close(app);
     match current(app) {
         Some(webview) => webview.close(),
         None => Ok(()),

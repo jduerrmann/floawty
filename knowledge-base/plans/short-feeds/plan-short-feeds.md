@@ -64,7 +64,6 @@ Decisions: [[sign-in-window-for-popups]], [[tiktok-as-short-feed]],
 | 04 | [[sf-04-sign-in-window]] | Sign-in pop-ups of a service open a small owned window in the shared profile | – |
 | 05 | [[sf-05-shorts-controls-in-video-only]] | Under video only YouTube's own volume, play and seek bar for Shorts, at the bottom | 01 |
 
-01 done and archived (2026-11-20); 02 (0bfa1dc) and 05 (4b6f60b) done and archived
-(2026-11-21). 03 builds on 02 and waits for [[open-questions]] #9; 04 is independent but
-shares TikTok's manifest with 02 (04 writes `signInHosts`). Next: sf-03 once #9 is
-answered, or sf-04.
+01 done and archived (2026-11-20); 02 (0bfa1dc), 04 and 05 (4b6f60b) done and archived
+(2026-11-21). 03 builds on 02 and waits for [[open-questions]] #9. Next: sf-03 once #9 is
+answered.

@@ -15,6 +15,7 @@ use crate::page::{self, Problem};
 use crate::persistence;
 use crate::service;
 use crate::settings::{Hotkeys, Language, Settings, Shorts};
+use crate::sign_in_window;
 
 mod settle;
 pub use settle::settle_later;
@@ -382,6 +383,12 @@ pub fn toggle_click_through(app: &AppHandle) -> tauri::Result<()> {
     toggle_click_through_now(app, &main_window(app))
 }
 
+/// floawty is visible and the window the user works in; a sign-in pop-up may open only then.
+pub fn in_front(app: &AppHandle) -> bool {
+    let window = main_window(app);
+    window.is_visible().unwrap_or(false) && is_active(&window).unwrap_or(false)
+}
+
 // A page dialog floawty owns counts as floawty; the service page itself is a child, not the foreground.
 fn is_active(window: &Window) -> tauri::Result<bool> {
     use windows_sys::Win32::UI::WindowsAndMessaging::{
@@ -426,6 +433,7 @@ pub fn toggle_visible(app: &AppHandle) -> tauri::Result<()> {
         }
         ShowHide::Hide => {
             service::pause(app);
+            sign_in_window::close(app);
             window.hide()?;
         }
         ShowHide::Show => {

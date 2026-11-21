@@ -8,7 +8,9 @@ updates of its own parts from Microsoft (see below).
 - No floawty account and no floawty server – there is nothing to send data to.
 - Your logins happen on the official websites (YouTube, Netflix, …) inside the
   overlay. Their cookies are stored locally on your computer, like in a normal
-  browser. floawty's code never reads them.
+  browser. floawty's code never reads them. A sign-in with Google, Apple or Facebook
+  (e.g. "Continue with Google" on TikTok) opens in a small floawty window and stays
+  signed in there, for every service in floawty, until you use "Reset all data".
 - Settings are stored locally in a plain JSON file in your user-data folder.
 - floawty makes no network requests on its own. It checks GitHub Releases for
   updates only when you click "Check for updates" or turn on automatic checks

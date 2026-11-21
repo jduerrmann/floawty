@@ -25,8 +25,13 @@ function symbolUrl(file: string): string {
   return symbolUrls[`./assets/symbols/${file}`] ?? '';
 }
 
-function openService(id: string, url: string, allowedDomains: string[]): void {
-  void invoke('open_service', { service: { id, url, allowedDomains } });
+function openService(
+  id: string,
+  url: string,
+  allowedDomains: string[],
+  signInHosts: readonly string[] = [],
+): void {
+  void invoke('open_service', { service: { id, url, allowedDomains, signInHosts } });
 }
 
 async function turnShortsAutoOn(): Promise<void> {
@@ -53,7 +58,7 @@ function serviceTile(service: ServiceManifest): HTMLLIElement {
   const button = tileButton(service.name, service.brandColor, service.symbol);
   button.addEventListener('click', async () => {
     if (service.startsShortsAuto) await turnShortsAutoOn();
-    openService(service.id, service.startUrl, service.allowedDomains);
+    openService(service.id, service.startUrl, service.allowedDomains, service.signInHosts);
   });
   item.append(button);
   return item;

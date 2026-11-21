@@ -15,7 +15,11 @@ export interface ServiceManifest {
   videoOnly?: true;
   /** Opening this tile turns the auto mode on. */
   startsShortsAuto?: true;
+  /** Hosts whose sign-in pop-up (e.g. "Continue with Google") opens in floawty's sign-in window. */
+  signInHosts?: readonly string[];
 }
+
+const BARE_HOST = /^[a-z0-9-]+(\.[a-z0-9-]+)+$/;
 
 /** Returns the problems of a manifest; an empty list means it is valid. */
 export function manifestProblems(manifest: ServiceManifest): string[] {
@@ -25,6 +29,9 @@ export function manifestProblems(manifest: ServiceManifest): string[] {
   if (manifest.allowedDomains.length === 0) problems.push('allowedDomains is empty');
   if (!/^#[0-9a-f]{6}$/i.test(manifest.brandColor)) problems.push('brandColor is not #rrggbb');
   if (!/^[a-z0-9-]+\.svg$/.test(manifest.symbol)) problems.push('symbol must be an svg file name');
+  if (manifest.signInHosts?.some((host) => !BARE_HOST.test(host))) {
+    problems.push('signInHosts must be bare host names');
+  }
   const start = URL.parse(manifest.startUrl);
   if (start?.protocol !== 'https:') problems.push('startUrl must use https');
   if (start && !hostAllowed(start.hostname, manifest.allowedDomains)) {

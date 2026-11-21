@@ -34,7 +34,9 @@ else, and can even let your mouse click right through it.
 - **Light on resources.** Made to run next to your work on an ordinary PC: a 4 MB
   download, under 250 MB of memory when idle.
 - **Fair to the services.** You sign in on the official websites; floawty does not
-  touch DRM, does not download content and does not block ads.
+  touch DRM, does not download content and does not block ads. "Continue with
+  Google / Apple / Facebook" opens the provider's own page in a small window; that
+  sign-in stays in floawty until "Reset all data".
 
 ## Install
 
