@@ -7,6 +7,6 @@ export const crunchyroll: ServiceManifest = {
   startUrl: 'https://www.crunchyroll.com/',
   allowedDomains: ['crunchyroll.com'],
   brandColor: '#f47521',
-  symbol: 'crunchyroll.svg',
+  symbol: 'logos/crunchyroll.svg',
   videoOnly: true,
 };

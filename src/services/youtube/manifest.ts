@@ -7,7 +7,7 @@ export const youtube: ServiceManifest = {
   startUrl: 'https://www.youtube.com/',
   allowedDomains: ['youtube.com', 'google.com', 'google.de'],
   brandColor: '#ff0000',
-  symbol: 'youtube.svg',
+  symbol: 'logos/youtube.svg',
   shortsAutoMode: true,
   videoOnly: true,
 };

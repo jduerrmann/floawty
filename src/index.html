@@ -29,73 +29,93 @@
     <section id="settings-panel" class="settings" aria-labelledby="settings-title" hidden>
       <header class="settings-header" data-tauri-drag-region>
         <h1 id="settings-title" data-tauri-drag-region></h1>
-        <button id="settings-done" type="button"></button>
+        <button id="settings-done" type="button" class="button primary"></button>
       </header>
-      <label class="setting">
-        <span id="language-label"></span>
-        <select id="language">
-          <option value="system"></option>
-          <option value="en"></option>
-          <option value="de"></option>
-        </select>
-      </label>
-      <fieldset class="setting-group">
-        <legend id="hotkeys-title"></legend>
+      <section class="card" aria-labelledby="general-title">
+        <h2 id="general-title"></h2>
+        <div class="setting">
+          <label id="language-label" for="language"></label>
+          <select id="language">
+            <option value="system"></option>
+            <option value="en"></option>
+            <option value="de"></option>
+          </select>
+        </div>
+        <div class="setting">
+          <div class="setting-text">
+            <label id="update-check-label" for="update-check"></label>
+            <p id="update-check-note" class="setting-note"></p>
+          </div>
+          <input
+            id="update-check"
+            class="switch"
+            type="checkbox"
+            role="switch"
+            aria-describedby="update-check-note"
+          />
+        </div>
+        <div class="setting">
+          <div class="setting-text">
+            <label id="graphics-acceleration-label" for="graphics-acceleration"></label>
+            <p id="graphics-acceleration-note" class="setting-note"></p>
+          </div>
+          <input
+            id="graphics-acceleration"
+            class="switch"
+            type="checkbox"
+            role="switch"
+            aria-describedby="graphics-acceleration-note"
+          />
+        </div>
+        <div
+          id="restart-confirm"
+          class="setting-confirm"
+          role="group"
+          aria-labelledby="restart-question"
+          hidden
+        >
+          <p id="restart-question"></p>
+          <div class="setting-actions">
+            <button id="restart-no" type="button" class="button"></button>
+            <button id="restart-yes" type="button" class="button primary"></button>
+          </div>
+        </div>
+      </section>
+      <section class="card" aria-labelledby="hotkeys-title">
+        <h2 id="hotkeys-title"></h2>
         <div id="hotkey-list" class="hotkey-list"></div>
         <p id="hotkey-error" class="setting-error" role="alert"></p>
-      </fieldset>
-      <fieldset class="setting-group">
-        <legend id="shorts-title"></legend>
-        <label class="setting">
-          <span id="shorts-pause-label"></span>
+      </section>
+      <section class="card" aria-labelledby="shorts-title">
+        <h2 id="shorts-title"></h2>
+        <div class="setting">
+          <label id="shorts-pause-label" for="shorts-pause"></label>
           <input id="shorts-pause" type="number" min="0" max="10" step="0.5" />
-        </label>
-        <label class="setting-check">
-          <input id="shorts-hold" type="checkbox" />
-          <span id="shorts-hold-label"></span>
-        </label>
-        <label class="setting">
-          <span id="portrait-size-label"></span>
+        </div>
+        <div class="setting">
+          <label id="shorts-hold-label" for="shorts-hold"></label>
+          <input id="shorts-hold" class="switch" type="checkbox" role="switch" />
+        </div>
+        <div class="setting">
+          <label id="portrait-size-label" for="portrait-size"></label>
           <select id="portrait-size">
             <option value="rotated"></option>
             <option value="separate"></option>
           </select>
-        </label>
-      </fieldset>
-      <div class="setting-group">
-        <label class="setting-check">
-          <input id="update-check" type="checkbox" aria-describedby="update-check-note" />
-          <span id="update-check-label"></span>
-        </label>
-        <p id="update-check-note" class="setting-note"></p>
-      </div>
-      <div class="setting-group">
-        <label class="setting-check">
-          <input
-            id="graphics-acceleration"
-            type="checkbox"
-            aria-describedby="graphics-acceleration-note"
-          />
-          <span id="graphics-acceleration-label"></span>
-        </label>
-        <p id="graphics-acceleration-note" class="setting-note"></p>
-        <div id="restart-confirm" role="group" aria-labelledby="restart-question" hidden>
-          <p id="restart-question" class="setting-note"></p>
-          <div class="setting-actions">
-            <button id="restart-yes" type="button"></button>
-            <button id="restart-no" type="button"></button>
-          </div>
         </div>
-      </div>
-      <fieldset class="setting-group">
-        <legend id="reset-title"></legend>
-        <p id="reset-explain" class="setting-note"></p>
-        <button id="reset" type="button"></button>
+      </section>
+      <section class="card" aria-labelledby="data-title">
+        <h2 id="data-title"></h2>
+        <div class="setting">
+          <p id="reset-explain" class="setting-note"></p>
+          <button id="reset" type="button" class="button"></button>
+        </div>
         <div id="reset-confirm" class="setting-actions" hidden>
-          <button id="reset-yes" type="button" class="danger"></button>
-          <button id="reset-no" type="button"></button>
+          <button id="reset-no" type="button" class="button"></button>
+          <button id="reset-yes" type="button" class="button danger"></button>
         </div>
-      </fieldset>
+      </section>
+      <p id="trademark-note" class="settings-footnote"></p>
     </section>
     <script type="module" src="./main.ts"></script>
   </body>

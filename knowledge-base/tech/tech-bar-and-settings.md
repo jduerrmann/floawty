@@ -4,7 +4,7 @@ area: ui
 tags: [bar, settings, i18n, hotkeys, reset]
 status: active
 created: 2026-11-17
-updated: 2026-11-20
+updated: 2026-11-21
 source: mvp-05 implementation
 ---
 
@@ -39,6 +39,21 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
   their natural width is measured under `.measuring`, free of the current width.
 - A hidden webview keeps `document.visibilityState` "visible"; the bar learns its
   visibility from the event `bar-visible` (also `body[data-visible]` for tests).
+- **Look** ([[glass-design-follows-windows-theme]]): bar, settings and tiles use the
+  `light-dark()` tokens of `src/tokens.css` and follow Windows. Over a visible service
+  (`serviceId` set, settings closed) `bar.ts` sets `body.over-service`, which pins
+  `color-scheme: dark` in CSS; never Tauri's theme API (it would reach the shared
+  WebView2 profile). The pill's shadow stays inside the 4 px the shell adds per side.
+- **Bar icons** are SVG files in `src/assets/icons/` drawn as CSS masks over
+  `currentcolor` (the CSP has no `data:`); pressed = accent tint, the problem dot is
+  `::after`. Accessible names come from `aria-label`, the buttons have no text.
+- **Settings page:** cards General (language, update check, graphics acceleration),
+  Hotkeys, Shorts and TikTok, Data (reset), then the trademark line for the logos
+  ([[redrawn-service-logos]]). rel-03's update button joins General, rel-05's export
+  and import join Data. On/off settings are checkboxes with `role="switch"` (Space
+  toggles, `change` events as before). Hotkeys show one `<kbd>` chip per key
+  (`hotkeyParts`); the button's accessible name is "action: Strg+Alt+…". "Delete
+  everything" is the only red control (`--danger`).
 - **Settings open** (`set_settings_open`): the service video pauses, its webview is
   hidden, the main page shows the panel and gets the keyboard. Closing shows the
   service again; the video stays paused.
@@ -73,11 +88,11 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
 | `src-tauri/src/commands.rs` | `toggle_click_through`, `toggle_always_on_top`, `toggle_video_only`, `toggle_zoom`, `set_bar_width`, `set_settings_open`, `set_preferences`, `set_graphics_acceleration` (save, restart), `set_hotkey`, `set_hotkeys_paused`, `move_focus` (F6), `reset_all_data`, `quit` | Playwright |
 | `src/state.ts` | `OverlayState`, start a page in its language, reload on change, `withShortsAuto` | Vitest |
 | `src/bar.ts`, `src/bar.css`, `src/click-through.ts` | controls, dot and hint | Playwright |
-| `src/settings-panel.ts`, `src/hotkey-list.ts` | panel, preferences, restart and reset confirms, hotkey recording | Playwright |
-| `src/hotkeys.ts` | key press → hotkey, conflicts, localized display | Vitest |
+| `src/settings-panel.ts`, `src/hotkey-list.ts`, `src/settings.css` | glass cards, preferences, restart and reset confirms, hotkey recording and chips | Playwright |
+| `src/hotkeys.ts` | key press → hotkey, conflicts, localized display (`hotkeyParts`, `formatHotkey`) | Vitest |
 | `src/i18n.ts` | all texts, `resolveLanguage` | Vitest |
 
-Bar controls: ◀ back to the tiles (only with a service), opacity 10–100 %, ⇄
+Bar controls (own icons; named here by glyph): ◀ back to the tiles (only with a service), opacity 10–100 %, ⇄
 click-through, 🖈 always on top (pressed = on; [[always-on-top-switch]]), ▶ auto mode (only for services whose manifest sets
 `shortsAutoMode`; an amber dot and another tooltip when the page script reports
 missing controls, [[tech-shorts]]), ▣ video only (only for manifests with `videoOnly`;

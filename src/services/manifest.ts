@@ -7,7 +7,7 @@ export interface ServiceManifest {
   allowedDomains: string[];
   /** Tints the tile's glass; the name sits on a darker shade of it (tile-colors.ts). */
   brandColor: string;
-  /** floawty's own SVG in src/assets/symbols/; never an imitation of the service's logo. */
+  /** SVG under src/assets/: the service's redrawn logo in logos/ (NOTICE.md) or an own symbol in symbols/. */
   symbol: string;
   /** Offers the auto mode toggle (Shorts, TikTok) in the bar. */
   shortsAutoMode?: true;
@@ -28,7 +28,9 @@ export function manifestProblems(manifest: ServiceManifest): string[] {
   if (!manifest.name.trim()) problems.push('name is empty');
   if (manifest.allowedDomains.length === 0) problems.push('allowedDomains is empty');
   if (!/^#[0-9a-f]{6}$/i.test(manifest.brandColor)) problems.push('brandColor is not #rrggbb');
-  if (!/^[a-z0-9-]+\.svg$/.test(manifest.symbol)) problems.push('symbol must be an svg file name');
+  if (!/^(logos|symbols)\/[a-z0-9-]+\.svg$/.test(manifest.symbol)) {
+    problems.push('symbol must be an svg file in logos/ or symbols/');
+  }
   if (manifest.signInHosts?.some((host) => !BARE_HOST.test(host))) {
     problems.push('signInHosts must be bare host names');
   }

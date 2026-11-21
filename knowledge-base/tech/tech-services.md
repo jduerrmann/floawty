@@ -56,7 +56,11 @@ page inside the main window.
   uses `get_window("main")` (`overlay::main_window`).
 - The last service is reopened **after** setup (async task): adding the webview
   during setup crashes WebView2.
-- Tiles never use the services' logos ([[own-service-symbols]]).
+- Service tiles show the services' redrawn logos ([[redrawn-service-logos]]): plain
+  SVG shapes in white glass, each with a tight `viewBox` so wide and tall logos fill the
+  tile's symbol box; trademarks of their owners, outside the GPL (`NOTICE.md`). Own
+  pages keep the globe and "+" the plus from `symbols/`. A manifest's `symbol` is a
+  path under `src/assets/`: `logos/<file>.svg` or `symbols/<file>.svg`.
 - Tiles are colour glass ([[glass-design-follows-windows-theme]]): `brandColor` tints the
   tile, the name sits on `labelShade(brandColor)`, the lightest shade of it that keeps
   white text at WCAG AA (Vitest for every manifest). Light and dark follow Windows.
@@ -81,7 +85,8 @@ page inside the main window.
 | `src/tiles.ts`, `src/home.ts` | tiles, options menu (rename, remove; a popover in the top layer, placed by the ⋯ button and kept inside the window), add/rename form, first-start notice | Playwright |
 | `src/tile-colors.ts` | `labelShade`, `contrastWithWhite`, the own-page colour | Vitest |
 | `src/tokens.css`, `src/style.css`, `src/tiles.css` | design values as `light-dark()` pairs, page and glass cards, tiles | Playwright (fit), screenshots |
-| `src/assets/symbols/*.svg` | floawty's own symbols; Vite emits them as files (`assetsInlineLimit: 0`) so the CSP needs no `data:` | Vitest (files exist) |
+| `src/assets/logos/*.svg`, `NOTICE.md` | the services' redrawn logos (trademarks, outside the GPL) | Vitest (every service has one, shapes only) |
+| `src/assets/symbols/*.svg` | floawty's own symbols (globe, plus); Vite emits all SVGs as files (`assetsInlineLimit: 0`) so the CSP needs no `data:` | Vitest |
 | `src-tauri/src/service.rs` | open/close the service webview, navigation guard, pause on hide, play/pause, cover for the settings, focus | Playwright, check scripts |
 | `src-tauri/src/navigation.rs` | stay or open in the browser | unit |
 | `src-tauri/src/sign_in.rs`, `sign_in_window.rs` | sign-in pop-ups: open, navigation, title and place (pure); the owned window and its close watcher | unit, `tests/sign-in.spec.ts` |

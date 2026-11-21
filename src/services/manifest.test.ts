@@ -1,10 +1,10 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { hostAllowed, manifestProblems, type ServiceManifest } from './manifest';
 import { services } from './index';
 
-const SYMBOLS = path.join(import.meta.dirname, '..', 'assets', 'symbols');
+const ASSETS = path.join(import.meta.dirname, '..', 'assets');
 
 const valid: ServiceManifest = {
   id: 'example',
@@ -12,7 +12,7 @@ const valid: ServiceManifest = {
   startUrl: 'https://www.example.com/',
   allowedDomains: ['example.com'],
   brandColor: '#123456',
-  symbol: 'example.svg',
+  symbol: 'logos/example.svg',
 };
 
 describe('service manifests', () => {
@@ -26,11 +26,19 @@ describe('service manifests', () => {
     );
   });
 
-  it('needs one of the own SVG symbols', () => {
-    expect(manifestProblems({ ...valid, symbol: '' })).toContain('symbol must be an svg file name');
-    expect(manifestProblems({ ...valid, symbol: 'https://x.org/logo.svg' })).toContain(
-      'symbol must be an svg file name',
-    );
+  it('needs an SVG file in logos/ or symbols/', () => {
+    expect(manifestProblems({ ...valid, symbol: 'symbols/example.svg' })).toEqual([]);
+    for (const symbol of [
+      '',
+      'example.svg',
+      'icons/more.svg',
+      '../logos/x.svg',
+      'https://x.org/logo.svg',
+    ]) {
+      expect(manifestProblems({ ...valid, symbol }), symbol).toContain(
+        'symbol must be an svg file in logos/ or symbols/',
+      );
+    }
   });
 
   it('sign-in hosts are bare lower-case host names', () => {
@@ -69,7 +77,6 @@ describe('service manifests', () => {
     ]);
     for (const service of services) {
       expect(manifestProblems(service), service.id).toEqual([]);
-      expect(existsSync(path.join(SYMBOLS, service.symbol)), service.symbol).toBe(true);
     }
     expect(services.filter((s) => s.shortsAutoMode).map((s) => s.id)).toEqual([
       'youtube',
@@ -91,6 +98,17 @@ describe('service manifests', () => {
     expect(services.filter((s) => s.signInHosts).map((s) => [s.id, s.signInHosts])).toEqual([
       ['tiktok', ['accounts.google.com', 'appleid.apple.com', 'www.facebook.com']],
     ]);
+  });
+
+  // Logos are shown as <img>, but plain shapes keep them free of scripts, rasters and fonts.
+  it('every service has its logo or symbol, made of vector shapes only', () => {
+    for (const service of services) {
+      const file = path.join(ASSETS, service.symbol);
+      expect(existsSync(file), service.symbol).toBe(true);
+      expect(readFileSync(file, 'utf8'), service.symbol).not.toMatch(
+        /<script|<image|<text|<foreignObject|<style|href="(?!#)/i,
+      );
+    }
   });
 });
 

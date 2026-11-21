@@ -6,5 +6,5 @@ export const netflix: ServiceManifest = {
   startUrl: 'https://www.netflix.com/browse',
   allowedDomains: ['netflix.com'],
   brandColor: '#e50914',
-  symbol: 'netflix.svg',
+  symbol: 'logos/netflix.svg',
 };

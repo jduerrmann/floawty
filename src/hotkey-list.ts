@@ -2,9 +2,9 @@
 import { invoke } from '@tauri-apps/api/core';
 import {
   findConflict,
-  formatHotkey,
   HOTKEY_ACTIONS,
   hotkeyFromKey,
+  hotkeyParts,
   type HotkeyAction,
   type Hotkeys,
 } from './hotkeys';
@@ -31,12 +31,30 @@ function row(language: Language, action: HotkeyAction): [HTMLElement, HTMLButton
   button.type = 'button';
   button.className = 'hotkey';
   button.dataset.action = action;
-  button.setAttribute(
-    'aria-label',
-    t(language, 'hotkeyChange', { action: t(language, ACTION_LABELS[action]) }),
-  );
+  button.title = t(language, 'hotkeyChange', { action: t(language, ACTION_LABELS[action]) });
   item.append(name, button);
   return [item, button];
+}
+
+function keyChip(key: string): HTMLElement {
+  const chip = document.createElement('kbd');
+  chip.textContent = key;
+  return chip;
+}
+
+/** Key chips for a hotkey, or the recording prompt for null; the name holds the whole combination. */
+function showKeys(
+  language: Language,
+  button: HTMLButtonElement,
+  action: HotkeyAction,
+  hotkey: string | null,
+): void {
+  const parts = hotkey === null ? [] : hotkeyParts(hotkey, language);
+  const keys = hotkey === null ? t(language, 'hotkeyRecording') : parts.join('+');
+  button.toggleAttribute('data-recording', hotkey === null);
+  button.replaceChildren(...(hotkey === null ? [keys] : parts.map(keyChip)));
+  const name = t(language, ACTION_LABELS[action]);
+  button.setAttribute('aria-label', t(language, 'hotkeyKeys', { action: name, keys }));
 }
 
 type KeyOutcome = { hotkey: string } | { problem: string } | null;
@@ -69,10 +87,7 @@ export function createHotkeyList(
 
   const show = () => {
     for (const [action, button] of buttons) {
-      button.textContent =
-        recording === action
-          ? t(language, 'hotkeyRecording')
-          : formatHotkey(hotkeys?.[action] ?? '', language);
+      showKeys(language, button, action, recording === action ? null : (hotkeys?.[action] ?? ''));
     }
   };
   // While recording, floawty's own hotkeys are off, so their keys reach this page.

@@ -8,5 +8,5 @@ export const appletv: ServiceManifest = {
   allowedDomains: ['apple.com'],
   // Silver instead of Apple's near-black: a black tint would leave the glass tile without colour.
   brandColor: '#c7c7d1',
-  symbol: 'appletv.svg',
+  symbol: 'logos/appletv.svg',
 };

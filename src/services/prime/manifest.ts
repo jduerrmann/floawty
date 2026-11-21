@@ -7,5 +7,5 @@ export const prime: ServiceManifest = {
   startUrl: 'https://www.primevideo.com/',
   allowedDomains: ['primevideo.com', 'amazon.com', 'amazon.de'],
   brandColor: '#1a98ff',
-  symbol: 'prime.svg',
+  symbol: 'logos/prime.svg',
 };

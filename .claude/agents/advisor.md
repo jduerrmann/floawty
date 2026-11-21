@@ -1,6 +1,6 @@
 ---
 name: advisor
-description: Read-only second opinion and independent reviewer for floawty in four cases — a hard-to-reverse decision (stored settings format, IPC and capability boundaries, navigation guard, service adapter contract, new dependencies, project rules), a plan map before multi-package work, a diagnosis stuck after a failed attempt, or the required independent review of a work package or another change to code, tests, build configuration or rules (AGENTS.md rule 14). Give it the package ID or problem, constraints, options or the path of a diff file, relevant sources, and the lead's recommendation, stated neutrally. Not for implementation or routine questions.
+description: Read-only second opinion and independent reviewer for floawty in four cases — a hard-to-reverse decision (stored settings format, IPC and capability boundaries, navigation guard, service adapter contract, new dependencies, project rules), a plan map that contains a hard-to-reverse part, a diagnosis stuck after a failed attempt, or the required independent review of a work package or another change to code, tests, build configuration or rules (AGENTS.md rule 14). Give it the package ID or problem, constraints, options or the path of a diff file, relevant sources, and the lead's recommendation, stated neutrally. Not for implementation or routine questions.
 model: claude-fable-5-2
 effort: high
 tools: Read, Grep, Glob

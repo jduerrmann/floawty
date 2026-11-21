@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="7 3 36 40">
+  <!-- The Twitch logo, a trademark of Twitch Interactive, Inc.. Redrawn by hand for floawty to name the service; not under floawty's GPL-3.0, see NOTICE.md. -->
+  <defs><linearGradient id="glass" gradientUnits="userSpaceOnUse" x1="0" y1="6" x2="0" y2="42"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity=".8"/></linearGradient></defs>
+  <path fill="url(#glass)" fill-rule="evenodd" d="M12.5 4H42V27L33 36H26.5L20.5 42V36H8V8.5ZM12.5 8.5V31.5H22.5V35.6L26.6 31.5H31.4L37.5 25.4V8.5ZM22.6 14.2H26.2V24.2H22.6ZM30.2 14.2H33.8V24.2H30.2Z"/>
+</svg>

@@ -50,6 +50,8 @@ Planning page and pictures: `.claude/plans/startseite-und-einstellungen.md`.
 
 ## Packages
 
+Base commit for the plan's review (AGENTS.md rule 14): `d529002`.
+
 | # | Package | Outcome | Depends on |
 |---|---|---|---|
 | 01 | [[gl-01-glass-home]] | Design values, colour-glass tiles with AA labels, notice and form as glass | – |

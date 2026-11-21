@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="4 4 40 40">
+  <!-- The Crunchyroll logo, a trademark of Crunchyroll, LLC. Redrawn by hand for floawty to name the service; not under floawty's GPL-3.0, see NOTICE.md. -->
+  <defs><linearGradient id="glass" gradientUnits="userSpaceOnUse" x1="0" y1="6" x2="0" y2="42"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity=".8"/></linearGradient></defs>
+  <path fill="url(#glass)" fill-rule="evenodd" d="M5 24A19 19 0 1 0 43 24A19 19 0 1 0 5 24ZM16.2 20.6A12.2 12.2 0 1 0 40.6 20.6A12.2 12.2 0 1 0 16.2 20.6ZM25.8 17.4A5.6 5.6 0 1 0 37 17.4A5.6 5.6 0 1 0 25.8 17.4Z"/>
+</svg>

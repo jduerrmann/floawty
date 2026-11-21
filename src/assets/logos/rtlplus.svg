@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="1 17.8 45.6 12.4">
+  <!-- The RTL+ logo, a trademark of RTL Deutschland GmbH. Redrawn by hand for floawty to name the service; not under floawty's GPL-3.0, see NOTICE.md. -->
+  <defs><linearGradient id="glass" gradientUnits="userSpaceOnUse" x1="0" y1="6" x2="0" y2="42"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity=".8"/></linearGradient></defs>
+  <path fill="url(#glass)" fill-rule="evenodd" d="M2 18.8H12.4V29.2H2ZM4.8 21H8.2C9.5 21 10.2 21.9 10.2 23.1C10.2 24.1 9.6 24.8 8.8 25.05L10.3 27H8.5L7.2 25.2H6.4V27H4.8ZM6.4 22.4H8C8.4 22.4 8.6 22.7 8.6 23.1C8.6 23.5 8.4 23.8 8 23.8H6.4ZM13.2 18.8H23.6V29.2H13.2ZM15.6 21H21.2V22.6H19.2V27H17.6V22.6H15.6ZM24.4 18.8H34.8V29.2H24.4ZM27.4 21H29V25.4H32.2V27H27.4ZM39.4 19.4H42.4V22.5H45.6V25.5H42.4V28.6H39.4V25.5H36.2V22.5H39.4Z"/>
+</svg>

@@ -54,3 +54,7 @@ layout. Read [CONTRIBUTING.md](CONTRIBUTING.md) and the project rules in
 
 [GPL-3.0](LICENSE). floawty is not affiliated with YouTube, Netflix, Amazon, Disney,
 Twitch or any other service it can display. All trademarks belong to their owners.
+
+The service logos on the tiles (`src/assets/logos/`) are the one exception to the
+GPL: they are trademarks of their owners, redrawn only to name each service, and
+not licensed under GPL-3.0. See [the logo notice](src/assets/logos/NOTICE.md).

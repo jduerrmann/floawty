@@ -6,6 +6,6 @@ export const twitch: ServiceManifest = {
   startUrl: 'https://www.twitch.tv/',
   allowedDomains: ['twitch.tv'],
   brandColor: '#9146ff',
-  symbol: 'twitch.svg',
+  symbol: 'logos/twitch.svg',
   videoOnly: true,
 };

@@ -8,7 +8,7 @@ import type { ServiceManifest } from './services/manifest';
 import { preferencesOf, withShortsAuto, type OverlayState } from './state';
 import { CUSTOM_COLOR, labelShade } from './tile-colors';
 
-const symbolUrls = import.meta.glob<string>('./assets/symbols/*.svg', {
+const symbolUrls = import.meta.glob<string>(['./assets/logos/*.svg', './assets/symbols/*.svg'], {
   eager: true,
   query: '?url',
   import: 'default',
@@ -21,7 +21,7 @@ export interface TileHandlers {
 }
 
 function symbolUrl(file: string): string {
-  return symbolUrls[`./assets/symbols/${file}`] ?? '';
+  return symbolUrls[`./assets/${file}`] ?? '';
 }
 
 function openService(
@@ -104,7 +104,7 @@ function placeMenu(menu: HTMLElement, anchor: HTMLElement): void {
 function customTile(language: Language, tile: CustomTile, handlers: TileHandlers): HTMLLIElement {
   const item = document.createElement('li');
   item.className = 'custom';
-  const button = tileButton(tile.name, CUSTOM_COLOR, 'custom.svg');
+  const button = tileButton(tile.name, CUSTOM_COLOR, 'symbols/custom.svg');
   button.addEventListener('click', () => openService(tile.id, tile.url, customTileDomains(tile)));
   const more = document.createElement('button');
   more.type = 'button';
@@ -137,7 +137,7 @@ export function renderTiles(
 ): void {
   list.setAttribute('aria-label', t(language, 'tilesLabel'));
   const add = document.createElement('li');
-  const addButton = tileButton(t(language, 'addTile'), null, 'add.svg');
+  const addButton = tileButton(t(language, 'addTile'), null, 'symbols/add.svg');
   addButton.classList.add('tile-add');
   addButton.addEventListener('click', handlers.onAdd);
   add.append(addButton);

@@ -27,7 +27,10 @@ PC. Paths are relative to the repository root.
 The identity of the project ([core-principles](knowledge-base/decisions/core-principles.md)).
 Breaking one needs a new decision and the maintainer's explicit OK first.
 
-1. **Free and open source, forever.** GPL-3.0, no paid tier, no closed parts.
+1. **Free and open source, forever.** GPL-3.0, no paid tier, no closed parts. The
+   services' redrawn logos are the one named exception: trademarks of their owners,
+   outside the GPL, kept apart with a notice
+   ([redrawn-service-logos](knowledge-base/decisions/redrawn-service-logos.md)).
 2. **No ads, no monetization in the app.** A donation link may live in the README only.
 3. **No server.** No backend, API, database or proxy. floawty's own code talks only
    to the services the user opens and to GitHub Releases for an update check the
@@ -95,8 +98,8 @@ Prototype code stays on the `spike/*` branches; `spikes/measure` is the measurin
 - **Pure logic is separate:** geometry, snapping, opacity, settings and migration,
   hotkey mapping and the Shorts state machine have no window or DOM access.
 - **Layout:** `src-tauri/` Rust shell (window, settings, hotkeys), `src/` TypeScript UI
-  (Vite), `src/services/<id>/` adapters, `src/assets/symbols/` floawty's own tile
-  symbols.
+  (Vite), `src/services/<id>/` adapters, `src/assets/logos/` the services' redrawn
+  logos (trademarks, `NOTICE.md`), `src/assets/symbols/` floawty's own tile symbols.
 - **Service adapters** are isolated modules `src/services/<id>/` with a manifest (id,
   name, start URL, allowed domains, brand colour, symbol) and an optional page script. Core code
   never contains service-specific `if`s. DOM selectors live in one `selectors.ts` per
@@ -121,7 +124,7 @@ overlay window (frameless, always on top, opacity 10–100 %, resize, drag, corn
 snapping, multi-monitor, remembered geometry) and a window mode (normal window) with
 its own geometry; hover bar over the video; click-through with a corner dot and a
 hotkey to leave it; configurable global hotkeys (default Ctrl+Alt+Shift); app tiles
-with own SVG symbols ([own-service-symbols](knowledge-base/decisions/own-service-symbols.md))
+with the services' redrawn logos ([redrawn-service-logos](knowledge-base/decisions/redrawn-service-logos.md))
 and custom URL tiles; first-start notice about WebView2; best-effort "video only"
 view; auto mode for YouTube Shorts and TikTok; a small sign-in window for a service's
 sign-in pop-ups (Google, Apple, Facebook); UI in English and German. Service tiles: YouTube,
@@ -203,7 +206,8 @@ one i18n file; no visible text is hard-coded in components.
   touches only the UI layer (styles, markup, icons, texts, DOM code; no IPC, Rust,
   stored formats, service adapters, page scripts, dependencies or rules) gets the
   main session's recorded own review; the plan's last package then gets one
-  independent review of all the plan's changes since `main`. Pure execution (rename,
+  independent review of all the plan's changes since the base commit named in the
+  plan map, also due when a plan pauses or is dropped. Pure execution (rename,
   typo, one obvious fix) and changes only to notes or the CHANGELOG need none.
   Resolve each material finding – fix and re-check, or reject it with evidence – and
   record reviewer and resolution in the package's evidence, or for work outside a

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { findConflict, formatHotkey, hotkeyFromKey, type Hotkeys } from './hotkeys';
+import { findConflict, formatHotkey, hotkeyFromKey, hotkeyParts, type Hotkeys } from './hotkeys';
 
 const press = (
   code: string,
@@ -91,5 +91,16 @@ describe('formatHotkey', () => {
   it('shows arrows as symbols and Super as Win', () => {
     expect(formatHotkey('Ctrl+Alt+Shift+Up', 'en')).toBe('Ctrl+Alt+Shift+↑');
     expect(formatHotkey('Super+Alt+Down', 'en')).toBe('Win+Alt+↓');
+  });
+});
+
+describe('hotkeyParts', () => {
+  it('gives one localized name per key, for the key chips', () => {
+    expect(hotkeyParts('Ctrl+Alt+Shift+Up', 'de')).toEqual(['Strg', 'Alt', 'Umschalt', '↑']);
+    expect(hotkeyParts('Super+Space', 'en')).toEqual(['Win', 'Space']);
+  });
+
+  it('gives no chips for no hotkey', () => {
+    expect(hotkeyParts('', 'en')).toEqual([]);
   });
 });

@@ -32,6 +32,7 @@ const en = {
   quit: 'Close floawty',
   settingsTitle: 'Settings',
   done: 'Done',
+  generalTitle: 'General',
   language: 'Language',
   languageSystem: 'Like Windows',
   languageEn: 'English',
@@ -47,6 +48,7 @@ const en = {
   hotkeyZoom: 'Zoom to fill on or off',
   hotkeyAlwaysOnTop: 'Always on top on or off',
   hotkeyChange: 'Change the hotkey for “{action}”',
+  hotkeyKeys: '{action}: {keys}',
   hotkeyRecording: 'Press the new keys … (Esc cancels)',
   hotkeyNeedsModifier: 'Use Ctrl, Alt or Win with the key.',
   hotkeyUnsupported: 'This key cannot be a hotkey.',
@@ -70,6 +72,7 @@ const en = {
     'Turned off, floawty needs more CPU, and services with copy protection may play in lower quality.',
   restartQuestion: 'Restart floawty now? The change takes effect at the restart.',
   restartConfirm: 'Restart',
+  dataTitle: 'Data',
   resetTitle: 'Reset all data',
   resetExplain: 'Deletes the settings, your own tiles and all sign-ins. floawty then restarts.',
   resetConfirm: 'Delete everything',
@@ -77,6 +80,8 @@ const en = {
   keyShift: 'Shift',
   keyWin: 'Win',
   keySpace: 'Space',
+  trademarkNote:
+    'The service logos are trademarks of their owners. floawty is not affiliated with these services.',
 };
 
 export type MessageKey = keyof typeof en;
@@ -111,6 +116,7 @@ const de: Record<MessageKey, string> = {
   quit: 'floawty schließen',
   settingsTitle: 'Einstellungen',
   done: 'Fertig',
+  generalTitle: 'Allgemein',
   language: 'Sprache',
   languageSystem: 'Wie Windows',
   languageEn: 'English',
@@ -126,6 +132,7 @@ const de: Record<MessageKey, string> = {
   hotkeyZoom: 'Auf Fläche zoomen an oder aus',
   hotkeyAlwaysOnTop: 'Immer im Vordergrund an oder aus',
   hotkeyChange: 'Tastenkürzel für „{action}“ ändern',
+  hotkeyKeys: '{action}: {keys}',
   hotkeyRecording: 'Drücke die neuen Tasten … (Esc bricht ab)',
   hotkeyNeedsModifier: 'Nimm Strg, Alt oder Win zur Taste dazu.',
   hotkeyUnsupported: 'Diese Taste geht nicht als Tastenkürzel.',
@@ -150,6 +157,7 @@ const de: Record<MessageKey, string> = {
     'Ausgeschaltet braucht floawty mehr CPU, und Dienste mit Kopierschutz spielen evtl. in geringerer Qualität.',
   restartQuestion: 'floawty jetzt neu starten? Die Änderung wirkt nach dem Neustart.',
   restartConfirm: 'Neu starten',
+  dataTitle: 'Daten',
   resetTitle: 'Alle Daten zurücksetzen',
   resetExplain:
     'Löscht die Einstellungen, deine eigenen Kacheln und alle Anmeldungen. Danach startet floawty neu.',
@@ -158,6 +166,8 @@ const de: Record<MessageKey, string> = {
   keyShift: 'Umschalt',
   keyWin: 'Win',
   keySpace: 'Leertaste',
+  trademarkNote:
+    'Die Logos der Dienste sind Marken ihrer Inhaber. floawty steht in keiner Verbindung zu diesen Diensten.',
 };
 
 export const messages: Record<Language, Record<MessageKey, string>> = { en, de };

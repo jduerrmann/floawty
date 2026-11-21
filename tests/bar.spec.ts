@@ -97,6 +97,30 @@ test('click-through shows the dot over a service with its hotkey', async () => {
   }
 });
 
+// The scheme is emulated light, so only the pin can make the bar dark.
+test('the bar is dark over a service, and follows Windows on the tiles and in the settings', async () => {
+  const app = await launch(freshProfile());
+  const scheme = () => app.bar.evaluate(() => getComputedStyle(document.body).colorScheme);
+  const pillColor = () =>
+    app.bar.locator('#controls').evaluate((pill) => getComputedStyle(pill).color);
+  try {
+    await app.bar.emulateMedia({ colorScheme: 'light' });
+    await expect.poll(scheme).not.toBe('dark');
+    const lightText = await pillColor();
+    await openExample(app);
+    await expect.poll(scheme).toBe('dark');
+    expect(await pillColor()).not.toBe(lightText);
+    await app.bar.evaluate(() =>
+      window.__TAURI_INTERNALS__.invoke('set_settings_open', { open: true }),
+    );
+    await expect.poll(scheme).not.toBe('dark');
+    expect(await pillColor()).toBe(lightText);
+  } finally {
+    pointAway(app.pid);
+    await app.stop();
+  }
+});
+
 test('the bar leaves the page clickable: narrow over a service, above it in window mode', async () => {
   const app = await launch(freshProfile());
   try {

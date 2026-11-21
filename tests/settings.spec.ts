@@ -38,7 +38,9 @@ test('the Shorts hover hold and portrait size are saved', async () => {
   const app = await launch(profile);
   try {
     await openSettings(app);
-    await expect(app.home.locator('#shorts-hold')).toBeChecked();
+    const hold =
+      /^(Hold while the mouse is over floawty|Anhalten, solange die Maus über floawty ist)$/;
+    await expect(app.home.getByRole('switch', { name: hold })).toBeChecked();
     await expect(app.home.locator('#portrait-size')).toHaveValue('rotated');
     await app.home.locator('#shorts-hold').uncheck();
     await app.home.locator('#portrait-size').selectOption('separate');
@@ -62,7 +64,9 @@ test('a new hotkey is recorded, a conflict is shown and it survives a restart', 
     await clickThrough.press('Control+Alt+Shift+O');
     await expect(first.home.locator('#hotkey-error')).not.toBeEmpty();
     await clickThrough.press('Control+Alt+Shift+K');
-    await expect(clickThrough).toHaveText(/^(Ctrl|Strg)\+Alt\+(Shift|Umschalt)\+K$/);
+    // The chips show the keys; the button's name holds the whole combination.
+    await expect(clickThrough).toHaveAccessibleName(/: (Ctrl|Strg)\+Alt\+(Shift|Umschalt)\+K$/);
+    await expect(clickThrough.locator('kbd')).toHaveCount(4);
     await expect(first.home.locator('#hotkey-error')).toBeEmpty();
   } finally {
     await first.stop();
@@ -73,7 +77,9 @@ test('a new hotkey is recorded, a conflict is shown and it survives a restart', 
   const second = await launch(profile);
   try {
     await openSettings(second);
-    await expect(second.home.locator('button[data-action="clickThrough"]')).toHaveText(/\+K$/);
+    await expect(second.home.locator('button[data-action="clickThrough"]')).toHaveAccessibleName(
+      /\+K$/,
+    );
   } finally {
     await second.stop();
   }
@@ -82,12 +88,16 @@ test('a new hotkey is recorded, a conflict is shown and it survives a restart', 
 test('graphics acceleration asks before it restarts floawty, and cancelling keeps it', async () => {
   const profile = freshProfile();
   const app = await launch(profile);
-  const acceleration = app.home.locator('#graphics-acceleration');
+  const acceleration = app.home.getByRole('switch', {
+    name: /^(Use graphics acceleration|Grafikbeschleunigung verwenden)$/,
+  });
   let restarted: number[] = [];
   try {
     await openSettings(app);
     await expect(acceleration).toBeChecked();
-    await acceleration.uncheck();
+    await acceleration.focus();
+    await acceleration.press('Space');
+    await expect(acceleration).not.toBeChecked();
     await expect(app.home.locator('#restart-confirm')).toBeVisible();
     await expect(app.home.locator('#restart-no')).toBeFocused();
     await app.home.locator('#restart-no').click();

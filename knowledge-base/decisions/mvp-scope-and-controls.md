@@ -4,7 +4,7 @@ area: ui
 tags: [mvp, scope, overlay, hotkeys, tiles]
 status: active
 created: 2026-11-17
-updated: 2026-11-17
+updated: 2026-11-21
 source: visual plan "MVP-Planung", rounds 1–2 (`.claude/plans/mvp-planung.md`)
 ---
 
@@ -26,7 +26,8 @@ maintainer wants to use floawty daily as soon as the MVP is done.
   Netflix first). The old phase 4 is dropped.
 - **Hover bar** lies over the video (transparent webview on top of the service).
 - **App tiles** with the services' official logos ([[bundled-service-logos]], since
-  2026-11-17 own SVG symbols: [[own-service-symbols]]); a
+  2026-11-17 own SVG symbols: [[own-service-symbols]], since 2026-11-21 redrawn
+  logos: [[redrawn-service-logos]]); a
   custom URL can be saved as its own tile.
 - **First start:** a cookie-banner-like notice above the tiles about WebView2
   ([[webview2-diagnostics-disclosed]]), one OK.

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="12 4.5 24 39">
+  <!-- The Netflix logo, a trademark of Netflix, Inc.. Redrawn by hand for floawty to name the service; not under floawty's GPL-3.0, see NOTICE.md. -->
+  <defs><linearGradient id="glass" gradientUnits="userSpaceOnUse" x1="0" y1="6" x2="0" y2="42"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity=".8"/></linearGradient></defs>
+  <path fill="#fff" fill-opacity=".62" d="M14 5.5H21V41.4Q17.4 41.7 14 42.5ZM27 5.5H34V42.5Q30.6 41.7 27 41.4Z"/><path fill="url(#glass)" d="M14 5.5H21L34 42.5Q30.6 41.7 27 41.4Z"/>
+</svg>

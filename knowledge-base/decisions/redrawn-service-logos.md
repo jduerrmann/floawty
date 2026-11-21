@@ -24,8 +24,12 @@ logo (colour, effects), which the glass tiles do.
 - The files live in `src/assets/logos/` with a `NOTICE.md`: the logos are
   trademarks of their owners, shown only to identify the service, not covered by
   floawty's GPL-3.0 licence; floawty is not affiliated with the services. NOTICE
-  records provenance: drawn by hand for floawty against the service's site as
-  reference, with the date; no path data copied from the owners' files.
+  records provenance with the date: redrawn for floawty against the service's site
+  as reference, no path data copied from the owners' files.
+- Exception, Disney+ (maintainer's OK, 2026-11-21): the free redraws of the script
+  wordmark were not recognisable enough, so its outline is traced automatically from
+  an image of the logo; NOTICE says so. This copies the logo more closely and raises
+  the risk of a complaint for that one service.
 - A manifest's `symbol` may point to `logos/` or `symbols/`. If an owner objects,
   that service gets an own symbol again in the next release.
 - Custom pages keep the globe, "+" keeps the plus (floawty's own work).

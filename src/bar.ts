@@ -132,6 +132,8 @@ function startBar(state: OverlayState, language: Language): StateView {
     showControls(language, next);
     showClickThrough(next);
     document.body.classList.toggle('docked', next.mode === 'window');
+    // Over a visible service the bar is dark glass, whatever Windows uses (the page is no backdrop).
+    document.body.classList.toggle('over-service', next.serviceId !== null && !next.settingsOpen);
     reportWidth();
   };
 }

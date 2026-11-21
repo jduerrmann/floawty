@@ -4,7 +4,7 @@ area: process
 tags: [principles, license, privacy]
 status: active
 created: 2026-11-16
-updated: 2026-11-18
+updated: 2026-11-21
 source: conversation
 ---
 
@@ -18,7 +18,10 @@ services, which brings legal and ethical constraints.
 
 ## Decision
 
-1. License **GPL-3.0**, so forks and redistributions stay open source.
+1. License **GPL-3.0**, so forks and redistributions stay open source. Amended by
+   [[redrawn-service-logos]]: the services' redrawn logos are trademarks of their
+   owners, outside the GPL, kept apart with a NOTICE (exception to "no closed parts"
+   approved by the maintainer, 2026-11-21).
 2. **No ads, no monetization** inside the app.
 3. **No server** operated by the project. Outgoing connections only to the services
    the user opens and to GitHub Releases for an update check the user triggers or

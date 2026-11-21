@@ -26,7 +26,9 @@ commit round. The maintainer found work on topics too slow.
   dependencies, rules).
 - In a multi-package plan, a package that touches only the UI layer gets the main
   session's recorded own review; the plan's last package gets one independent review
-  of all the plan's changes since `main` (AGENTS.md rule 14).
+  of all the plan's changes since the base commit named in the plan map, also due
+  when a plan pauses or is dropped (AGENTS.md rule 14; amended after the glass plan's
+  review, 2026-11-21, because merged packages drop out of a diff against `main`).
 - Plans prefer fewer, larger packages where the parts are verified the same way.
 
 ## Alternatives

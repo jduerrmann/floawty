@@ -8,6 +8,11 @@ User-facing changes, in plain language. Format based on
 
 - New look for the start screen: tiles of coloured glass, light or dark like Windows,
   with names that stay easy to read; the notice and the add-page form match.
+- The tiles show the services' own logos, redrawn in white glass.
+- The settings are one page of glass cards (General, Hotkeys, Shorts and TikTok,
+  Data) with switches and hotkeys shown as keys; they follow Windows light or dark.
+- The bar has new icons; over a video it is always dark, on the tiles and in the
+  settings it follows Windows.
 - Small window that stays on top: bottom right at first, snaps to corners and edges,
   remembers where it was.
 - Adjustable transparency, click-through with a dot in the corner, hide/show – all

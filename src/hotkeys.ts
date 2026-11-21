@@ -105,8 +105,8 @@ export function findConflict(
   return other ?? null;
 }
 
-/** The hotkey with the key names of the user's language, e.g. Strg+Alt+Umschalt+D. */
-export function formatHotkey(hotkey: string, language: Language): string {
+/** The key names of a hotkey in the user's language, e.g. ["Strg", "Alt", "Umschalt", "↑"]. */
+export function hotkeyParts(hotkey: string, language: Language): string[] {
   const names: Record<string, string> = {
     Ctrl: t(language, 'keyCtrl'),
     Shift: t(language, 'keyShift'),
@@ -116,6 +116,11 @@ export function formatHotkey(hotkey: string, language: Language): string {
   };
   return hotkey
     .split('+')
-    .map((part) => names[part] ?? part)
-    .join('+');
+    .filter(Boolean)
+    .map((part) => names[part] ?? part);
+}
+
+/** The hotkey with the key names of the user's language, e.g. Strg+Alt+Umschalt+D. */
+export function formatHotkey(hotkey: string, language: Language): string {
+  return hotkeyParts(hotkey, language).join('+');
 }

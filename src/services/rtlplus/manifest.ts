@@ -7,5 +7,5 @@ export const rtlplus: ServiceManifest = {
   startUrl: 'https://plus.rtl.de/',
   allowedDomains: ['rtl.de', 'amazon.de', 'amazon.com'],
   brandColor: '#e5002b',
-  symbol: 'rtlplus.svg',
+  symbol: 'logos/rtlplus.svg',
 };

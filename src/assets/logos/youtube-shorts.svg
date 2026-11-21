@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="8 5 32.2 38">
+  <!-- The YouTube Shorts logo, a trademark of Google LLC. Redrawn by hand for floawty to name the service; not under floawty's GPL-3.0, see NOTICE.md. -->
+  <defs><linearGradient id="glass" gradientUnits="userSpaceOnUse" x1="0" y1="6" x2="0" y2="42"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity=".8"/></linearGradient><mask id="play"><path fill="#fff" d="M0 0H48V48H0Z"/><path d="M20.4 18.6V29.4L29.6 24Z"/></mask></defs>
+  <path fill="url(#glass)" mask="url(#play)" d="M28.67 25.91L35.38 21.55A8.5 8.5 0 0 0 26.13 7.29L19.42 11.65A8.5 8.5 0 0 0 28.67 25.91ZM21.87 40.71L28.58 36.35A8.5 8.5 0 0 0 19.33 22.09L12.62 26.45A8.5 8.5 0 0 0 21.87 40.71Z"/>
+</svg>

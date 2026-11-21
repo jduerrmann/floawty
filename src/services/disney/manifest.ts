@@ -7,5 +7,5 @@ export const disney: ServiceManifest = {
   allowedDomains: ['disneyplus.com', 'disney.com'],
   // Lighter than Disney+'s navy so the glass tile shows its colour on the dark ground.
   brandColor: '#3d7bff',
-  symbol: 'disney.svg',
+  symbol: 'logos/disney.svg',
 };

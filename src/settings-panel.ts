@@ -11,6 +11,7 @@ function element<T extends HTMLElement>(id: string): T {
 const TEXTS: [string, MessageKey][] = [
   ['settings-title', 'settingsTitle'],
   ['settings-done', 'done'],
+  ['general-title', 'generalTitle'],
   ['language-label', 'language'],
   ['hotkeys-title', 'hotkeysTitle'],
   ['shorts-title', 'shortsTitle'],
@@ -24,11 +25,12 @@ const TEXTS: [string, MessageKey][] = [
   ['restart-question', 'restartQuestion'],
   ['restart-yes', 'restartConfirm'],
   ['restart-no', 'cancel'],
-  ['reset-title', 'resetTitle'],
+  ['data-title', 'dataTitle'],
   ['reset-explain', 'resetExplain'],
   ['reset', 'resetTitle'],
   ['reset-yes', 'resetConfirm'],
   ['reset-no', 'cancel'],
+  ['trademark-note', 'trademarkNote'],
 ];
 const PORTRAIT_OPTIONS: Record<string, MessageKey> = {
   rotated: 'portraitRotated',

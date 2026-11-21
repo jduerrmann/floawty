@@ -1,10 +1,4 @@
-:root {
-  color-scheme: dark;
-  --text: #f2f2f2;
-  --accent: #00bcd4;
-  --pill: rgb(17 17 17 / 82%);
-}
-
+/* The bar: a glass pill that follows Windows on the tiles and settings, and is dark over a service. */
 [hidden] {
   display: none !important;
 }
@@ -15,14 +9,18 @@ body {
   margin: 0;
   overflow: hidden;
   background: transparent;
-  font:
-    13px system-ui,
-    sans-serif;
+  color: var(--text);
+  font: 13px var(--font);
+}
+
+/* Pins the light-dark() tokens of the whole bar to their dark values. */
+body.over-service {
+  color-scheme: dark;
 }
 
 /* In window mode the bar is a strip above the page, not over it. */
 body.docked {
-  background: #111;
+  background: var(--ground-1);
 }
 
 body {
@@ -37,21 +35,76 @@ body {
   align-items: center;
   min-width: 0;
   max-width: calc(100% - 8px);
-  padding: 2px 6px;
+  box-sizing: border-box;
+  padding: 1px 6px;
+  border: 1px solid var(--glass-edge);
   border-radius: 16px;
-  background: var(--pill);
-  box-shadow: 0 1px 6px rgb(0 0 0 / 40%);
+  background: var(--glass-strong);
+  /* The webview is 4 px wider than the pill on each side; the shadow stays inside. */
+  box-shadow: 0 1px 3px var(--shadow-color);
+}
+
+/* Icons are files shown as masks, so they take the text colour in light and dark. */
+.controls button::before,
+.grip::before {
+  display: block;
+  width: 18px;
+  height: 18px;
+  margin: auto;
+  background: currentcolor;
+  content: '';
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
 }
 
 /* Over a service the bar is only as wide as its controls; the grip moves the window. */
 .grip {
   flex: none;
   width: 14px;
-  color: rgb(255 255 255 / 55%);
-  font-size: 14px;
-  text-align: center;
+  color: var(--text-muted);
   cursor: move;
-  user-select: none;
+}
+
+.grip::before {
+  width: 14px;
+  mask-image: url('./assets/icons/grip.svg');
+}
+
+#back::before {
+  mask-image: url('./assets/icons/back.svg');
+}
+
+#click-through::before {
+  mask-image: url('./assets/icons/click-through.svg');
+}
+
+#on-top::before {
+  mask-image: url('./assets/icons/on-top.svg');
+}
+
+#shorts::before {
+  mask-image: url('./assets/icons/auto-mode.svg');
+}
+
+#video-only::before {
+  mask-image: url('./assets/icons/video-only.svg');
+}
+
+#zoom::before {
+  mask-image: url('./assets/icons/zoom.svg');
+}
+
+#mode::before {
+  mask-image: url('./assets/icons/window-mode.svg');
+}
+
+#settings::before {
+  mask-image: url('./assets/icons/settings.svg');
+}
+
+#quit::before {
+  mask-image: url('./assets/icons/close.svg');
 }
 
 .controls.appear {
@@ -64,6 +117,12 @@ body {
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .controls.appear {
+    animation: none;
+  }
+}
+
 .controls button {
   flex: none;
   width: 28px;
@@ -73,7 +132,6 @@ body {
   border-radius: 50%;
   background: transparent;
   color: var(--text);
-  font-size: 15px;
   cursor: pointer;
 }
 
@@ -84,6 +142,11 @@ body {
 
 .controls.compact button {
   width: 20px;
+}
+
+.controls.compact button::before {
+  width: 16px;
+  height: 16px;
 }
 
 .controls.compact input {
@@ -107,9 +170,13 @@ body {
   flex: none;
 }
 
-.controls button:hover,
+.controls button:hover {
+  background: var(--control-hover);
+}
+
+/* The tint shows the state; the icon keeps the text colour, which stays readable on it. */
 .controls button[aria-pressed='true'] {
-  background: rgb(255 255 255 / 16%);
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
 }
 
 .controls button.problem {
@@ -131,6 +198,10 @@ body {
 .controls input:disabled {
   opacity: 0.35;
   cursor: default;
+}
+
+.controls button:disabled:hover {
+  background: transparent;
 }
 
 .controls input {
@@ -163,8 +234,9 @@ body {
   left: 8px;
   margin: 0;
   padding: 4px 8px;
-  border-radius: 4px;
-  background: rgb(0 0 0 / 70%);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--radius-s);
+  background: var(--glass-strong);
   color: var(--text);
   font-size: 12px;
   text-align: right;

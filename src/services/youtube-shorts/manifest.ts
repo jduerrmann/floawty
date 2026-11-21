@@ -7,6 +7,6 @@ export const youtubeShorts: ServiceManifest = {
   id: 'youtube-shorts',
   name: 'YouTube Shorts',
   startUrl: 'https://www.youtube.com/shorts',
-  symbol: 'youtube-shorts.svg',
+  symbol: 'logos/youtube-shorts.svg',
   startsShortsAuto: true,
 };
