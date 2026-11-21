@@ -1,7 +1,7 @@
 ---
 type: plan
 tags: [package, youtube, shorts, video-only]
-status: in-progress
+status: done
 created: 2026-11-21
 updated: 2026-11-21
 source: visual plan "Shorts-Scrollen und TikTok", rounds 4–5, 2026-11-20/21
@@ -53,15 +53,15 @@ YouTube's own seek bar, shown while the mouse is over the video, never under flo
   at the bottom: the seek bar on the bottom edge, the row directly above it.
 
 ## Acceptance criteria
-- [ ] Video only on `/shorts/…`, mouse over the video: ▶, 🔊 (slider opens on hover)
+- [x] Video only on `/shorts/…`, mouse over the video: ▶, 🔊 (slider opens on hover)
       and ⋮ at the bottom above the seek bar; nothing within floawty's bar (top 40 px).
-- [ ] Mouse away: the row hides as YouTube does; the seek bar shows as YouTube shows it.
-- [ ] Volume and mute work and stay as YouTube keeps them; seeking works; ads follow
+- [x] Mouse away: the row hides as YouTube does; the seek bar shows as YouTube shows it.
+- [x] Volume and mute work and stay as YouTube keeps them; seeking works; ads follow
       YouTube's own rules.
-- [ ] Wheel and swipe paging (sf-01), the ad card and the auto mode behave as before.
-- [ ] Without video only and in window mode nothing changes.
-- [ ] A changed selector leaves the controls hidden as today: no crash, no frozen picture.
-- [ ] Maintainer live test.
+- [x] Wheel and swipe paging (sf-01), the ad card and the auto mode behave as before.
+- [x] Without video only and in window mode nothing changes.
+- [x] A changed selector leaves the controls hidden as today: no crash, no frozen picture.
+- [x] Maintainer live test.
 
 ## Tests first
 - Playwright adapter on the routed Shorts fixture, extended by a control row and a seek
@@ -122,6 +122,6 @@ YouTube's own seek bar, shown while the mouse is over the video, never under flo
   219.3 → 236.5 MB) without a change to the tile view; not caused by this CSS.
 
 ## Resume here
-Code, tests, notes and the app run done on `main`, uncommitted; maintainer test passed;
-review resolved. Open live: the wheel over the row, an ad Short with the row hovered.
-Next: commit after the maintainer's OK, then set `done` and archive.
+Done: committed as 4b6f60b (2026-11-21) after verify, measure, the advisor review and the
+maintainer's live tests, the wheel over the row included (2026-11-21); archived. Not seen
+live: an ad Short with the row hovered (the card lies above the row by YouTube's order).

@@ -79,8 +79,8 @@ Status: `{ aspect, problems: ("controls-missing" | "player-missing")[] }`, at mo
 - A renamed `.player-controls` or `#scrubber` is skipped like the other overlays: volume
   and seeking are gone under video only, without a warning dot.
 - The row and bar are `position: fixed`; YouTube's Short boxes (`contain: size layout`,
-  live 2026-11-21) hold them, so they move with their Short. Whether the wheel over the
-  row pages like over the video is not settled live.
+  live 2026-11-21) hold them, so they move with their Short, and the wheel over the row
+  pages like over the video (maintainer, 2026-11-21).
 - Netflix, Prime Video, Disney+ and RTL+ show only their player while playing (maintainer,
   2026-11-18); Netflix's page scrollbar is removed by its own script ([[tech-services]]).
 - Twitch's channel list (`NOT_CHANNELS`) is hand-made; a missed page of Twitch's own
