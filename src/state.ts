@@ -32,7 +32,7 @@ export interface OverlayState extends Preferences {
 
 export type PageProblem = 'controls-missing' | 'player-missing';
 
-/** The preferences with the Shorts auto mode on, as the Shorts tile opens. */
+/** The preferences with the auto mode on, as the Shorts and TikTok tiles open. */
 export function withShortsAuto(preferences: Preferences): Preferences {
   return { ...preferences, shorts: { ...preferences.shorts, auto: true } };
 }

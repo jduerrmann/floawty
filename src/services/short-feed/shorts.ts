@@ -11,6 +11,7 @@ export type ShortsEvent =
   | { type: 'media-started'; now: number }
   | { type: 'time'; currentTime: number; duration: number; now: number }
   | { type: 'ended'; now: number }
+  | { type: 'slide'; index: number; count: number; now: number }
   | { type: 'timer'; now: number }
   | { type: 'gesture'; now: number };
 
@@ -27,6 +28,8 @@ export interface ShortsState {
   /** A Short that started while floawty was hidden or covered; its first sample pauses it. */
   startedUnseen: boolean;
   previousTime: number | null;
+  /** The pictures of a slideshow (TikTok photo series) shown this round, the current one last. */
+  slidesSeen: readonly number[];
   dueAt: number | null;
 }
 
@@ -47,6 +50,7 @@ export function initialShorts(): ShortsState {
     active: true,
     startedUnseen: false,
     previousTime: null,
+    slidesSeen: [],
     dueAt: null,
   };
 }
@@ -60,11 +64,18 @@ export function step(state: ShortsState, event: ShortsEvent): StepResult {
     case 'active':
       return onActive(state, event.active);
     case 'media-started':
-      return idle({ ...state, previousTime: null, startedUnseen: !state.active });
+      return idle({
+        ...state,
+        previousTime: null,
+        slidesSeen: [],
+        startedUnseen: !state.active,
+      });
     case 'time':
       return onTime(state, event);
     case 'ended':
       return onRunComplete(state, event.now);
+    case 'slide':
+      return onSlide(state, event);
     case 'timer':
       return onTimer(state, event.now);
     case 'gesture':
@@ -117,6 +128,18 @@ function onTime(
   return nearEnd && nearStart && jumpedBack
     ? onRunComplete(sampled, event.now)
     : unchanged(sampled);
+}
+
+// A slideshow has run once when, after every picture was shown, the next one comes up.
+function onSlide(
+  state: ShortsState,
+  event: { index: number; count: number; now: number },
+): StepResult {
+  const seen = state.slidesSeen;
+  if (seen.at(-1) === event.index) return unchanged(state);
+  const round = seen.length > 0 && event.count > 1 && new Set(seen).size >= event.count;
+  if (round) return onRunComplete({ ...state, slidesSeen: [event.index] }, event.now);
+  return unchanged({ ...state, slidesSeen: [...seen, event.index] });
 }
 
 function onRunComplete(state: ShortsState, now: number): StepResult {

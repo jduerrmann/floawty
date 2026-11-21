@@ -3,7 +3,7 @@ type: plan
 tags: [plan-map, shorts, tiktok]
 status: active
 created: 2026-11-20
-updated: 2026-11-20
+updated: 2026-11-21
 source: visual plan "Shorts-Scrollen und TikTok", rounds 1–3, 2026-11-20; advisor plan check
 ---
 
@@ -31,7 +31,9 @@ Decisions: [[sign-in-window-for-popups]], [[tiktok-as-short-feed]],
 - Ads play once in full. On YouTube Shorts the ad card stays visible under video only
   ([[shorts-video-only-fills-with-the-list]]); for TikTok's ad label see [[open-questions]] #9.
 - Guest dialogs and captchas stay above the video; floawty never closes or bypasses them.
-- LIVE items and photo series have no end; the auto mode stays until the user scrolls.
+- A photo series moves on once all its pictures were shown or its music has run,
+  whichever comes first (changed 2026-11-21 after the maintainer's tests); a LIVE item has
+  no end, the auto mode stays until the user scrolls.
 - Sign-in window: see [[sign-in-window-for-popups]]. Off-list links inside it do
   nothing (host-only log line); the feed keeps running behind it.
 - AGENTS.md rule 9 names the auto mode for Shorts and TikTok and the sign-in window;

@@ -335,3 +335,52 @@ describe('Shorts state machine', () => {
     expect(result.actions.flat()).toEqual([]);
   });
 });
+
+describe('a slideshow (TikTok photo series)', () => {
+  const slide = (index: number, count: number, now: number): ShortsEvent => ({
+    type: 'slide',
+    index,
+    count,
+    now,
+  });
+
+  it('completes a run when the last picture gives way to the first', () => {
+    const shown = run(playing(), [slide(0, 3, 100), slide(1, 3, 4000), slide(2, 3, 8000)]);
+    expect(shown.actions.flat()).toEqual([]);
+    const wrapped = step(shown.state, slide(0, 3, 12000));
+    expect(wrapped.actions).toEqual([{ type: 'pause' }, { type: 'schedule', at: 13000 }]);
+  });
+
+  it('does not complete a run on a jump back before the last picture', () => {
+    const result = run(playing(), [slide(0, 4, 100), slide(1, 4, 4000), slide(0, 4, 5000)]);
+    expect(result.actions.flat()).toEqual([]);
+  });
+
+  it('forgets the pictures seen when a new item starts', () => {
+    const before = run(playing(), [slide(0, 3, 100), slide(1, 3, 4000), slide(2, 3, 8000)]).state;
+    const result = run(before, [started(9000), slide(0, 3, 9100)]);
+    expect(result.actions.flat()).toEqual([]);
+  });
+
+  it('ignores a single picture', () => {
+    const result = run(playing(), [slide(0, 1, 100), slide(0, 1, 4000)]);
+    expect(result.actions.flat()).toEqual([]);
+  });
+
+  it('counts the round from whichever picture it first sees', () => {
+    const shown = run(
+      playing(),
+      [3, 4, 0, 1, 2].map((index, i) => slide(index, 5, 100 + i * 2500)),
+    );
+    expect(shown.actions.flat()).toEqual([]);
+    const done = step(shown.state, slide(3, 5, 12600));
+    expect(done.actions).toEqual([{ type: 'pause' }, { type: 'schedule', at: 13600 }]);
+  });
+
+  it('starts a new round after one held by the mouse', () => {
+    const held = run(playing(), [hover(true, 50), slide(0, 3, 100), slide(1, 3, 2600)]);
+    const after = run(held.state, [slide(2, 3, 5100), slide(0, 3, 7600), hover(false, 8000)]);
+    expect(after.actions.flat()).toEqual([]);
+    expect(step(after.state, slide(1, 3, 10100)).actions).toEqual([]);
+  });
+});

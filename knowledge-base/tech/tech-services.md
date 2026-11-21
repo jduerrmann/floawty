@@ -4,7 +4,7 @@ area: services
 tags: [tiles, services, webview, navigation, privacy]
 status: active
 created: 2026-11-17
-updated: 2026-11-20
+updated: 2026-11-21
 source: mvp-04 implementation, mvp-05
 ---
 
@@ -42,7 +42,7 @@ page inside the main window.
 
 | File | Role | Tests |
 |---|---|---|
-| `src/services/<id>/manifest.ts` | id, name, start URL, allowed domains (incl. sign-in), brand colour, symbol, `shortsAutoMode` (YouTube, YouTube Shorts), `videoOnly` (YouTube, YouTube Shorts, Twitch, Crunchyroll; [[tech-video-only]]), `startsShortsAuto` (the Shorts tile turns the auto mode on before opening) | Vitest, Playwright |
+| `src/services/<id>/manifest.ts` | id, name, start URL, allowed domains (incl. sign-in), brand colour, symbol, `shortsAutoMode` (YouTube, YouTube Shorts, TikTok), `videoOnly` (YouTube, YouTube Shorts, Twitch, Crunchyroll; [[tech-video-only]]), `startsShortsAuto` (the Shorts and TikTok tiles turn the auto mode on before opening) | Vitest, Playwright |
 | `src/services/manifest.ts` | manifest validation, `hostAllowed` | Vitest |
 | `src/custom-tiles.ts` | own pages: name and URL rules, https added, duplicates, allowed domain = host without `www.` | Vitest |
 | `src/tiles.ts`, `src/home.ts` | tiles, options menu (rename, remove), add/rename form, first-start notice | Playwright |
@@ -54,7 +54,10 @@ page inside the main window.
 | `src-tauri/src/commands.rs` | `tiles_state`, `accept_notice`, `set_custom_tiles`, `open_service` / `close_service` (async) | Playwright |
 
 Settings gain `noticeAccepted`, `customTiles`, `lastService` (id, URL, allowed
-domains) and the hotkey `playPause` (Ctrl+Alt+Shift+Space).
+domains) and the hotkey `playPause` (Ctrl+Alt+Shift+Space): it pauses every playing video and audio,
+or else plays the video across the middle of the window (else the page's only video) –
+`src-tauri/src/play_pause.js`, tested in `tests/adapters/play-pause.spec.ts`; feeds like
+TikTok keep the previous item's video in the page.
 
 Tests run the release build with `FLOAWTY_DATA_DIR` and `WEBVIEW2_USER_DATA_FOLDER`
 set to fresh temporary folders (`tests/app.ts`), so they never touch the user's data,

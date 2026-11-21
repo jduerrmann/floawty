@@ -54,8 +54,8 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
   German complete, same placeholders – Vitest). `system` follows Windows. Changing
   the language reloads both pages. Hotkeys are shown localized (Strg, Umschalt,
   Leertaste, arrows) everywhere, also in the click-through hint.
-- Shorts settings: pause 0–10 s, "hold while the mouse is over floawty" (default on),
-  size while a Short plays (`rotated` default or `separate`, [[tech-window]]).
+- Auto-mode settings (section "Shorts and TikTok"): pause 0–10 s, "hold while the mouse
+  is over floawty" (default on), size while a short video plays (`rotated` default or `separate`, [[tech-window]]).
 - The update check is stored only (off by default); nothing talks to GitHub yet.
 - "Use graphics acceleration" (default on): turning it off or on asks "Restart floawty
   now?" in place; Cancel puts the box back, Restart saves and restarts
@@ -78,7 +78,7 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
 | `src/i18n.ts` | all texts, `resolveLanguage` | Vitest |
 
 Bar controls: ◀ back to the tiles (only with a service), opacity 10–100 %, ⇄
-click-through, ▶ Shorts auto mode (only for services whose manifest sets
+click-through, ▶ auto mode (only for services whose manifest sets
 `shortsAutoMode`; an amber dot and another tooltip when the page script reports
 missing controls, [[tech-shorts]]), ▣ video only (only for manifests with `videoOnly`;
 the dot when the player is missing, [[tech-video-only]]), ⤢ zoom to fill (every open

@@ -14,9 +14,9 @@ use crate::settings::OpenService;
 pub const LABEL: &str = "service";
 const BROWSER_ARGS: &str =
     "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --disable-background-networking";
-const PAUSE: &str = "document.querySelectorAll('video').forEach((v) => v.pause())";
-const PLAY_PAUSE: &str =
-    "(() => { const v = document.querySelector('video'); if (v) v.paused ? v.play() : v.pause(); })()";
+const PAUSE: &str = "document.querySelectorAll('video, audio').forEach((m) => m.pause())";
+// Its own file, so the adapter tests can run it on fixture pages.
+const PLAY_PAUSE: &str = include_str!("play_pause.js");
 
 /// WebView2's arguments; every webview of one run must get the same, they share one profile.
 pub fn browser_args(graphics_acceleration: bool) -> String {

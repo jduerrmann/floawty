@@ -8,6 +8,7 @@ import { freshProfile, launch } from './app';
 const SERVICE_NAMES = [
   'YouTube',
   'YouTube Shorts',
+  'TikTok',
   'Twitch',
   'Netflix',
   'Prime Video',

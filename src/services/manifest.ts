@@ -9,11 +9,11 @@ export interface ServiceManifest {
   brandColor: string;
   /** floawty's own SVG in src/assets/symbols/; never an imitation of the service's logo. */
   symbol: string;
-  /** Offers the Shorts auto mode toggle in the bar. */
+  /** Offers the auto mode toggle (Shorts, TikTok) in the bar. */
   shortsAutoMode?: true;
   /** Offers the video only toggle in the bar. */
   videoOnly?: true;
-  /** Opening this tile turns the Shorts auto mode on. */
+  /** Opening this tile turns the auto mode on. */
   startsShortsAuto?: true;
 }
 

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>TikTok fixture</title>
+    <style>
+      body {
+        margin: 0;
+      }
+      article {
+        height: 100vh;
+      }
+      /* As on TikTok, the video fills its item. */
+      section,
+      video {
+        display: block;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- As on TikTok (2026-11-20/21): one article per item, two video elements reused across
+         them, placeholder articles without an id; item 2 is a photo series whose music is an
+         audio element, item 3 an item without any media (like a LIVE preview). -->
+    <main>
+      <article data-e2e="recommend-list-item-container"></article>
+      <article id="one-column-item-0" data-e2e="recommend-list-item-container">
+        <section data-e2e="feed-video"><video id="first"></video></section>
+      </article>
+      <article id="one-column-item-1" data-e2e="recommend-list-item-container">
+        <section data-e2e="feed-video"><video id="second"></video></section>
+      </article>
+      <article id="one-column-item-2" data-e2e="recommend-list-item-container">
+        <section data-e2e="feed-video">
+          <!-- Swiper in loop mode, as on TikTok: three pictures, the last and first copied. -->
+          <div class="swiper-wrapper">
+            <div class="swiper-slide" data-swiper-slide-index="2"><img alt="3" /></div>
+            <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="0">
+              <img alt="1" />
+            </div>
+            <div class="swiper-slide" data-swiper-slide-index="1"><img alt="2" /></div>
+            <div class="swiper-slide" data-swiper-slide-index="2"><img alt="3" /></div>
+            <div class="swiper-slide" data-swiper-slide-index="0"><img alt="1" /></div>
+          </div>
+          <audio id="music"></audio>
+          <!-- A reused video parked in the photo item, never shown here. -->
+          <video id="spare" style="display: none"></video>
+        </section>
+      </article>
+      <article id="one-column-item-3" data-e2e="recommend-list-item-container">
+        <section data-e2e="feed-video"><img alt="LIVE" /></section>
+      </article>
+    </main>
+    <button data-e2e="feed-navigation-prev">Previous</button>
+    <button data-e2e="feed-navigation-next">Next</button>
+    <script>
+      window.__calls = [];
+      let item = 0;
+      const videos = [...document.querySelectorAll('video')];
+      const media = [...document.querySelectorAll('video, audio')];
+      for (const element of media) {
+        element.__playing = false;
+        Object.defineProperty(element, 'paused', { get: () => !element.__playing });
+        // Like TikTok, a video or photo series music that ends starts again at once.
+        element.addEventListener('ended', () => {
+          element.__playing = true;
+          element.dispatchEvent(new Event('playing'));
+        });
+      }
+      // Shows an item as TikTok does when the user scrolls or presses next: in view, its media playing.
+      window.__show = (index) => {
+        item = index;
+        for (const element of media) element.__playing = false;
+        const article = document.querySelector('#one-column-item-' + index);
+        const video = index < 2 ? videos[index % 2] : null;
+        if (video) article.querySelector('section').append(video);
+        article.scrollIntoView();
+        const playing = video ?? article.querySelector('audio');
+        if (playing) {
+          playing.__playing = true;
+          playing.dispatchEvent(new Event('playing'));
+        }
+      };
+      // Like TikTok, media pauses before it fires ended.
+      window.__end = (id) => {
+        const video = document.querySelector('#' + id);
+        video.__playing = false;
+        video.dispatchEvent(new Event('ended'));
+      };
+      // Like Swiper, the next picture becomes the active slide while the music plays on.
+      window.__slide = (index, mediaId = 'music') => {
+        const slides = [...document.querySelectorAll('[data-swiper-slide-index]')];
+        for (const slide of slides) slide.classList.remove('swiper-slide-active');
+        const shown = slides.find((slide) => slide.dataset.swiperSlideIndex === String(index));
+        shown.classList.add('swiper-slide-active');
+        document.querySelector('#' + mediaId).dispatchEvent(new Event('timeupdate'));
+      };
+      document.querySelector('[data-e2e="feed-navigation-next"]').addEventListener('click', () => {
+        window.__calls.push({ name: 'advance', at: Date.now() });
+        window.__show(item + 1);
+      });
+      // ?idle keeps the feed as before its first video starts, on a placeholder item.
+      if (!location.search.includes('idle')) window.__show(0);
+    </script>
+  </body>
+</html>

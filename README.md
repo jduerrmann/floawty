@@ -16,9 +16,9 @@ else, and can even let your mouse click right through it.
 - Adjustable size, opacity and position (snap to corners, multi-monitor)
 - Click-through mode – the overlay stays visible, your clicks go to the app behind it
 - Global hotkeys (show/hide, opacity, click-through, play/pause)
-- Services: YouTube, Netflix, Prime Video, Disney+, Twitch, RTL+, Crunchyroll, Apple
-  TV, or any custom URL
-- **YouTube Shorts auto mode** – automatically moves on to the next Short
+- Services: YouTube, TikTok, Netflix, Prime Video, Disney+, Twitch, RTL+, Crunchyroll,
+  Apple TV, or any custom URL
+- **Auto mode for YouTube Shorts and TikTok** – automatically moves on to the next video
 - English and German interface
 
 ## Promises

@@ -213,7 +213,10 @@ test('a failed advance reports the problem at once until the next media start', 
   await open(page, 'shorts-no-next.html');
   await sync(page, config(true, 0));
   await loopJump(page);
-  expect((await sync(page, config(true, 0))).problems).toEqual(['controls-missing']);
+  // The click goes out one task after the event, so the missing control shows a moment later.
+  await expect
+    .poll(async () => (await sync(page, config(true, 0))).problems)
+    .toEqual(['controls-missing']);
   await page.evaluate(() => document.querySelector('video')?.dispatchEvent(new Event('loadstart')));
   expect((await sync(page, config(true, 0))).problems).toEqual([]);
 });

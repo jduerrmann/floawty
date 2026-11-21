@@ -7,9 +7,9 @@ Wording: plain imperatives are binding. `prefer`, `normally` and `by default` ma
 defaults; deviate only with a stated reason. `never` marks an invariant.
 
 floawty is a small, always-on-top overlay window for watching videos from common
-streaming services (YouTube, Netflix, Prime Video, Disney+, Twitch, …) while doing
-something else. Size, opacity and position are adjustable; for YouTube there is a
-Shorts **auto mode**. Free, open source (GPL-3.0), no server, light on an ordinary
+streaming services (YouTube, TikTok, Netflix, Prime Video, Disney+, Twitch, …) while
+doing something else. Size, opacity and position are adjustable; for YouTube Shorts and
+TikTok there is an **auto mode**. Free, open source (GPL-3.0), no server, light on an ordinary
 PC. Paths are relative to the repository root.
 
 ## 1. Read the relevant context first
@@ -123,7 +123,7 @@ its own geometry; hover bar over the video; click-through with a corner dot and 
 hotkey to leave it; configurable global hotkeys (default Ctrl+Alt+Shift); app tiles
 with own SVG symbols ([own-service-symbols](knowledge-base/decisions/own-service-symbols.md))
 and custom URL tiles; first-start notice about WebView2; best-effort "video only"
-view; YouTube Shorts auto mode; UI in English and German. Service tiles: YouTube,
+view; auto mode for YouTube Shorts and TikTok; UI in English and German. Service tiles: YouTube,
 Twitch, Netflix, Prime Video, Disney+, RTL+; further services once they pass a
 maintainer test. Windows 10/11 only.
 
@@ -131,9 +131,10 @@ maintainer test. Windows 10/11 only.
 content; ad blocking or sponsor skipping; own library, recommendations, social
 features or sync; mobile apps.
 
-**Shorts auto mode** lives in `src/services/youtube/`, detects the end of a looping
-Short (not only `ended`), moves on the way a user would, and is configurable (on/off,
-delay, pause on hover). It never likes, subscribes, comments or skips ads.
+**Auto mode** (YouTube Shorts, TikTok) lives in `src/services/short-feed/` and is used by
+the adapters; it detects the end of a video (a loop jump, not only `ended`), moves on
+through the service's own next control the way a user would, and is configurable
+(on/off, delay, pause on hover). It never likes, follows, subscribes, comments or skips ads.
 
 ## 10. Verify before reporting completion
 

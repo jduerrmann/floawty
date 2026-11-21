@@ -6,6 +6,7 @@ import type { ServiceManifest } from './manifest';
 import { netflix } from './netflix/manifest';
 import { prime } from './prime/manifest';
 import { rtlplus } from './rtlplus/manifest';
+import { tiktok } from './tiktok/manifest';
 import { twitch } from './twitch/manifest';
 import { youtube } from './youtube/manifest';
 import { youtubeShorts } from './youtube-shorts/manifest';
@@ -13,6 +14,7 @@ import { youtubeShorts } from './youtube-shorts/manifest';
 export const services: ServiceManifest[] = [
   youtube,
   youtubeShorts,
+  tiktok,
   twitch,
   netflix,
   prime,

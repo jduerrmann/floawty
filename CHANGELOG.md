@@ -48,6 +48,16 @@ User-facing changes, in plain language. Format based on
 - "Video only" (▣ in the bar or Ctrl+Alt+Shift+V): on YouTube, YouTube Shorts and
   Twitch the video fills the overlay, the rest of the page is hidden beneath it. It
   stays on until you switch it off; window mode always shows the whole page.
+- A TikTok tile opens the For You feed upright with the auto mode on: each video – and
+  each ad – plays once in full, rests for the chosen pause, then TikTok's own "next"
+  button moves on. A photo slideshow moves on once all its pictures were shown (or its
+  music has played, if that is sooner); a LIVE stays.
+  The ▶ button is called "Auto mode", its settings "Shorts and TikTok".
+  Without a TikTok account, TikTok shows its sign-in prompt every few videos and the
+  feed waits until you deal with it; floawty leaves the prompt alone.
+- Ctrl+Alt+Shift+Space pauses whatever plays, also a slideshow's music, or plays the
+  video in the middle of the window (or the page's only video), so on TikTok it never
+  starts a neighbouring video. Hiding floawty also pauses a slideshow's music.
 - With "video only" on, YouTube Shorts show just the video, and the mouse wheel or a
   swipe moves to the next or previous Short with YouTube's own animation.
 - Settings: "Use graphics acceleration" (on at first). Turning it off makes floawty

@@ -4,7 +4,7 @@ area: shorts
 tags: [tiktok, shorts, video-only, wheel]
 status: active
 created: 2026-11-20
-updated: 2026-11-20
+updated: 2026-11-21
 source: visual plan "Shorts-Scrollen und TikTok", rounds 1–3, 2026-11-20
 ---
 
@@ -31,7 +31,10 @@ wheel did nothing on Shorts, because the page beneath is locked and the player i
   extends [[video-only-lays-player-over-page]] ("only styles") by one attribute.
 - Ads play once in full; whether TikTok's ad label may be covered under video only is
   open ([[open-questions]] #9) – YouTube Shorts keep their ad card visible. Guest dialogs and captchas stay above the video and are never closed or
-  bypassed. LIVE items and photo series have no end; the auto mode stays there.
+  bypassed. A photo series moves on once all its pictures were shown or its music (an
+  `<audio>` that ends and restarts like a video) has run, whichever comes first
+  (maintainer, 2026-11-21, after his tests – first decided as "stays", then music only,
+  which took about a minute); a LIVE item has no end, the auto mode stays there.
 
 ## Alternatives
 - A separate TikTok auto mode – doubles settings and needs a migration.

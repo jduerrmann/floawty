@@ -43,6 +43,7 @@ describe('service manifests', () => {
     expect(services.map((s) => s.id)).toEqual([
       'youtube',
       'youtube-shorts',
+      'tiktok',
       'twitch',
       'netflix',
       'prime',
@@ -58,6 +59,7 @@ describe('service manifests', () => {
     expect(services.filter((s) => s.shortsAutoMode).map((s) => s.id)).toEqual([
       'youtube',
       'youtube-shorts',
+      'tiktok',
     ]);
     expect(services.filter((s) => s.videoOnly).map((s) => s.id)).toEqual([
       'youtube',
@@ -65,7 +67,10 @@ describe('service manifests', () => {
       'twitch',
       'crunchyroll',
     ]);
-    expect(services.filter((s) => s.startsShortsAuto).map((s) => s.id)).toEqual(['youtube-shorts']);
+    expect(services.filter((s) => s.startsShortsAuto).map((s) => s.id)).toEqual([
+      'youtube-shorts',
+      'tiktok',
+    ]);
   });
 });
 
