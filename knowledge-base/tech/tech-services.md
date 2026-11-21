@@ -26,6 +26,10 @@ page inside the main window.
   webviews `main` and `bar` and no remote origin; `__TAURI_INTERNALS__` exists in service pages, but every
   command is refused ("not allowed by ACL", checked for all commands). Adapter page
   scripts are asked by floawty instead ([[tech-shorts]]).
+- **floawty's own pages never load in a frame:** the CSP contains
+  `frame-ancestors 'none'`, because app commands from floawty's origin skip the ACL
+  (no app manifest). The CSP has no `connect-src` for `ipc.localhost`, so floawty's
+  UI uses Tauri's postMessage IPC; keep it so ([[floawty-ui-never-framed]]).
 - Top-level navigation stays on the service's `allowedDomains` and their subdomains;
   `about:`, `blob:` and `data:` stay; http(s)/mailto elsewhere open in the default
   browser, other schemes (e.g. `file:`) are dropped. Only the host is logged.
@@ -64,6 +68,10 @@ set to fresh temporary folders (`tests/app.ts`), so they never touch the user's 
 and with `--mute-audio`, so they stay silent.
 
 ## Known gaps
+
+- A custom tile `http://tauri.localhost/` shows floawty's home page top-level in the
+  service webview, where app commands work; accepted until sf-04
+  ([[floawty-ui-never-framed]]).
 
 - A tile id is also its page-script key (`page/<id>.js`): `youtube-shorts` has its own
   entry that imports the YouTube script. Per-service profiles must give it the

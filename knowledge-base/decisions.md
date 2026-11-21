@@ -2,7 +2,7 @@
 type: moc
 tags: [decisions]
 created: 2026-11-16
-updated: 2026-11-20
+updated: 2026-11-21
 source: conversation
 ---
 
@@ -29,6 +29,7 @@ One line per decision record in `decisions/`. Template: `templates/t-decision.md
 - [[video-only-lays-player-over-page]] – "video only" covers the page with the player by styles; YouTube, Twitch, Crunchyroll
 - [[passkey-prompts-left-to-the-service]] – passkey dialogs come from the services (Amazon too in Edge); floawty leaves them
 - [[page-scripts-polled-on-title-change]] – floawty asks the page script on title change; service pages never call floawty
+- [[floawty-ui-never-framed]] – CSP `frame-ancestors 'none'`: no service page can frame floawty's own pages to call commands
 - [[graphics-acceleration-switch]] – "Use graphics acceleration" off starts WebView2 with --disable-gpu; asks, then restarts
 
 ## ui
