@@ -22,15 +22,14 @@ wheel did nothing on Shorts, because the page beneath is locked and the player i
   adapter supplies its current video, media-start trigger and controls.
 - Under video only the wheel pages as on the service's own page: on YouTube the list of
   Shorts fills the window and YouTube swipes itself ([[shorts-video-only-fills-with-the-list]]);
-  sf-03 checks the same for TikTok first.
+  on TikTok its feed list does the same ([[tiktok-video-only-fills-with-the-feed]]).
 - TikTok's overlay is always portrait on its player pages; landscape videos letterbox.
 - TikTok's tile shows floawty's own symbol "T in an upright frame", starts at
   `/foryou` with the auto mode on, and sits after YouTube Shorts.
-- Video only on TikTok marks the current player's container with one data attribute,
-  because TikTok has one player per feed item and CSS cannot tell which one plays. This
-  extends [[video-only-lays-player-over-page]] ("only styles") by one attribute.
-- Ads play once in full; whether TikTok's ad label may be covered under video only is
-  open ([[open-questions]] #9) – YouTube Shorts keep their ad card visible. Guest dialogs and captchas stay above the video and are never closed or
+- Superseded 2026-11-21 by [[tiktok-video-only-fills-with-the-feed]]: video only on TikTok
+  was to mark the current player's container with one data attribute.
+- Ads play once in full; TikTok's ad label stays visible under video only, as YouTube's
+  ad card on Shorts (maintainer, 2026-11-21, open question #9). Guest dialogs and captchas stay above the video and are never closed or
   bypassed. A photo series moves on once all its pictures were shown or its music (an
   `<audio>` that ends and restarts like a video) has run, whichever comes first
   (maintainer, 2026-11-21, after his tests – first decided as "stays", then music only,

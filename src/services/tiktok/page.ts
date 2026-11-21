@@ -1,10 +1,9 @@
-// TikTok page script: the For You and Following feeds with the auto mode.
+// TikTok page script: its feeds and video pages with the auto mode and video only.
 import { startShortFeed } from '../short-feed/feed';
 import {
   ACTIVE_SLIDE,
   FEED_ARTICLE,
-  FEED_HOST,
-  FEED_PATHS,
+  isFeedPage,
   ITEM_MUSIC,
   ITEM_VIDEO,
   NEXT_CONTROL,
@@ -52,7 +51,7 @@ function currentSlide(): { index: number; count: number } | null {
 
 startShortFeed({
   hosts: ['tiktok.com'],
-  onFeed: () => location.hostname === FEED_HOST && FEED_PATHS.includes(location.pathname),
+  onFeed: () => isFeedPage(location.hostname, location.pathname),
   feedFound: () => currentArticle() !== null,
   currentMedia,
   // TikTok hides its arrows in narrow windows; a click on the hidden one still pages.

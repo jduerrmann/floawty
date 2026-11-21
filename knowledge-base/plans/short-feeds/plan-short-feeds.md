@@ -26,10 +26,11 @@ Decisions: [[sign-in-window-for-popups]], [[tiktok-as-short-feed]],
   "Shorts and TikTok"; settings keep `shorts.*`, no format change.
 - TikTok: portrait on its player pages; own symbol "T in an upright frame"; start
   `https://www.tiktok.com/foryou`, turns the auto mode on, tile after YouTube Shorts.
-- Video only on TikTok's feed and single video pages; the page script marks the
-  current player's container with one data attribute.
+- Video only on TikTok's feed and single video pages; the feed list fills the window as
+  on Shorts (maintainer, 2026-11-21, [[tiktok-video-only-fills-with-the-feed]]).
 - Ads play once in full. On YouTube Shorts the ad card stays visible under video only
-  ([[shorts-video-only-fills-with-the-list]]); for TikTok's ad label see [[open-questions]] #9.
+  ([[shorts-video-only-fills-with-the-list]]); TikTok's ad label stays visible too
+  (maintainer, 2026-11-21).
 - Guest dialogs and captchas stay above the video; floawty never closes or bypasses them.
 - A photo series moves on once all its pictures were shown or its music has run,
   whichever comes first (changed 2026-11-21 after the maintainer's tests); a LIVE item has
@@ -65,5 +66,4 @@ Decisions: [[sign-in-window-for-popups]], [[tiktok-as-short-feed]],
 | 05 | [[sf-05-shorts-controls-in-video-only]] | Under video only YouTube's own volume, play and seek bar for Shorts, at the bottom | 01 |
 
 01 done and archived (2026-11-20); 02 (0bfa1dc), 04 and 05 (4b6f60b) done and archived
-(2026-11-21). 03 builds on 02 and waits for [[open-questions]] #9. Next: sf-03 once #9 is
-answered.
+(2026-11-21). Next: sf-03.

@@ -1,7 +1,7 @@
 ---
 type: tech
 area: services
-tags: [video-only, page-script, youtube, twitch]
+tags: [video-only, page-script, youtube, twitch, tiktok]
 status: active
 created: 2026-11-18
 updated: 2026-11-21
@@ -10,9 +10,10 @@ source: mvp-07 implementation
 
 # "Video only"
 
-The page script lays the service's player over its own page – on YouTube Shorts the whole
-list of Shorts. Decisions: [[video-only-lays-player-over-page]],
-[[shorts-video-only-fills-with-the-list]]; bridge and wake-ups: [[tech-shorts]].
+The page script lays the service's player over its own page – on YouTube Shorts and TikTok the
+whole list of short videos. Decisions: [[video-only-lays-player-over-page]],
+[[shorts-video-only-fills-with-the-list]], [[tiktok-video-only-fills-with-the-feed]]; bridge
+and wake-ups: [[tech-shorts]].
 
 ## Invariants
 
@@ -43,6 +44,13 @@ list of Shorts. Decisions: [[video-only-lays-player-over-page]],
   its 24 px hit area – clear of floawty's bar at the top. YouTube shows the bar always and
   the row only on hover, by itself (live 2026-11-21)
   ([[service-own-controls-in-video-only]]).
+- TikTok (feeds and video pages): the list sits at layer 1000, between TikTok's header (100)
+  and its dialogs (2100 and up, live 2026-11-21). TikTok snaps the list and plays the item in
+  view itself (built-in browser, 2026-11-21: a large wheel turn and ten next clicks paged
+  exactly, switching video only at the tenth item kept it). One wheel notch is not yet
+  checked in floawty; the pane's synthetic notch snapped back, on TikTok's own page too.
+  Its volume control (slider opens to the right on hover) sits low on the left, 48 px above
+  the bottom, clear of its label chips; its progress bar stays at the bottom edge.
 
 ## Rules per adapter (`selectors.ts`)
 
@@ -51,6 +59,7 @@ list of Shorts. Decisions: [[video-only-lays-player-over-page]],
 | YouTube | `www.youtube.com/watch` | `ytd-watch-flexy:not([hidden]) #movie_player` | the hidden watch page stays in the DOM elsewhere; the wider layout names `#player-container` for view transitions (a stacking context), so every ancestor of the player gets `view-transition-name: none` |
 | YouTube | `www.youtube.com/shorts/…` | the Short boxes `[class*=reel-video-in-sequence]` of the list `ytd-shorts #shorts-container` | the list is fixed at 2200; its Short boxes and the nested renderer, player containers, `ytd-player` and `#shorts-player` are window-sized; on each level everything beside the way to the player gets `content-visibility: hidden` and `pointer-events: none` – YouTube's overlay parts set their own visibility, so `visibility: hidden` did not hold (live 2026-11-20) |
 | Twitch | `www.twitch.tv`: one path part not in a list of Twitch's own pages, `/videos/<id>` | `.persistent-player .video-player` | box: no transform, overflow or max-height; `main` lifted over the nav |
+| TikTok | `www.tiktok.com`: `/`, `/foryou`, `/following`, `/@user/video/<id>`, `/@user/photo/<id>` | the media cards `section[data-e2e=feed-video]` of the items in `#column-list-container` | the list is fixed at 1000, its scrollbar hidden; items, their children and the media cards are window-sized (TikTok sets `min-width`, `min-height` and `aspect-ratio`; its card stays 348 px wide in a 270 px window otherwise); `display: none` for the card's sibling sections (the action bar) and, on it, creator, description, music and ⋯ – a deny list, so TikTok's labels (an ad's among them) stay; the volume container moves to the bottom left |
 | Crunchyroll | `www.crunchyroll.com/[lang/]watch/…` | `.video-player-wrapper` (Bitmovin player in the page, no iframe) | layer 200: above header (100) and layout overlay (99); `#player-container` fills, no padding |
 
 ## Structure
@@ -60,6 +69,7 @@ list of Shorts. Decisions: [[video-only-lays-player-over-page]],
 | `src/services/video-only.ts` | class, style, settle time, missing check | Playwright adapter |
 | `src/services/bridge.ts` | frozen `__floawty.sync` in the top frame on the adapter's hosts | Playwright adapter |
 | `src/services/youtube/page.ts` | wires the rules into its `sync` | `tests/adapters/video-only.spec.ts`, Shorts in `video-only-shorts.spec.ts` |
+| `src/services/tiktok/page.ts` | wires the rules into its feed | `tests/adapters/video-only-tiktok.spec.ts` |
 | `src/services/twitch/page.ts`, `crunchyroll/page.ts` | `startVideoOnlyPage(hosts, rules)`: video only is their whole script | `tests/adapters/video-only.spec.ts` |
 | `src-tauri/src/page.rs` | input `videoOnly`, status `problems` | unit |
 | `src/bar.ts` | ▣ for manifests with `videoOnly` | `tests/video-only.spec.ts` |
@@ -81,6 +91,14 @@ Status: `{ aspect, problems: ("controls-missing" | "player-missing")[] }`, at mo
 - The row and bar are `position: fixed`; YouTube's Short boxes (`contain: size layout`,
   live 2026-11-21) hold them, so they move with their Short, and the wheel over the row
   pages like over the video (maintainer, 2026-11-21).
+- TikTok's ad label was not seen live (no ad in about 70 guest items, 2026-11-21). The deny
+  list keeps it only outside the hidden parts; on an ad, a label in the name line or the
+  description, the advertiser's name and its text would be hidden.
+- A renamed TikTok component (`…--DivCreatorInfoContainer`, `…--DivVolumeControlContainer`)
+  shows that part again or leaves the volume at the top under floawty's bar, without a dot.
+- A photo page's path (`/@user/photo/<id>`) is assumed, not seen live.
+- `/following` without an account shows no feed: video only stays off there and shows the
+  warning dot.
 - Netflix, Prime Video, Disney+ and RTL+ show only their player while playing (maintainer,
   2026-11-18); Netflix's page scrollbar is removed by its own script ([[tech-services]]).
 - Twitch's channel list (`NOT_CHANNELS`) is hand-made; a missed page of Twitch's own

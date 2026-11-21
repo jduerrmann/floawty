@@ -79,6 +79,7 @@ describe('service manifests', () => {
     expect(services.filter((s) => s.videoOnly).map((s) => s.id)).toEqual([
       'youtube',
       'youtube-shorts',
+      'tiktok',
       'twitch',
       'crunchyroll',
     ]);

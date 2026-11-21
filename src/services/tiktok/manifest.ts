@@ -10,6 +10,7 @@ export const tiktok: ServiceManifest = {
   symbol: 'tiktok.svg',
   shortsAutoMode: true,
   startsShortsAuto: true,
+  videoOnly: true,
   // "Continue with Google / Apple / Facebook" open these pop-ups (live 2026-11-20).
   signInHosts: ['accounts.google.com', 'appleid.apple.com', 'www.facebook.com'],
 };

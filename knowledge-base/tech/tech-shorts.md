@@ -80,7 +80,7 @@ activated from the start and the scripted click paged, so the blocked phase is a
 |---|---|---|
 | `src/services/short-feed/shorts.ts` | pure state machine `step(state, event) → actions` | Vitest |
 | `src/services/short-feed/feed.ts`, `input.ts` | DOM wiring of the auto mode, `__floawty.sync`, problem after 2 s, video only; reads the input as untrusted | Playwright adapter (both services) |
-| `src/services/tiktok/` | manifest (`/foryou`, own symbol, `startsShortsAuto`), selectors, page: feed pages `/`, `/foryou`, `/following` | Vitest, `tests/adapters/tiktok.spec.ts` |
+| `src/services/tiktok/` | manifest (`/foryou`, own symbol, `startsShortsAuto`), selectors, page: feed pages `/`, `/foryou`, `/following` and video pages `/@user/video/<id>` | Vitest, `tests/adapters/tiktok.spec.ts` |
 | `src/services/youtube-shorts/` | the Shorts tile: YouTube manifest with `/shorts` start, own symbol, `startsShortsAuto`; its `page.ts` imports the YouTube script | Vitest, Playwright |
 | `src/services/youtube/page.ts`, `selectors.ts` | the YouTube adapter of the feed: `/shorts/` pages, video only | Playwright adapter (Edge) |
 | `src-tauri/src/page.rs` | script lookup, reset per service, wake, hover, sync, parse | unit |
@@ -96,7 +96,6 @@ hosts the top frame gets a frozen no-op bridge, so a page cannot catch the input
 - TikTok without an account: its sign-in dialog opens within seconds and, while open,
   TikTok ignores the next control; the auto mode then waits in `blocked` until the user's
   next click (live 2026-11-20). floawty never closes the dialog.
-- TikTok's single video pages (`/@user/video/…`) are no feed pages yet (sf-03).
 - TikTok hides its up/down arrows in narrow and some landscape windows (`display: none`);
   a click on the hidden arrow still pages (live 2026-11-21, browser shown), so presence
   counts. Live checks in the built-in browser hold only while it is shown: hidden, smooth

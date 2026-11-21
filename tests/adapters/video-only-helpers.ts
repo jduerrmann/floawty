@@ -32,6 +32,11 @@ export const CRUNCHYROLL: Site = {
   origin: 'https://www.crunchyroll.com',
   fixtures: 'crunchyroll',
 };
+export const TIKTOK: Site = {
+  script: 'tiktok',
+  origin: 'https://www.tiktok.com',
+  fixtures: 'tiktok',
+};
 export const EPISODE = '/de/watch/G0000000/episode';
 
 export async function open(
