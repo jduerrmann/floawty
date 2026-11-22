@@ -3,7 +3,7 @@ type: note
 tags: [product, scope]
 status: active
 created: 2026-11-16
-updated: 2026-11-20
+updated: 2026-11-22
 source: conversation
 ---
 
@@ -20,7 +20,7 @@ GitHub Releases, start, pick a service, watch. No account, no setup.
 ## Core experience
 
 1. Start floawty → the last used service plays in the overlay. First start: app tiles
-   with the services' logos plus saved custom URLs, and a cookie-banner-like notice
+   with the services' logos plus saved custom URLs, and over them until OK a notice
    about WebView2.
 2. The user signs in once in window mode (a normal window), then switches to the
    floaty view (the overlay); the session is remembered.

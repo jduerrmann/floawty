@@ -41,6 +41,8 @@ const en = {
   themeSystem: 'Like Windows',
   themeLight: 'Light',
   themeDark: 'Dark',
+  animations: 'Animations',
+  animationsNote: 'Off keeps tiles still with only a glow. Uses less memory from the next start.',
   hotkeysTitle: 'Hotkeys',
   hotkeyToggleVisible: 'Show or hide floawty',
   hotkeyClickThrough: 'Click-through on or off',
@@ -129,6 +131,9 @@ const de: Record<MessageKey, string> = {
   themeSystem: 'Wie Windows',
   themeLight: 'Hell',
   themeDark: 'Dunkel',
+  animations: 'Animationen',
+  animationsNote:
+    'Aus: Kacheln leuchten nur und bewegen sich nicht. Weniger Arbeitsspeicher ab dem nächsten Start.',
   hotkeysTitle: 'Tastenkürzel',
   hotkeyToggleVisible: 'floawty zeigen oder verstecken',
   hotkeyClickThrough: 'Durchklicken an oder aus',

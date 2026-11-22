@@ -25,6 +25,9 @@
   --control-edge: light-dark(rgb(0 0 0 / 14%), rgb(255 255 255 / 16%));
   --shadow-color: light-dark(rgb(40 40 90 / 26%), rgb(0 0 0 / 55%));
 
+  /* Dims the start page behind the first-start notice, in both schemes. */
+  --scrim: rgb(8 10 22 / 55%);
+
   --radius-s: 6px;
   --radius-m: 10px;
   --ease: 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -46,4 +49,9 @@
   :root {
     --ease: 0ms linear;
   }
+}
+
+/* Animations switched off mean the same as reduced motion; each such rule has both. */
+:root[data-still] {
+  --ease: 0ms linear;
 }

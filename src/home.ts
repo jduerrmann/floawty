@@ -15,14 +15,20 @@ function element<T extends HTMLElement>(id: string): T {
 
 function showNotice(language: Language, accepted: boolean): void {
   const notice = element('notice');
-  notice.hidden = accepted;
+  // Not <dialog>: showModal() would make the settings inert, which open in this page too.
+  const waitForOk = (waiting: boolean) => {
+    notice.hidden = !waiting;
+    element('tiles-area').inert = waiting;
+  };
+  waitForOk(!accepted);
   element('notice-text').textContent = t(language, 'noticeText');
   const ok = element<HTMLButtonElement>('notice-ok');
   ok.textContent = t(language, 'noticeOk');
   ok.onclick = () => {
-    notice.hidden = true;
+    waitForOk(false);
     void invoke('accept_notice');
   };
+  if (!accepted) ok.focus();
 }
 
 function labelForm(language: Language): void {

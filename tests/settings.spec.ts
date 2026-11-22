@@ -2,7 +2,7 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { freshProfile, launch, type Profile, type RunningApp } from './app';
 import { EXE } from './tested-exe';
 
@@ -32,6 +32,38 @@ test('the language changes both pages and is kept', async () => {
     await app.stop();
   }
   expect(readFileSync(settingsFile(profile), 'utf8')).toContain('"language": "en"');
+});
+
+test('animations switched off stand still at once and after a restart', async () => {
+  const profile = freshProfile();
+  const still = (page: Page) =>
+    page.evaluate(() => document.documentElement.hasAttribute('data-still'));
+  const animations = (app: RunningApp) =>
+    app.home.getByRole('switch', { name: /^(Animations|Animationen)$/ });
+  const first = await launch(profile);
+  try {
+    await openSettings(first);
+    await expect(animations(first)).toBeChecked();
+    await animations(first).uncheck();
+    await expect.poll(() => still(first.home)).toBe(true);
+    await expect.poll(() => still(first.bar)).toBe(true);
+    await animations(first).check();
+    await expect.poll(() => still(first.home)).toBe(false);
+    await animations(first).uncheck();
+    await expect.poll(() => still(first.home)).toBe(true);
+  } finally {
+    await first.stop();
+  }
+  expect(readFileSync(settingsFile(profile), 'utf8')).toContain('"animations": false');
+  const second = await launch(profile);
+  try {
+    await expect.poll(() => still(second.home)).toBe(true);
+    await expect.poll(() => still(second.bar)).toBe(true);
+    await openSettings(second);
+    await expect(animations(second)).not.toBeChecked();
+  } finally {
+    await second.stop();
+  }
 });
 
 test('the Shorts hover hold and portrait size are saved', async () => {

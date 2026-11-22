@@ -1,11 +1,8 @@
 // The home page's real markup and styles in headless Edge: hover needs no app and no real mouse.
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 import { tiltStyle, type Pointer } from '../../src/tilt';
+import { showHome } from './own-pages';
 
-const read = (file: string): string =>
-  readFileSync(path.join(import.meta.dirname, '..', '..', 'src', file), 'utf8');
 // The shipped tiles, then with six own pages, which add rows and scrolling.
 const COUNTS = [11, 17];
 const SIZES: [number, number][] = [
@@ -27,22 +24,6 @@ const POINTERS: Pointer[] = [
   { x: 0.02, y: 0.97 },
   { x: 0.98, y: 0.97 },
 ];
-// As tiles.ts builds an own page's tile.
-const TILE =
-  '<li><button class="tile"><span class="tile-face"><span class="tile-symbol"></span>' +
-  '<span class="tile-name">Tile</span></span></button><button class="tile-more"></button></li>';
-
-async function showHome(page: Page, width: number, height: number, count: number): Promise<void> {
-  await page.setViewportSize({ width, height });
-  await page.setContent(read('index.html').replace(/<link[^>]*>|<script.*<\/script>/g, ''));
-  for (const file of ['tokens.css', 'style.css', 'tiles.css', 'settings.css']) {
-    await page.addStyleTag({ content: read(file) });
-  }
-  await page
-    .locator('#tiles')
-    .evaluate((list, tiles) => (list.innerHTML = tiles), TILE.repeat(count));
-}
-
 /** Puts the pointer on a tile and tilts it as tiles.ts does. */
 async function pointTile(page: Page, index: number, pointer: Pointer): Promise<void> {
   const item = page.locator('#tiles > li').nth(index);

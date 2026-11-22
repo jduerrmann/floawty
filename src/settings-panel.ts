@@ -17,6 +17,8 @@ const TEXTS: [string, MessageKey][] = [
   ['theme-system', 'themeSystem'],
   ['theme-light', 'themeLight'],
   ['theme-dark', 'themeDark'],
+  ['animations-label', 'animations'],
+  ['animations-note', 'animationsNote'],
   ['hotkeys-title', 'hotkeysTitle'],
   ['shorts-title', 'shortsTitle'],
   ['shorts-pause-label', 'shortsPause'],
@@ -97,6 +99,7 @@ function wirePreferences(current: () => OverlayState): void {
     change((p) => ({ ...p, shorts: { ...p.shorts, pauseSeconds: pause.valueAsNumber } }));
   });
   wireTheme(change);
+  wireAnimations(change);
   wireShorts(change);
   const updateCheck = element<HTMLInputElement>('update-check');
   updateCheck.addEventListener('change', () =>
@@ -117,6 +120,11 @@ function wireTheme(change: Change): void {
   }
 }
 
+function wireAnimations(change: Change): void {
+  const box = element<HTMLInputElement>('animations');
+  box.addEventListener('change', () => change((p) => ({ ...p, animations: box.checked })));
+}
+
 function wireShorts(change: Change): void {
   const shorts = (patch: Partial<Preferences['shorts']>) =>
     change((p) => ({ ...p, shorts: { ...p.shorts, ...patch } }));
@@ -131,6 +139,7 @@ function wireShorts(change: Change): void {
 function showValues(state: OverlayState): void {
   element<HTMLSelectElement>('language').value = state.language;
   for (const radio of themeRadios()) radio.checked = radio.value === state.theme;
+  element<HTMLInputElement>('animations').checked = state.animations;
   element<HTMLInputElement>('shorts-pause').value = String(state.shorts.pauseSeconds);
   element<HTMLInputElement>('shorts-hold').checked = state.shorts.holdOnHover;
   element<HTMLSelectElement>('portrait-size').value = state.shorts.portraitSize;
@@ -157,6 +166,7 @@ export function startSettingsPanel(state: OverlayState, language: Language): Sta
 
   return (next) => {
     const opening = next.settingsOpen && panel.hidden;
+    const closing = !next.settingsOpen && !panel.hidden;
     latest = next;
     panel.hidden = !next.settingsOpen;
     element('home').hidden = next.settingsOpen;
@@ -166,6 +176,8 @@ export function startSettingsPanel(state: OverlayState, language: Language): Sta
       element('hotkey-error').textContent = '';
       element('language').focus();
     }
+    // Back to a waiting notice; once accepted it is hidden and takes no focus.
+    if (closing) element('notice-ok').focus();
     showValues(next);
     showHotkeys(next.hotkeys);
   };

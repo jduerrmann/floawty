@@ -45,6 +45,8 @@ One line per decision record in `decisions/`. Template: `templates/t-decision.md
 - [[overlay-snaps-flush]] – the overlay snaps flush to corners and edges, no 16 px margin
 - [[bar-leaves-the-page-clickable]] – bar above the page in window mode, only as wide as its controls over a service
 - [[own-service-symbols]] – superseded: own SVG symbols on the brand colour
+- [[animations-switch]] – one switch turns all floawty animations off, glow stays; default on
+- [[first-start-notice-over-tiles]] – the notice is a centred card over inert tiles until OK
 - [[redrawn-service-logos]] – tiles show redrawn service logos with glass effects; trademarks kept apart from GPL, NOTICE
 - [[glass-design-follows-windows-theme]] – one glass design for home, settings and bar; follows Windows light/dark; cyan accent
 - [[floawty-theme-choice]] – floawty's own light/dark (default like Windows), title bar via DWM, never Tauri's theme API

@@ -123,6 +123,10 @@ body {
   }
 }
 
+:root[data-still] .controls.appear {
+  animation: none;
+}
+
 .controls button {
   flex: none;
   width: 28px;

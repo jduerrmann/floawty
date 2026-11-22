@@ -3,7 +3,7 @@ type: plan
 tags: [package, release, ui]
 status: ready
 created: 2026-11-20
-updated: 2026-11-20
+updated: 2026-11-22
 source: visual plan "Phase 3 – Release-Pipeline", approved 2026-11-20; advisor review
 ---
 
@@ -31,7 +31,7 @@ older floawty.
 Same keys and `version` counter as `settings.json`, plus a marker key; an explicit
 allow-list. Never exported: window geometry, `lastService`, `mode`,
 `noticeAccepted`, `updateCheck`. `graphicsAcceleration` is exported (maintainer,
-2026-11-20).
+2026-11-20), `animations` too (maintainer, 2026-11-22, [[animations-switch]]).
 
 ## Acceptance criteria
 - [ ] Export writes only the allow-listed keys with marker and `version`.

@@ -62,8 +62,9 @@ Base commit for the plan's review (AGENTS.md rule 14): `d529002`.
 | 02 | [[gl-02-logos-settings-bar]] | Redrawn logos, settings as glass cards, bar icons dark over video; plan review and measurement | 01 |
 | 03 | [[gl-03-theme-and-hover]] | floawty's own light/dark with title bar; tilting tiles under a moving light | 02 |
 | 04 | [[gl-04-sleeping-home]] | Dropped 2026-11-22, never built: hiding the home saves about 3 MB | – |
+| 05 | [[gl-05-animations-and-notice]] | Animations can be off; the first-start notice lies over the tiles | 03 |
 
 gl-03 touches IPC, the stored format and the shell, so it gets an independent review
-before the commit proposal.
+before the commit proposal; gl-05 likewise (stored format, IPC).
 
 gl-02 merges the former packages for logos, settings and bar ([[leaner-reviews]]).

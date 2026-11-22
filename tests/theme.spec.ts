@@ -107,11 +107,12 @@ test('the choice survives a language change and a restart, and leaves services t
     for (const theme of ['system', 'light', 'dark']) {
       await second.bar.evaluate(async (theme) => {
         const { invoke } = window.__TAURI_INTERNALS__;
-        const { language, shorts, updateCheck } = (await invoke('overlay_state')) as Record<
-          string,
-          unknown
-        >;
-        await invoke('set_preferences', { preferences: { language, shorts, updateCheck, theme } });
+        const { language, shorts, updateCheck, animations } = (await invoke(
+          'overlay_state',
+        )) as Record<string, unknown>;
+        await invoke('set_preferences', {
+          preferences: { language, shorts, updateCheck, animations, theme },
+        });
       }, theme);
       await expect
         .poll(() => second.bar.evaluate(() => document.documentElement.dataset.theme))

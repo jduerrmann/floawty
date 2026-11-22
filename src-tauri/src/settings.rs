@@ -120,6 +120,7 @@ impl Default for Shorts {
 pub struct Preferences {
     pub language: Language,
     pub theme: Theme,
+    pub animations: bool,
     pub shorts: Shorts,
     pub update_check: bool,
 }
@@ -139,6 +140,8 @@ pub struct Settings {
     pub last_service: Option<OpenService>,
     pub language: Language,
     pub theme: Theme,
+    /// Off keeps floawty's own pages still; tiles only glow.
+    pub animations: bool,
     pub shorts: Shorts,
     /// Off by default; floawty only talks to GitHub once the user turns it on.
     pub update_check: bool,
@@ -167,6 +170,7 @@ impl Default for Settings {
             last_service: None,
             language: Language::System,
             theme: Theme::System,
+            animations: true,
             shorts: Shorts::default(),
             update_check: false,
             video_only: false,
@@ -191,6 +195,7 @@ pub fn parse(text: &str) -> Settings {
 pub fn apply_preferences(settings: &mut Settings, preferences: Preferences) {
     settings.language = preferences.language;
     settings.theme = preferences.theme;
+    settings.animations = preferences.animations;
     settings.shorts = Shorts {
         pause_seconds: clamp_shorts_pause(preferences.shorts.pause_seconds),
         ..preferences.shorts
@@ -373,6 +378,28 @@ mod tests {
     }
 
     #[test]
+    fn animations_are_on_unless_switched_off() {
+        let on = to_json(&parse(r#"{ "version": 1, "opacity": 0.5 }"#));
+        assert!(on.contains(r#""animations": true"#), "{on}");
+        assert!(on.contains(r#""opacity": 0.5"#), "{on}");
+        let off = to_json(&parse(r#"{ "animations": false }"#));
+        assert!(off.contains(r#""animations": false"#), "{off}");
+    }
+
+    #[test]
+    fn the_preferences_switch_animations_off() {
+        let preferences = serde_json::from_str(
+            r#"{ "language": "en", "theme": "system", "animations": false, "updateCheck": false,
+                 "shorts": { "auto": false } }"#,
+        )
+        .expect("the panel's preferences");
+        let mut settings = Settings::default();
+        apply_preferences(&mut settings, preferences);
+        let text = to_json(&settings);
+        assert!(text.contains(r#""animations": false"#), "{text}");
+    }
+
+    #[test]
     fn preferences_survive_a_round_trip() {
         let mut settings = Settings::default();
         apply_preferences(
@@ -380,6 +407,7 @@ mod tests {
             Preferences {
                 language: Language::De,
                 theme: Theme::Dark,
+                animations: false,
                 shorts: Shorts {
                     auto: true,
                     pause_seconds: 2.5,
@@ -409,6 +437,7 @@ mod tests {
                 Preferences {
                     language: Language::En,
                     theme: Theme::System,
+                    animations: true,
                     shorts,
                     update_check: false,
                 },

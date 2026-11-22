@@ -10,6 +10,8 @@ source: visual plan "Hell/Dunkel und Hover-Effekt", rounds 1–3, 2026-11-22
 
 # Tiles tilt towards the pointer under a moving light
 
+Can be switched off, the tilt stays the default: [[animations-switch]].
+
 ## Context
 The 3 % growth on hover felt flat and pushed edge tiles out of the scroll area.
 

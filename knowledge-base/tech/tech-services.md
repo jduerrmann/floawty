@@ -67,16 +67,21 @@ page inside the main window.
   choice ([[tech-bar-and-settings]]).
 - At 480 × 270 eleven tiles fit in four columns without scrolling: rows take the
   height left (`.tiles-area` is a size container), at most 16:9, at least 52 px; below
-  that the tile area scrolls (first-start notice, small windows). Symbol and name size
+  that the tile area scrolls (small windows). Symbol and name size
   follow the tile's width and height (size container), so the name stays below the
   shade's 60 % stop in any overlay shape.
 - Hover ([[tiles-tilt-with-light]]): the button stays still and only `.tile-face`
   tilts (7°), pushed back by `tiltOf` so no corner leaves the tile's box. The pointer's
   place reaches CSS as custom properties on the `<li>`, so the ⋯ button turns with the
-  face. Light, rim and glow fade by opacity; focus and reduced motion have no tilt.
+  face. Light, rim and glow fade by opacity; focus, reduced motion and switched-off
+  animations ([[animations-switch]], [[tech-bar-and-settings]]) have no tilt.
   The light ends above the shade under the name, which has no contrast to spare.
   The tile area's padding against an equal negative margin gives the glow room
   without moving the grid (`tests/adapters/tile-hover.spec.ts`, headless).
+- First-start notice ([[first-start-notice-over-tiles]]): `.notice-ground` dims the page
+  above the tiles without taking room; `home.ts` makes the tile area inert until OK
+  and focuses OK, again when the settings close. Narrow (< 360 px) or flat (< 200 px) windows put OK beside the text;
+  the text scrolls only where it cannot fit (`tests/adapters/first-start-notice.spec.ts`, headless).
 - "+" is a mask in the text colour, so it follows a chosen theme.
 - The release CSS targets Chrome 123 (`build.cssTarget`), so `light-dark()` stays
   native and a part can pin its colour scheme; WebView2 is evergreen.

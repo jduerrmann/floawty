@@ -1,7 +1,7 @@
 ---
 type: plan
 tags: [package, glass, theme, tiles, settings]
-status: in-progress
+status: awaiting-answer
 created: 2026-11-22
 updated: 2026-11-22
 source: visual plan "Hell/Dunkel und Hover-Effekt", approved by the maintainer 2026-11-22
@@ -23,23 +23,23 @@ pointer with light and a gentle tilt that never leaves their box.
 - Tiles: `src/tilt.ts` (pure) + test, `src/tiles.ts`, `tiles.css`, `style.css`,
   `tests/adapters/tile-hover.spec.ts`. Includes the scrollbar fix found 2026-11-22.
 - Non-goals: theming services, sign-in window or tooltips; Tauri's theme API; new
-  dependencies; settings for the effect.
+  dependencies; settings for the effect (later: gl-05).
 - Read first: [[floawty-theme-choice]], [[tiles-tilt-with-light]].
 
 ## Acceptance criteria
 - [ ] `system` by default and following Windows live; `light`/`dark` apply at once to
       tiles, settings, bar and the window-mode title bar, survive a restart and
       paint right from the first frame; reset returns to `system`.
-- [ ] A forced title bar survives a Windows setting change; back to `system` takes
+- [x] A forced title bar survives a Windows setting change; back to `system` takes
       Windows' colour at once. Services' `prefers-color-scheme` is untouched.
-- [ ] A file without or with an unknown `theme` reads as `system`, the rest intact.
-- [ ] Bar dark over a service under every choice; "+" readable under every choice.
-- [ ] Segments are radios in a named group, reachable by Tab and arrows.
-- [ ] The tilted face stays in its box for every pointer position and tile shape; no
+- [x] A file without or with an unknown `theme` reads as `system`, the rest intact.
+- [x] Bar dark over a service under every choice; "+" readable under every choice.
+- [x] Segments are radios in a named group, reachable by Tab and arrows.
+- [x] The tilted face stays in its box for every pointer position and tile shape; no
       scrollbar, no cut at 240 × 135 to 3440 × 1440; clicks work up to the tile's
       edge; resting layout unchanged; ⋯ moves along and its menu works.
-- [ ] Focus glows without motion; reduced motion keeps only the glow.
-- [ ] Idle RAM on the tiles measured before and after hovering, shown to the
+- [x] Focus glows without motion; reduced motion keeps only the glow.
+- [x] Idle RAM on the tiles measured before and after hovering, shown to the
       maintainer; over 260 MB blocks the merge ([[idle-budget-260]]).
 
 ## Tests first
@@ -84,14 +84,16 @@ pointer with light and a gentle tilt that never leaves their box.
   front before the click: the specs rely on Windows activating it when it opens. Why
   that and the click sometimes fail is not captured yet.
 - App run 4, all app tests on the same exe: **46/46 green**, no launch failed.
+- Measured on that exe (one start each): after hover 267.2 MB, CPU 0 % (be9a7b0
+  235.2); YouTube 1080p 735 MB / 0.39 % at 61.5 fps, hidden 736 MB / 0 % (gl-02 725,
+  721.6). All within budget.
 
 ## Resume here
-On `claude/cool-noyce-12b84f`, not pushed. App tests are green. Next:
-1. After the maintainer's yes: measure hover on both builds, YouTube and hidden once.
-2. The maintainer decides open question 10; tick the criteria, record the numbers, set
-   `done`. Not merged before that.
-If `on-top:82` or `sign-in:171` turn red again: run them with an observer of cursor
-and foreground before blaming the build.
+On `claude/cool-noyce-12b84f`, not pushed. Tests and measurements are done, open
+question 10 is answered by [[animations-switch]] (gl-05). Only the maintainer's live
+check is left: switch Windows between light and dark under "Like Windows"; then
+`done`. If `on-top:82` or `sign-in:171` turn red again: run them with an observer
+of cursor and foreground before blaming the build.
 Found, not fixed: `budgets.spec.ts` divides frames by 60 s even when sampling takes
 longer.
 Also open from gl-01: the maintainer's live light/dark switch check.

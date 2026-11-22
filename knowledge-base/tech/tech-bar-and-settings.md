@@ -47,7 +47,7 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
 - **Bar icons** are SVG files in `src/assets/icons/` drawn as CSS masks over
   `currentcolor` (the CSP has no `data:`); pressed = accent tint, the problem dot is
   `::after`. Accessible names come from `aria-label`, the buttons have no text.
-- **Settings page:** cards General (language, update check, graphics acceleration),
+- **Settings page:** cards General (language, theme, animations, update check, graphics acceleration),
   Hotkeys, Shorts and TikTok, Data (reset), then the trademark line for the logos
   ([[redrawn-service-logos]]). rel-03's update button joins General, rel-05's export
   and import join Data. On/off settings are checkboxes with `role="switch"` (Space
@@ -82,6 +82,11 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
   first paint (the root element does not exist yet when it runs, hence the observer);
   later changes come with the state, with a session copy for reloads. `tokens.css`
   turns it into `color-scheme`; no colour may ask `prefers-color-scheme`.
+- **Animations** ([[animations-switch]]): `animations` (default on) travels with the
+  preferences; `state.ts` puts `data-still` on the root of home and bar before they
+  render and on every state. CSS gives it what `prefers-reduced-motion: reduce` gets,
+  so a new animation needs both rules. No startup script: tiles and hover need the state
+  first, and a bar fade already running stops when it arrives.
 - **Title bar:** `theme::apply` sets DWM's dark attribute on the main window and a
   subclass sets a chosen one again after every `WM_SETTINGCHANGE`, which tao answers
   with Windows' colour. It repaints only a decorated window. No Tauri calls in the
@@ -115,7 +120,7 @@ the window (the bar may be no wider than the controls); in window mode the title
 the settings.
 
 `OverlayState` (command `overlay_state`, event `overlay-state`): mode, opacity,
-clickThrough, serviceId, settingsOpen, hotkeys, language, theme, shorts (auto, pauseSeconds,
+clickThrough, serviceId, settingsOpen, hotkeys, language, theme, animations, shorts (auto, pauseSeconds,
 holdOnHover, portraitSize), updateCheck, graphicsAcceleration, videoOnly, zoom,
 alwaysOnTop, pageProblems.
 

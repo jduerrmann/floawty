@@ -6,6 +6,10 @@ User-facing changes, in plain language. Format based on
 
 ## [Unreleased]
 
+- A new switch turns floawty's animations off: tiles then only glow, and from the next
+  start pointing at them takes less memory.
+- The notice at the first start lies over the start screen instead of pushing the
+  tiles away, waits for OK, and its OK fits the smallest window too.
 - A new setting makes floawty light or dark on its own, or like Windows (the default);
   the window mode's title bar follows it, the services keep following Windows.
 - Tiles tilt gently towards the mouse under a moving light and glow in the service's

@@ -157,13 +157,13 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .tiles li:hover .tile-face,
-  .tiles li:hover .tile-more {
+  :root:not([data-still]) .tiles li:hover .tile-face,
+  :root:not([data-still]) .tiles li:hover .tile-more {
     transform: perspective(var(--perspective, 1000px)) translateZ(var(--back, 0px))
       rotateX(var(--rotate-x, 0deg)) rotateY(var(--rotate-y, 0deg));
   }
 
-  .tiles li:hover .tile-symbol {
+  :root:not([data-still]) .tiles li:hover .tile-symbol {
     transform: translate(var(--float-x, 0%), var(--float-y, 0%)) scale(1.06);
   }
 }
@@ -173,6 +173,11 @@
     --light-x: 50%;
     --light-y: 30%;
   }
+}
+
+:root[data-still] .tiles li .tile-face {
+  --light-x: 50%;
+  --light-y: 30%;
 }
 
 .tile-more:hover {

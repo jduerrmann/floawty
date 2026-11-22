@@ -10,11 +10,15 @@
   </head>
   <body>
     <main id="home" class="home" data-tauri-drag-region>
-      <section id="notice" class="notice" hidden>
-        <p id="notice-text"></p>
-        <button id="notice-ok" type="button" class="button primary"></button>
-      </section>
-      <div class="tiles-area" data-tauri-drag-region><ul id="tiles" class="tiles"></ul></div>
+      <div id="notice" class="notice-ground" data-tauri-drag-region hidden>
+        <section class="notice" role="dialog" aria-modal="true" aria-labelledby="notice-text">
+          <p id="notice-text" tabindex="0"></p>
+          <button id="notice-ok" type="button" class="button primary"></button>
+        </section>
+      </div>
+      <div id="tiles-area" class="tiles-area" data-tauri-drag-region>
+        <ul id="tiles" class="tiles"></ul>
+      </div>
       <form id="tile-form" class="tile-form" hidden>
         <label><span id="tile-name-label"></span><input id="tile-name" maxlength="80" /></label>
         <label><span id="tile-url-label"></span><input id="tile-url" inputmode="url" /></label>
@@ -54,6 +58,19 @@
               ><input type="radio" name="theme" value="dark" /><span id="theme-dark"></span
             ></label>
           </div>
+        </div>
+        <div class="setting">
+          <div class="setting-text">
+            <label id="animations-label" for="animations"></label>
+            <p id="animations-note" class="setting-note"></p>
+          </div>
+          <input
+            id="animations"
+            class="switch"
+            type="checkbox"
+            role="switch"
+            aria-describedby="animations-note"
+          />
         </div>
         <div class="setting">
           <div class="setting-text">

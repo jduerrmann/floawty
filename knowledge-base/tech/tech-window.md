@@ -4,7 +4,7 @@ area: window
 tags: [overlay, settings, hotkeys, logging]
 status: active
 created: 2026-11-17
-updated: 2026-11-20
+updated: 2026-11-22
 source: mvp-02 implementation, mvp-05
 ---
 
@@ -55,7 +55,7 @@ wiring talks to Tauri and Win32.
 | File | Role | Tests |
 |---|---|---|
 | `geometry.rs` | first placement (floaty: flush bottom right, 480 × 270; window: centred 1280 × 720 or smaller to fit with 16 px room; scaled), per-axis snapping flush within 32 px ([[overlay-snaps-flush]]), landscape shape free with magnets at 16:9 and 12:5 within 4 % (`fit_landscape`, never below the minimum height), 9:16 while a Short plays (`fit_resized`); a height-only drag keeps its height, anything else the width ([[overlay-shape-free-with-zoom]]), restore on the monitor with the largest overlap | unit |
-| `settings.rs` | `Settings` v1 (opacity, geometry, hotkeys, tiles, language, Shorts, update check, graphics acceleration, video only, zoom, always on top), tolerant `parse` (unknown language → system), Shorts pause 0–10 s | unit |
+| `settings.rs` | `Settings` v1 (opacity, geometry, hotkeys, tiles, language, animations, Shorts, update check, graphics acceleration, video only, zoom, always on top), tolerant `parse` (unknown language → system), Shorts pause 0–10 s | unit |
 | `opacity.rs` | opacity clamp 10–100 %, 10 % steps | unit |
 | `persistence.rs` | `%APPDATA%\floawty\settings.json`, atomic write (temp + rename), keeps broken files | unit (temp dir) |
 | `mode.rs` | `Mode` (floaty / window), switch and remember geometry per mode | unit |
@@ -88,6 +88,8 @@ Settings file (v1):
   "customTiles": [],
   "lastService": null,
   "language": "system",
+  "theme": "system",
+  "animations": true,
   "floatyPortrait": null,
   "shorts": { "auto": false, "pauseSeconds": 1, "holdOnHover": true, "portraitSize": "rotated" },
   "updateCheck": false,

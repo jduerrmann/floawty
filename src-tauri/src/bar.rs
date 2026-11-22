@@ -305,6 +305,7 @@ mod tests {
             hotkeys: settings.hotkeys,
             language: settings.language,
             theme: settings.theme,
+            animations: settings.animations,
             shorts: settings.shorts,
             update_check: settings.update_check,
             graphics_acceleration: settings.graphics_acceleration,

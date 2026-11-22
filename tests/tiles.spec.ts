@@ -21,6 +21,7 @@ const SERVICE_NAMES = [
 test('shows one tile per service and a tile to add a page', async () => {
   const app = await launch(freshProfile());
   try {
+    await app.home.locator('#notice-ok').click();
     const tiles = app.home.locator('#tiles > li');
     await expect(tiles).toHaveCount(SERVICE_NAMES.length + 1);
     const columns = await app.home.evaluate(
@@ -67,6 +68,36 @@ test('the WebView2 notice is shown once', async () => {
     await expect(second.home.locator('#notice')).toBeHidden();
   } finally {
     await second.stop();
+  }
+});
+
+test('the notice lies over the tiles, which wait for OK', async () => {
+  const app = await launch(freshProfile());
+  try {
+    await expect(app.home.locator('#notice-ok')).toBeFocused();
+    const area = app.home.locator('.tiles-area');
+    await expect.poll(() => area.evaluate((element) => (element as HTMLElement).inert)).toBe(true);
+    const tile = app.home.locator('#tiles > li').first();
+    const before = await tile.boundingBox();
+    if (!before) throw new Error('the tile has no box');
+    // A click where YouTube's tile is reaches the notice's ground.
+    const onTile = await app.home.evaluate(
+      ([x, y]) => document.elementFromPoint(x, y)?.closest('#tiles') !== null,
+      [before.x + before.width / 2, before.y + before.height / 2] as const,
+    );
+    expect(onTile).toBe(false);
+
+    await app.bar.locator('#settings').click();
+    await expect(app.home.locator('#language')).toBeFocused();
+    await app.home.locator('#settings-done').click();
+    await expect(app.home.locator('#notice')).toBeVisible();
+    await expect(app.home.locator('#notice-ok')).toBeFocused();
+
+    await app.home.locator('#notice-ok').click();
+    await expect.poll(() => area.evaluate((element) => (element as HTMLElement).inert)).toBe(false);
+    expect(await tile.boundingBox()).toEqual(before);
+  } finally {
+    await app.stop();
   }
 });
 
@@ -118,6 +149,7 @@ test('an own page becomes a tile, survives a restart and can be removed', async 
   const first = await launch(profile);
   const home = first.home;
   try {
+    await home.locator('#notice-ok').click();
     await home.locator('.tile-add').click();
     await home.locator('#tile-name').fill('My page');
     await home.locator('#tile-url').fill('not a url');
@@ -148,6 +180,7 @@ test('a tile opens its page over the home page and it reopens on start', async (
   const profile = freshProfile();
   const first = await launch(profile);
   try {
+    await first.home.locator('#notice-ok').click();
     await first.home.locator('.tile-add').click();
     await first.home.locator('#tile-name').fill('Example');
     await first.home.locator('#tile-url').fill('https://example.com/');
@@ -181,6 +214,7 @@ test('the YouTube Shorts tile opens the Shorts with the auto mode on', async () 
       requested.push(route.request().url());
       return route.fulfill({ body: '<title>Shorts</title>', contentType: 'text/html' });
     });
+    await app.home.locator('#notice-ok').click();
     await expect(app.bar.locator('#shorts')).toHaveAttribute('aria-pressed', 'false');
     await app.home.getByRole('button', { name: 'YouTube Shorts', exact: true }).click();
     await expect.poll(() => requested).toContain('https://www.youtube.com/shorts');

@@ -40,10 +40,11 @@ function pwsh(args: string[], env?: NodeJS.ProcessEnv): string {
 }
 
 // A normal start, only with fresh data folders and the first-start notice already accepted.
-function plainStart(): NodeJS.ProcessEnv {
+function plainStart(settings: object = {}): NodeJS.ProcessEnv {
   const profile: Profile = freshProfile();
   mkdirSync(profile.dataDir, { recursive: true });
-  writeFileSync(path.join(profile.dataDir, 'settings.json'), '{ "noticeAccepted": true }');
+  const text = JSON.stringify({ noticeAccepted: true, ...settings });
+  writeFileSync(path.join(profile.dataDir, 'settings.json'), text);
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     FLOAWTY_DATA_DIR: profile.dataDir,
@@ -144,7 +145,15 @@ test('idle on the tiles, without the debug port', async () => {
 });
 
 test('idle after pointing at every tile, without the debug port', async () => {
-  const app = spawn(EXE, [], { env: plainStart() });
+  await measureAfterHover('idle-after-hover');
+});
+
+test('idle after pointing with animations off, without the debug port', async () => {
+  await measureAfterHover('idle-after-hover-still', { animations: false });
+});
+
+async function measureAfterHover(scenario: string, settings?: object): Promise<void> {
+  const app = spawn(EXE, [], { env: plainStart(settings) });
   try {
     await new Promise((resolve) => setTimeout(resolve, SETTLE_MS));
     const pid = app.pid ?? 0;
@@ -155,13 +164,13 @@ test('idle after pointing at every tile, without the debug port', async () => {
     pointAway(pid);
     await new Promise((resolve) => setTimeout(resolve, SETTLE_MS));
     // The idle budget is for untouched tiles; this RAM is reported for the maintainer to judge.
-    const idle = measure('idle-after-hover', pid);
+    const idle = measure(scenario, pid);
     expect(idle.cpu).toBeLessThan(BUDGET.idleCpu);
   } finally {
     app.kill();
     await exited(app);
   }
-});
+}
 
 test('YouTube 1080p at 70 % opacity, then hidden and paused', async () => {
   const app = await launch(freshProfile());
