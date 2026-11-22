@@ -15,5 +15,5 @@ export default defineConfig({
   },
   server: { port: 1420, strictPort: true },
   clearScreen: false,
-  test: { root: '.', include: ['src/**/*.test.ts'] },
+  test: { root: '.', include: ['src/**/*.test.ts', 'tests/**/*.test.ts'] },
 });

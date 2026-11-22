@@ -4,6 +4,7 @@ import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { chromium, expect, type Browser, type Page } from '@playwright/test';
+import { startOnFreePort } from './debug-port';
 
 const EXE = path.join(import.meta.dirname, '..', 'src-tauri', 'target', 'release', 'floawty.exe');
 const CDP_PORT = 9334;
@@ -53,14 +54,13 @@ function exited(app: ChildProcess): Promise<void> {
 }
 
 export async function launch(profile: Profile): Promise<RunningApp> {
-  const app = spawn(EXE, [], {
-    env: {
-      ...process.env,
-      FLOAWTY_DATA_DIR: profile.dataDir,
-      WEBVIEW2_USER_DATA_FOLDER: profile.webviewDir,
-      WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: BROWSER_ARGS,
-    },
-  });
+  const env = {
+    ...process.env,
+    FLOAWTY_DATA_DIR: profile.dataDir,
+    WEBVIEW2_USER_DATA_FOLDER: profile.webviewDir,
+    WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: BROWSER_ARGS,
+  };
+  const app = await startOnFreePort(CDP_PORT, () => spawn(EXE, [], { env }));
   const browser = await connect();
   const pages = () => browser.contexts().flatMap((context) => context.pages());
   const find = (file: string) =>
