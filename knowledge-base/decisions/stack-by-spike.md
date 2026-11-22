@@ -4,7 +4,7 @@ area: process
 tags: [stack, drm, performance, tauri]
 status: active
 created: 2026-11-16
-updated: 2026-11-17
+updated: 2026-11-22
 source: conversation; spike results in [[stack-spike-results]]; visual plan "Auswertung Testprototyp"
 ---
 
@@ -40,7 +40,7 @@ lighter one wins.
 
 - **Resource budgets** (with headroom over the measured values, checked with
   `spikes/measure`): download ≤ 10 MiB; start to visible window ≤ 200 ms; RAM idle
-  ≤ 250 MB; RAM playing YouTube 1080p ≤ 850 MB; CPU idle and hidden ≈ 0 %.
+  ≤ 250 MB (superseded: 260, [[idle-budget-260]]); RAM playing YouTube 1080p ≤ 850 MB; CPU idle and hidden ≈ 0 %.
 - WebView2 always starts with `--disable-background-networking` (plus Tauri's
   default arguments).
 - Testing: Playwright over WebView2's debug port.

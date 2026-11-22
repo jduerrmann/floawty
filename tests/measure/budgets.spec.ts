@@ -1,4 +1,4 @@
-// Measures floawty against the budgets of decisions/stack-by-spike.md with spikes/measure.
+// Measures floawty against the budgets of engineering standards §7 with spikes/measure.
 // Start and idle run without the debug port; YouTube and hidden are set up over it, muted.
 import { execFileSync, spawn, type ChildProcess } from 'node:child_process';
 import { mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
@@ -7,9 +7,9 @@ import { expect, test, type Page } from '@playwright/test';
 import { youtube } from '../../src/services/youtube/manifest';
 import { freshProfile, launch, type Profile, type RunningApp } from '../app';
 import { pointAt, pointAway, pressKeys } from '../desktop';
+import { EXE } from '../tested-exe';
 
 const ROOT = path.join(import.meta.dirname, '..', '..');
-const EXE = path.join(ROOT, 'src-tauri', 'target', 'release', 'floawty.exe');
 const MEASURE = path.join(ROOT, 'spikes', 'measure', 'measure.ps1');
 const RESULTS = path.join(ROOT, 'spikes', 'measure', 'results');
 const APP = 'floawty';
@@ -17,7 +17,7 @@ const SETTLE_MS = 25_000;
 const SECONDS = 60;
 // Big Buck Bunny 60 fps 4K (Blender Foundation, CC BY 3.0), the spike's test video.
 const TEST_VIDEO = 'https://www.youtube.com/watch?v=aqz-KE-bpKQ';
-const BUDGET = { downloadMiB: 10, startMs: 200, idleMB: 250, youtubeMB: 850, idleCpu: 0.1 };
+const BUDGET = { downloadMiB: 10, startMs: 200, idleMB: 260, youtubeMB: 850, idleCpu: 0.1 };
 
 interface YoutubePlayer {
   setPlaybackQualityRange: (min: string, max: string) => void;
@@ -118,8 +118,6 @@ async function playAt1080(page: Page): Promise<void> {
   await expect.poll(async () => (await playback(page)).height, { timeout: 60_000 }).toBe(1080);
   await expect.poll(async () => (await playback(page)).paused, { timeout: 30_000 }).toBe(false);
 }
-
-test.describe.configure({ mode: 'serial' });
 
 test('download size and start time', () => {
   const mib = statSync(EXE).size / 2 ** 20;

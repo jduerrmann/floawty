@@ -7,8 +7,7 @@ import type { AddressInfo } from 'node:net';
 import path from 'node:path';
 import { expect, test } from '@playwright/test';
 import { freshProfile, type Profile } from './app';
-
-const EXE = path.join(import.meta.dirname, '..', 'src-tauri', 'target', 'release', 'floawty.exe');
+import { EXE } from './tested-exe';
 
 function browserCommandLines(profile: Profile): string[] {
   const query =

@@ -41,8 +41,8 @@ in gl-03 (gl-04 was dropped); where they differ, they win over the list below.
 - Element ids stay, so the Playwright specs keep their selectors. No new dependency.
 
 ## Constraints
-- Rules 5 (no dependency, no icon package), 6 (test first for pure logic), 10 (one
-  app run per package after the maintainer's yes), 13 (new texts EN and DE in
+- Rules 5 (no dependency, no icon package), 6 (test first for pure logic), 10 (app
+  runs smallest first, after the maintainer's yes), 13 (new texts EN and DE in
   `src/i18n.ts`), 14 as amended by [[leaner-reviews]]: one independent review of the whole plan in
   gl-02, which also changes rules).
 - Invariant 7 and [[redrawn-service-logos]]: the logos only identify the service.

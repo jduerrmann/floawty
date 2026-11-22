@@ -1,12 +1,12 @@
-// Starts the release build with its own empty data folders and connects over CDP.
+// Starts the build under test with its own empty data folders and connects over CDP.
 import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { chromium, expect, type Browser, type Page } from '@playwright/test';
 import { startOnFreePort } from './debug-port';
+import { EXE } from './tested-exe';
 
-const EXE = path.join(import.meta.dirname, '..', 'src-tauri', 'target', 'release', 'floawty.exe');
 const CDP_PORT = 9334;
 // The environment variable replaces the app's own WebView2 arguments, so repeat them.
 const BROWSER_ARGS = [

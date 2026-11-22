@@ -147,12 +147,22 @@ through the service's own next control the way a user would, and is configurable
 - App tests take over the maintainer's mouse, keyboard and screen: `npm run smoke`
   and `verify`, any spec in the Playwright app project, `npm run measure`, and live
   probes (which start floawty through `launch()` in `tests/app.ts`, so they are muted
-  and use a fresh profile). Ask the maintainer before each run; one yes covers one
-  run, a re-run after a failure asks again. Never two agents at once. While working,
-  use `npm run check` and single unit or adapter tests
-  (`npm run test:adapters -- <file>`). Normally a package needs one app run, after
-  the review fixes and before the commit proposal; a new app test's red run may be a
-  run of its own.
+  and use a fresh profile). Never two agents at once. While working, use
+  `npm run check` and single unit or adapter tests (`npm run test:adapters -- <file>`).
+- App runs go **smallest first**, as separate stages on a build of the current code
+  (`npm run build` first; engineering standards §2):
+  1. **Red or new test:** only those specs, under a minute per run; a failure of
+     unclear cause also runs on the last good build before anything wider.
+  2. **Code final and reviewed:** all app tests, normally once per package.
+  3. **All app tests green:** measure, if the change needs it, only the affected
+     scenarios.
+- Ask the maintainer before each stage, with its duration and how long it needs mouse
+  and keyboard. One yes covers one run of a stage. Exception: a yes for stage 1
+  covers, in that session, repeated runs of those named specs while each stays under
+  a minute, until their failure is fixed; announce each before it starts. A wider or
+  longer run asks again.
+- Report after each stage. Stop at the first result that means the code must change;
+  never start a wider stage on code that will change.
 - Within these limits, verify yourself – run the app, drive it with Playwright or the
   built-in browser – instead of handing the maintainer a checklist. Leave only what
   needs their eyes or accounts (e.g. a logged-in Netflix check), and name it.
@@ -160,8 +170,8 @@ through the service's own next control the way a user would, and is configurable
 - Report what was verified and what was not; never call an unrun check passed.
 
 Completion order: `npm run check` (10) → tech notes and CHANGELOG (11) → decisions
-and open questions (11, 3) → final diff review → independent review (14) → app run
-after the maintainer's yes (10) → commit proposal (12).
+and open questions (11, 3) → final diff review → independent review (14) → all app
+tests, then the measurement, after the maintainer's yes (10) → commit proposal (12).
 
 ## 11. Keep the knowledge current
 

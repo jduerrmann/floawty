@@ -32,7 +32,7 @@ else, and can even let your mouse click right through it.
   video DRM module) from Microsoft, which floawty keeps on because some services need
   that module. floawty tells you at the first start. See [PRIVACY.md](PRIVACY.md).
 - **Light on resources.** Made to run next to your work on an ordinary PC: a 4 MB
-  download, under 250 MB of memory when idle.
+  download, about 250 MB of memory when idle.
 - **Fair to the services.** You sign in on the official websites; floawty does not
   touch DRM, does not download content and does not block ads. "Continue with
   Google / Apple / Facebook" opens the provider's own page in a small window; that

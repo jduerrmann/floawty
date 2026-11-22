@@ -21,7 +21,7 @@ Vault conventions and budgets: `CLAUDE.md` in this folder.
 | Bar, settings panel, languages, reset, export | [[tech-bar-and-settings]], [[bar-hover-by-cursor-look]], [[settings-export-without-logins]] |
 | Multi-session work, resuming | [[active-plans]], [[planning]] |
 | A product or scope question | [[overview]], [[core-principles]], [[open-questions]] |
-| Stack, DRM, budgets | [[stack-by-spike]], [[stack-spike-results]], [[drm-in-desktop-webviews]], [[mvp-measurements]] |
+| Stack, DRM, budgets | [[stack-by-spike]], [[idle-budget-260]], [[stack-spike-results]], [[drm-in-desktop-webviews]], [[mvp-measurements]] |
 | Privacy, network | [[webview2-diagnostics-disclosed]], [[webview2-component-updates-disclosed]] |
 | WebView2 profile | [[shared-webview2-profile-in-mvp]] |
 | Release pipeline, next package | [[plan-release]], [[active-plans]] |

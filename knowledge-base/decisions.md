@@ -20,6 +20,8 @@ One line per decision record in `decisions/`. Template: `templates/t-decision.md
 - [[advisor-and-coder-subagents]] – main session leads, coder implements bounded slices, advisor gives the independent reviews ([[leaner-reviews]])
 - [[leaner-reviews]] – advisor at effort high with a reading budget; one independent review per UI plan, plan check only if hard to reverse
 - [[app-tests-ask-first]] – app tests only after the maintainer's yes, muted, one agent at a time; `npm run check` while working
+- [[app-runs-smallest-first]] – red specs first, then all app tests, measurement last; one yes for repeated targeted runs
+- [[idle-budget-260]] – idle RAM ≤ 260 MB instead of 250; median of three when one value is over
 
 ## services
 

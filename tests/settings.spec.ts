@@ -4,6 +4,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test } from '@playwright/test';
 import { freshProfile, launch, type Profile, type RunningApp } from './app';
+import { EXE } from './tested-exe';
 
 const settingsFile = (profile: Profile) => path.join(profile.dataDir, 'settings.json');
 
@@ -124,7 +125,7 @@ function logOf(profile: Profile): string {
 }
 
 function childrenOf(pid: number): number[] {
-  const query = `(Get-CimInstance Win32_Process -Filter "ParentProcessId=${pid} AND Name='floawty.exe'").ProcessId`;
+  const query = `(Get-CimInstance Win32_Process -Filter "ParentProcessId=${pid} AND Name='${path.basename(EXE)}'").ProcessId`;
   const output = execFileSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', query]);
   return output.toString().split(/\s+/).filter(Boolean).map(Number);
 }
