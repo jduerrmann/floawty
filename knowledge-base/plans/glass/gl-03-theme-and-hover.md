@@ -40,7 +40,7 @@ pointer with light and a gentle tilt that never leaves their box.
       edge; resting layout unchanged; ⋯ moves along and its menu works.
 - [ ] Focus glows without motion; reduced motion keeps only the glow.
 - [ ] Idle RAM on the tiles measured before and after hovering, shown to the
-      maintainer; over 250 MB blocks the merge.
+      maintainer; over 260 MB blocks the merge ([[idle-budget-260]]).
 
 ## Tests first
 - Cargo: theme default, unknown value, round trip through preferences; startup
@@ -60,7 +60,7 @@ pointer with light and a gentle tilt that never leaves their box.
   no colour media query, observer in the startup script, attribute 19 fallback,
   tests for the reset message and the services' scheme, class names on the face.
 - Tests first, red then green: theme setting, title bar rules, `tiltOf`/`tiltStyle`,
-  hover spec (headless). `tests/theme.spec.ts` written, not run.
+  hover spec (headless). `tests/theme.spec.ts` first ran in app run 1 (below).
 - Built page, headless Edge: both schemes, 240–1740 px, ⋯ menu, click at the edge.
 - Real WebView2 probe: scheme right at the first frame; RAM see
   [[tiles-tilt-with-light]].
@@ -71,17 +71,25 @@ pointer with light and a gentle tilt that never leaves their box.
   gl-04 references were cleaned when it was dropped. Rejected: try/catch around
   sessionStorage (only floawty's own origin runs the script, rule 5); guards against
   repeated property and storage writes (work only per pointer move or state event).
+- App run 1 (2026-11-22, with the start-race fix): 42/46, measurement void (CPU at
+  93 %). Theme spec fixed: Playwright emulates light over CDP, `windowsDark` lifts it
+  (also makes the services' scheme check real). Follow-up review (advisor): no findings.
+- App run 2 (quiet PC): 44/46, no launch failed, theme spec green. Start 33 ms, 3.3 MiB.
+- App run 3 (quiet PC), stopped after idle: **regression in gl-03** – on-top show/hide
+  (`:82`) and sign-in background (`:171`) pass on be9a7b0 and fail here: a click no
+  longer activates the helper window. Other 44 green. Idle, three starts each:
+  be9a7b0 258.7, 243.1, 257.6 (median 257.6); gl-03 261.9, 244.3, 225.1 (median
+  244.3, within budget). be9a7b0 after hover: 235.2 MB (run 2).
 
 ## Resume here
-Committed on `claude/gl-02-logos-settings-bar-6fbd9c` at the maintainer's request
-before the app run (2026-11-22), not pushed: implemented, reviewed (the scrollbar fix
-too), `npm run check` green. The app run happens together with the start-race fix
-(port 9334, branch `claude/cool-noyce-12b84f`), on a tree that has both branches;
-gl-01 and gl-02 come with this one. Next there:
-1. After the maintainer's yes, one run: release build, all app specs (`npm run
-   smoke`; the theme spec and the pointer test in the tiles spec have never run),
-   `npm run measure` (new: idle after hover; its RAM is printed, not asserted).
-2. Measure that same hover on be9a7b0 for comparison (rebuild from that commit).
-3. Maintainer decides open question 10 (RAM after hovering); over the idle budget
-   nothing merges. Then tick the criteria, record the numbers, set `done`.
+On `claude/cool-noyce-12b84f`: 9720b97 plus the start-race and theme-test fixes and
+the app-run rules, not pushed. **gl-03 must not merge yet.** Next:
+1. Find the regression's cause and fix it, test first. Stage 1 (AGENTS.md rule 10):
+   only the two red specs, after the maintainer's yes.
+2. All app tests once.
+3. Measure hover on both builds, YouTube and hidden once; idle again only if the fix
+   touches startup or the tiles. Then the maintainer decides open question 10; tick
+   the criteria, record the numbers, set `done`.
+Found, not fixed: `budgets.spec.ts` divides frames by 60 s even when sampling takes
+longer.
 Also open from gl-01: the maintainer's live light/dark switch check.
