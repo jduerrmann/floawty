@@ -7,8 +7,11 @@ import { sendSettingChange, titleBarIsDark } from './title-bar';
 
 const scheme = (page: Page) =>
   page.evaluate(() => getComputedStyle(document.documentElement).colorScheme);
-const windowsDark = (page: Page) =>
-  page.evaluate(() => matchMedia('(prefers-color-scheme: dark)').matches);
+const windowsDark = async (page: Page) => {
+  // Playwright emulates light on every page it connects to over CDP.
+  await page.emulateMedia({ colorScheme: null });
+  return page.evaluate(() => matchMedia('(prefers-color-scheme: dark)').matches);
+};
 
 const addSymbolIsLight = (page: Page) =>
   page.evaluate(() => {
