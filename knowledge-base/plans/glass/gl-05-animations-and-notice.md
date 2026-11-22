@@ -61,8 +61,8 @@ covers the start page instead of pushing the tiles away.
 - App stage 1 (2026-11-22): the 8 new and edited specs, 8/8 green on first run (17 s).
 
 ## Resume here
-Committed on `claude/cool-noyce-12b84f` at the maintainer's request before the full
-app run (testing gets better first), not pushed. `npm run check`, release build and
-app stage 1 green, review resolved. Next, after the maintainer's yes each: all app
-tests, hover with "off" three times (`npm run measure -- -g "animations off"`, on a
-quiet PC). Then tick the criteria.
+Committed and on `main`. `npm run check`, release build and app stage 1 (8 specs)
+green, review resolved. Still open: all app tests and the hover measurement with
+"off". They wait for testing without the maintainer's screen: plan
+`.claude/plans/testen-ohne-bildschirm.md` (round 4, not yet approved; probe sources
+in the session notes `quiet-test-probes/`). Then tick the criteria and set `done`.
