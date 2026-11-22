@@ -11,8 +11,11 @@ export interface Shorts {
   portraitSize: 'rotated' | 'separate';
 }
 
+export type ThemeChoice = 'system' | 'light' | 'dark';
+
 export interface Preferences {
   language: LanguageChoice;
+  theme: ThemeChoice;
   shorts: Shorts;
   updateCheck: boolean;
 }
@@ -41,7 +44,14 @@ export function withShortsAuto(preferences: Preferences): Preferences {
 export type StateView = (state: OverlayState) => void;
 
 export function preferencesOf(state: OverlayState): Preferences {
-  return { language: state.language, shorts: state.shorts, updateCheck: state.updateCheck };
+  const { language, theme, shorts, updateCheck } = state;
+  return { language, theme, shorts, updateCheck };
+}
+
+// tokens.css pins the scheme from this; the session copy is for reloads, which the startup script reads.
+function showTheme(theme: ThemeChoice): void {
+  document.documentElement.dataset.theme = theme;
+  sessionStorage.setItem('theme', theme);
 }
 
 /** Starts a page in the chosen language; a new language reloads it, so no text is left behind. */
@@ -51,9 +61,11 @@ export async function startWithState(
   const state = await invoke<OverlayState>('overlay_state');
   const language = resolveLanguage(state.language, navigator.languages);
   document.documentElement.lang = language;
+  showTheme(state.theme);
   const show = start(state, language);
   show(state);
   await listen<OverlayState>('overlay-state', ({ payload }) => {
+    showTheme(payload.theme);
     if (resolveLanguage(payload.language, navigator.languages) !== language) location.reload();
     else show(payload);
   });

@@ -6,6 +6,12 @@ User-facing changes, in plain language. Format based on
 
 ## [Unreleased]
 
+- A new setting makes floawty light or dark on its own, or like Windows (the default);
+  the window mode's title bar follows it, the services keep following Windows.
+- Tiles tilt gently towards the mouse under a moving light and glow in the service's
+  colour; with reduced motion they only glow.
+- Pointing at a tile on the edge of the start screen no longer shows a scrollbar or
+  cuts the tile off.
 - New look for the start screen: tiles of coloured glass, light or dark like Windows,
   with names that stay easy to read; the notice and the add-page form match.
 - The tiles show the services' own logos, redrawn in white glass.

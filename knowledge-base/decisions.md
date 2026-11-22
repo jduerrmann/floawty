@@ -2,7 +2,7 @@
 type: moc
 tags: [decisions]
 created: 2026-11-16
-updated: 2026-11-21
+updated: 2026-11-22
 source: conversation
 ---
 
@@ -45,6 +45,9 @@ One line per decision record in `decisions/`. Template: `templates/t-decision.md
 - [[own-service-symbols]] – superseded: own SVG symbols on the brand colour
 - [[redrawn-service-logos]] – tiles show redrawn service logos with glass effects; trademarks kept apart from GPL, NOTICE
 - [[glass-design-follows-windows-theme]] – one glass design for home, settings and bar; follows Windows light/dark; cyan accent
+- [[floawty-theme-choice]] – floawty's own light/dark (default like Windows), title bar via DWM, never Tauri's theme API
+- [[tiles-tilt-with-light]] – tiles tilt 7° under a moving light, never outside their box; no loop
+- [[home-stays-awake-under-a-service]] – non-goal: no sleeping home under a service; saves only ~3 MB on real WebView2
 - [[bundled-service-logos]] – superseded: official logos
 - [[overlay-controls]] – hover bar, tiles, settings, hide pauses, Shorts after one run (partly superseded)
 

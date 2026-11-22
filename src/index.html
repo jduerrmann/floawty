@@ -42,6 +42,20 @@
           </select>
         </div>
         <div class="setting">
+          <span id="theme-label"></span>
+          <div id="theme" class="segments" role="radiogroup" aria-labelledby="theme-label">
+            <label
+              ><input type="radio" name="theme" value="system" /><span id="theme-system"></span
+            ></label>
+            <label
+              ><input type="radio" name="theme" value="light" /><span id="theme-light"></span
+            ></label>
+            <label
+              ><input type="radio" name="theme" value="dark" /><span id="theme-dark"></span
+            ></label>
+          </div>
+        </div>
+        <div class="setting">
           <div class="setting-text">
             <label id="update-check-label" for="update-check"></label>
             <p id="update-check-note" class="setting-note"></p>

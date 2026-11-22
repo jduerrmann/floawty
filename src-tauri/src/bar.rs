@@ -17,6 +17,7 @@ use crate::mode::Mode;
 use crate::overlay::{self, Overlay, OverlayState};
 use crate::page;
 use crate::service;
+use crate::theme;
 
 const LABEL: &str = "bar";
 pub const HEIGHT: f64 = 40.0;
@@ -90,8 +91,10 @@ pub fn create(app: &AppHandle) -> tauri::Result<()> {
         .inner_size()?
         .to_logical::<f64>(window.scale_factor()?)
         .width;
+    let chosen = app.state::<Overlay>().settings().theme;
     let builder = WebviewBuilder::new(LABEL, WebviewUrl::App("bar.html".into()))
         .additional_browser_args(&service::current_browser_args(app))
+        .initialization_script(theme::startup_script(chosen))
         .transparent(true);
     window.add_child(
         builder,
@@ -301,6 +304,7 @@ mod tests {
             settings_open,
             hotkeys: settings.hotkeys,
             language: settings.language,
+            theme: settings.theme,
             shorts: settings.shorts,
             update_check: settings.update_check,
             graphics_acceleration: settings.graphics_acceleration,

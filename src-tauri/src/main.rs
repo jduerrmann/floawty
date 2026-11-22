@@ -19,6 +19,7 @@ mod service;
 mod settings;
 mod sign_in;
 mod sign_in_window;
+mod theme;
 
 use tauri::{AppHandle, Manager, WebviewWindowBuilder, WindowEvent};
 
@@ -43,8 +44,10 @@ fn create_main_window(app: &AppHandle, browser_args: &str) -> tauri::Result<()> 
         .iter()
         .find(|w| w.label == "main")
         .expect("the main window is defined in tauri.conf.json");
+    let theme = app.state::<Overlay>().settings().theme;
     WebviewWindowBuilder::from_config(app, config)?
         .additional_browser_args(browser_args)
+        .initialization_script(theme::startup_script(theme))
         .build()?;
     Ok(())
 }
@@ -87,6 +90,7 @@ fn setup(app: &AppHandle) -> tauri::Result<()> {
     }
     app.manage(Bar::default());
     app.manage(Page::default());
+    theme::apply(app, app.state::<Overlay>().settings().theme);
     overlay::place_and_show(app)?;
     let settings = app.state::<Overlay>().settings();
     hotkeys::register(app, &settings.hotkeys);

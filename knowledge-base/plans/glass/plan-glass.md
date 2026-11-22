@@ -3,7 +3,7 @@ type: plan
 tags: [plan-map, glass, ui]
 status: active
 created: 2026-11-21
-updated: 2026-11-21
+updated: 2026-11-22
 source: visual plan "Startseite und Einstellungen neu gestalten", rounds 1–4, 2026-11-21
 ---
 
@@ -14,6 +14,10 @@ Home, settings, bar, first-start notice and add-page form look like one high-qua
 app in a glass design that follows Windows light or dark, with redrawn service logos.
 Decisions: [[glass-design-follows-windows-theme]], [[redrawn-service-logos]].
 Planning page and pictures: `.claude/plans/startseite-und-einstellungen.md`.
+
+Extended 2026-11-22 (visual plan `.claude/plans/hell-dunkel-und-hover.md`, approved):
+[[floawty-theme-choice]], [[tiles-tilt-with-light]], [[home-stays-awake-under-a-service]]
+in gl-03 (gl-04 was dropped); where they differ, they win over the list below.
 
 ## Decided (visual plan, 2026-11-21)
 - Glass. Light: colour-glass tiles tinted in the service colour on a pale indigo-pink
@@ -56,5 +60,10 @@ Base commit for the plan's review (AGENTS.md rule 14): `d529002`.
 |---|---|---|---|
 | 01 | [[gl-01-glass-home]] | Design values, colour-glass tiles with AA labels, notice and form as glass | – |
 | 02 | [[gl-02-logos-settings-bar]] | Redrawn logos, settings as glass cards, bar icons dark over video; plan review and measurement | 01 |
+| 03 | [[gl-03-theme-and-hover]] | floawty's own light/dark with title bar; tilting tiles under a moving light | 02 |
+| 04 | [[gl-04-sleeping-home]] | Dropped 2026-11-22, never built: hiding the home saves about 3 MB | – |
+
+gl-03 touches IPC, the stored format and the shell, so it gets an independent review
+before the commit proposal.
 
 gl-02 merges the former packages for logos, settings and bar ([[leaner-reviews]]).

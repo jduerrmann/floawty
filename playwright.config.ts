@@ -1,5 +1,5 @@
 // Playwright: "app" drives the built app over WebView2's debug port; "adapter" runs page
-// scripts against fixtures in the Edge that ships with Windows (no browser download).
+// scripts and floawty's own styles against fixtures in Windows' own Edge (no browser download).
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({

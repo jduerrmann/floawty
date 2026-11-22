@@ -7,6 +7,7 @@ import { services } from './services';
 import type { ServiceManifest } from './services/manifest';
 import { preferencesOf, withShortsAuto, type OverlayState } from './state';
 import { CUSTOM_COLOR, labelShade } from './tile-colors';
+import { tiltStyle } from './tilt';
 
 const symbolUrls = import.meta.glob<string>(['./assets/logos/*.svg', './assets/symbols/*.svg'], {
   eager: true,
@@ -38,7 +39,22 @@ async function turnShortsAutoOn(): Promise<void> {
   await invoke('set_preferences', { preferences: withShortsAuto(preferencesOf(state)) });
 }
 
-function tileButton(label: string, color: string | null, symbol: string): HTMLButtonElement {
+// Without a file the symbol is a mask in the text colour ("+"), so it follows the theme.
+function tileSymbol(file: string | null): HTMLElement {
+  if (!file) {
+    const mask = document.createElement('span');
+    mask.className = 'tile-symbol';
+    return mask;
+  }
+  const image = document.createElement('img');
+  image.className = 'tile-symbol';
+  image.src = symbolUrl(file);
+  image.alt = '';
+  return image;
+}
+
+// The button stays still and only its face tilts, so the edge keeps hover and click.
+function tileButton(label: string, color: string | null, symbol: string | null): HTMLButtonElement {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'tile';
@@ -46,13 +62,29 @@ function tileButton(label: string, color: string | null, symbol: string): HTMLBu
     button.style.setProperty('--tint', color);
     button.style.setProperty('--shade', labelShade(color));
   }
-  const image = document.createElement('img');
-  image.src = symbolUrl(symbol);
-  image.alt = '';
+  const face = document.createElement('span');
+  face.className = 'tile-face';
   const name = document.createElement('span');
+  name.className = 'tile-name';
   name.textContent = label;
-  button.append(image, name);
+  face.append(tileSymbol(symbol), name);
+  button.append(face);
   return button;
+}
+
+// The light and the tilt follow the pointer; tiles.css draws them only while it is over the tile.
+function followPointer(item: HTMLLIElement): void {
+  item.addEventListener('pointermove', (event) => {
+    if ((event.target as Element).closest('.tile-menu')) return;
+    const box = item.getBoundingClientRect();
+    const pointer = {
+      x: (event.clientX - box.left) / box.width,
+      y: (event.clientY - box.top) / box.height,
+    };
+    for (const [name, value] of Object.entries(tiltStyle(pointer, box))) {
+      item.style.setProperty(name, value);
+    }
+  });
 }
 
 function serviceTile(service: ServiceManifest): HTMLLIElement {
@@ -137,13 +169,15 @@ export function renderTiles(
 ): void {
   list.setAttribute('aria-label', t(language, 'tilesLabel'));
   const add = document.createElement('li');
-  const addButton = tileButton(t(language, 'addTile'), null, 'symbols/add.svg');
+  const addButton = tileButton(t(language, 'addTile'), null, null);
   addButton.classList.add('tile-add');
   addButton.addEventListener('click', handlers.onAdd);
   add.append(addButton);
-  list.replaceChildren(
+  const items = [
     ...services.map(serviceTile),
     ...customTiles.map((tile) => customTile(language, tile, handlers)),
     add,
-  );
+  ];
+  items.forEach(followPointer);
+  list.replaceChildren(...items);
 }

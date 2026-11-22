@@ -71,6 +71,17 @@ pub enum Language {
     System,
 }
 
+/// Light or dark for floawty's own pages and title bar; `System` follows Windows.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Theme {
+    Light,
+    Dark,
+    #[default]
+    #[serde(other)]
+    System,
+}
+
 /// How the floaty view finds its size while a Short plays.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -108,6 +119,7 @@ impl Default for Shorts {
 #[serde(rename_all = "camelCase")]
 pub struct Preferences {
     pub language: Language,
+    pub theme: Theme,
     pub shorts: Shorts,
     pub update_check: bool,
 }
@@ -126,6 +138,7 @@ pub struct Settings {
     pub custom_tiles: Vec<CustomTile>,
     pub last_service: Option<OpenService>,
     pub language: Language,
+    pub theme: Theme,
     pub shorts: Shorts,
     /// Off by default; floawty only talks to GitHub once the user turns it on.
     pub update_check: bool,
@@ -153,6 +166,7 @@ impl Default for Settings {
             custom_tiles: Vec::new(),
             last_service: None,
             language: Language::System,
+            theme: Theme::System,
             shorts: Shorts::default(),
             update_check: false,
             video_only: false,
@@ -176,6 +190,7 @@ pub fn parse(text: &str) -> Settings {
 /// Takes the panel's choices, kept within their ranges.
 pub fn apply_preferences(settings: &mut Settings, preferences: Preferences) {
     settings.language = preferences.language;
+    settings.theme = preferences.theme;
     settings.shorts = Shorts {
         pause_seconds: clamp_shorts_pause(preferences.shorts.pause_seconds),
         ..preferences.shorts
@@ -349,12 +364,22 @@ mod tests {
     }
 
     #[test]
+    fn the_theme_follows_windows_unless_light_or_dark_is_chosen() {
+        assert_eq!(parse(r#"{ "version": 1 }"#).theme, Theme::System);
+        assert_eq!(parse(r#"{ "theme": "light" }"#).theme, Theme::Light);
+        assert_eq!(parse(r#"{ "theme": "dark" }"#).theme, Theme::Dark);
+        let unknown = parse(r#"{ "opacity": 0.5, "theme": "sepia" }"#);
+        assert_eq!((unknown.theme, unknown.opacity), (Theme::System, 0.5));
+    }
+
+    #[test]
     fn preferences_survive_a_round_trip() {
         let mut settings = Settings::default();
         apply_preferences(
             &mut settings,
             Preferences {
                 language: Language::De,
+                theme: Theme::Dark,
                 shorts: Shorts {
                     auto: true,
                     pause_seconds: 2.5,
@@ -366,6 +391,7 @@ mod tests {
         );
         let text = to_json(&settings);
         assert!(text.contains(r#""language": "de""#), "{text}");
+        assert!(text.contains(r#""theme": "dark""#), "{text}");
         assert_eq!(parse(&text), settings);
     }
 
@@ -382,6 +408,7 @@ mod tests {
                 &mut settings,
                 Preferences {
                     language: Language::En,
+                    theme: Theme::System,
                     shorts,
                     update_check: false,
                 },

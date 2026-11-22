@@ -11,6 +11,7 @@ use crate::paths;
 use crate::reset;
 use crate::service;
 use crate::settings::{self, CustomTile, OpenService, Preferences};
+use crate::theme;
 
 type CommandResult = Result<(), String>;
 
@@ -114,8 +115,13 @@ pub fn set_settings_open(app: AppHandle, open: bool) -> CommandResult {
 
 #[tauri::command]
 pub fn set_preferences(app: AppHandle, preferences: Preferences) {
+    let before = app.state::<Overlay>().settings().theme;
+    let chosen = preferences.theme;
     app.state::<Overlay>()
         .update(&app, |s| settings::apply_preferences(s, preferences));
+    if chosen != before {
+        theme::apply(&app, chosen);
+    }
     overlay::emit_state(&app);
     page::sync(&app);
 }

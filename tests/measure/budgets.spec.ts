@@ -6,7 +6,7 @@ import path from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 import { youtube } from '../../src/services/youtube/manifest';
 import { freshProfile, launch, type Profile, type RunningApp } from '../app';
-import { pointAway, pressKeys } from '../desktop';
+import { pointAt, pointAway, pressKeys } from '../desktop';
 
 const ROOT = path.join(import.meta.dirname, '..', '..');
 const EXE = path.join(ROOT, 'src-tauri', 'target', 'release', 'floawty.exe');
@@ -138,6 +138,26 @@ test('idle on the tiles, without the debug port', async () => {
     const idle = measure('idle', app.pid ?? 0);
     console.log(readFileSync(path.join(RESULTS, `${APP}-idle-hosts.txt`), 'utf8'));
     expect(idle.ramMB).toBeLessThanOrEqual(BUDGET.idleMB);
+    expect(idle.cpu).toBeLessThan(BUDGET.idleCpu);
+  } finally {
+    app.kill();
+    await exited(app);
+  }
+});
+
+test('idle after pointing at every tile, without the debug port', async () => {
+  const app = spawn(EXE, [], { env: plainStart() });
+  try {
+    await new Promise((resolve) => setTimeout(resolve, SETTLE_MS));
+    const pid = app.pid ?? 0;
+    // Four columns in three rows at the default 480 × 270, below the bar.
+    for (const y of [0.25, 0.5, 0.75]) {
+      for (const x of [0.125, 0.375, 0.625, 0.875]) pointAt(pid, x, y);
+    }
+    pointAway(pid);
+    await new Promise((resolve) => setTimeout(resolve, SETTLE_MS));
+    // The idle budget is for untouched tiles; this RAM is reported for the maintainer to judge.
+    const idle = measure('idle-after-hover', pid);
     expect(idle.cpu).toBeLessThan(BUDGET.idleCpu);
   } finally {
     app.kill();

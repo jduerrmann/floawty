@@ -33,6 +33,15 @@
   --bar-height: 40px;
 }
 
+/* The user's choice; without one floawty follows Windows. */
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root {
     --ease: 0ms linear;

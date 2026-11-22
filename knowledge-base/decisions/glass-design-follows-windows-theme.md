@@ -4,11 +4,14 @@ area: ui
 tags: [design, theme, tiles, settings, bar, accessibility]
 status: active
 created: 2026-11-21
-updated: 2026-11-21
+updated: 2026-11-22
 source: visual plan "Startseite und Einstellungen neu gestalten", rounds 1–4, 2026-11-21
 ---
 
 # floawty's own pages use one glass design that follows Windows light or dark
+
+Amended by [[floawty-theme-choice]] (light or dark by choice, 2026-11-22) and
+[[tiles-tilt-with-light]] (hover).
 
 ## Context
 Home, settings and bar looked improvised: flat colour tiles, browser form controls,

@@ -14,7 +14,7 @@ use crate::opacity;
 use crate::page::{self, Problem};
 use crate::persistence;
 use crate::service;
-use crate::settings::{Hotkeys, Language, Settings, Shorts};
+use crate::settings::{Hotkeys, Language, Settings, Shorts, Theme};
 use crate::sign_in_window;
 
 mod settle;
@@ -46,6 +46,7 @@ pub struct OverlayState {
     pub settings_open: bool,
     pub hotkeys: Hotkeys,
     pub language: Language,
+    pub theme: Theme,
     pub shorts: Shorts,
     pub update_check: bool,
     pub graphics_acceleration: bool,
@@ -106,6 +107,7 @@ impl Overlay {
             settings_open: *self.settings_open.lock().unwrap(),
             hotkeys: settings.hotkeys.clone(),
             language: settings.language,
+            theme: settings.theme,
             shorts: settings.shorts.clone(),
             update_check: settings.update_check,
             graphics_acceleration: settings.graphics_acceleration,

@@ -4,7 +4,7 @@ area: ui
 tags: [bar, settings, i18n, hotkeys, reset]
 status: active
 created: 2026-11-17
-updated: 2026-11-21
+updated: 2026-11-22
 source: mvp-05 implementation
 ---
 
@@ -77,12 +77,23 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
   (`set_graphics_acceleration`), because WebView2 takes its arguments only at start.
   Off starts every webview with `--disable-gpu`: no PlayReady, more CPU (mvp-11).
 
+- **Theme** ([[floawty-theme-choice]]): `theme` (system, light, dark) travels with the
+  preferences. `theme::startup_script` sets `data-theme` on home and bar before the
+  first paint (the root element does not exist yet when it runs, hence the observer);
+  later changes come with the state, with a session copy for reloads. `tokens.css`
+  turns it into `color-scheme`; no colour may ask `prefers-color-scheme`.
+- **Title bar:** `theme::apply` sets DWM's dark attribute on the main window and a
+  subclass sets a chosen one again after every `WM_SETTINGCHANGE`, which tao answers
+  with Windows' colour. It repaints only a decorated window. No Tauri calls in the
+  subclass.
+
 ## Structure
 
 | File | Role | Tests |
 |---|---|---|
 | `src-tauri/src/bar.rs` | create, place bar and service (`layout`), raise, show/hide, hover watcher | unit (`wanted`, `layout`), Playwright |
 | `src-tauri/src/hover.rs` | when the bar shows: delay, leave, idle | unit |
+| `src-tauri/src/theme.rs` | startup script, title bar colour | cargo, `tests/theme.spec.ts` |
 | `src-tauri/src/reset.rs` | reset request and wipe at start | unit (temp dirs), Playwright |
 | `src-tauri/src/hotkeys.rs` | register, change one, pause all; action names | unit |
 | `src-tauri/src/commands.rs` | `toggle_click_through`, `toggle_always_on_top`, `toggle_video_only`, `toggle_zoom`, `set_bar_width`, `set_settings_open`, `set_preferences`, `set_graphics_acceleration` (save, restart), `set_hotkey`, `set_hotkeys_paused`, `move_focus` (F6), `reset_all_data`, `quit` | Playwright |
@@ -104,7 +115,7 @@ the window (the bar may be no wider than the controls); in window mode the title
 the settings.
 
 `OverlayState` (command `overlay_state`, event `overlay-state`): mode, opacity,
-clickThrough, serviceId, settingsOpen, hotkeys, language, shorts (auto, pauseSeconds,
+clickThrough, serviceId, settingsOpen, hotkeys, language, theme, shorts (auto, pauseSeconds,
 holdOnHover, portraitSize), updateCheck, graphicsAcceleration, videoOnly, zoom,
 alwaysOnTop, pageProblems.
 

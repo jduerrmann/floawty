@@ -13,6 +13,10 @@ const TEXTS: [string, MessageKey][] = [
   ['settings-done', 'done'],
   ['general-title', 'generalTitle'],
   ['language-label', 'language'],
+  ['theme-label', 'theme'],
+  ['theme-system', 'themeSystem'],
+  ['theme-light', 'themeLight'],
+  ['theme-dark', 'themeDark'],
   ['hotkeys-title', 'hotkeysTitle'],
   ['shorts-title', 'shortsTitle'],
   ['shorts-pause-label', 'shortsPause'],
@@ -92,6 +96,7 @@ function wirePreferences(current: () => OverlayState): void {
     if (Number.isNaN(pause.valueAsNumber)) return;
     change((p) => ({ ...p, shorts: { ...p.shorts, pauseSeconds: pause.valueAsNumber } }));
   });
+  wireTheme(change);
   wireShorts(change);
   const updateCheck = element<HTMLInputElement>('update-check');
   updateCheck.addEventListener('change', () =>
@@ -100,6 +105,17 @@ function wirePreferences(current: () => OverlayState): void {
 }
 
 type Change = (patch: (preferences: Preferences) => Preferences) => void;
+
+const themeRadios = () =>
+  element('theme').querySelectorAll<HTMLInputElement>('input[name="theme"]');
+
+function wireTheme(change: Change): void {
+  for (const radio of themeRadios()) {
+    radio.addEventListener('change', () =>
+      change((p) => ({ ...p, theme: radio.value as Preferences['theme'] })),
+    );
+  }
+}
 
 function wireShorts(change: Change): void {
   const shorts = (patch: Partial<Preferences['shorts']>) =>
@@ -114,6 +130,7 @@ function wireShorts(change: Change): void {
 
 function showValues(state: OverlayState): void {
   element<HTMLSelectElement>('language').value = state.language;
+  for (const radio of themeRadios()) radio.checked = radio.value === state.theme;
   element<HTMLInputElement>('shorts-pause').value = String(state.shorts.pauseSeconds);
   element<HTMLInputElement>('shorts-hold').checked = state.shorts.holdOnHover;
   element<HTMLSelectElement>('portrait-size').value = state.shorts.portraitSize;

@@ -95,6 +95,24 @@ test('all eleven tiles fit the default 480 × 270 overlay without scrolling', as
   }
 });
 
+test('the light follows the pointer over a tile', async () => {
+  const app = await launch(freshProfile());
+  try {
+    await app.home.locator('#notice-ok').click();
+    const item = app.home.locator('#tiles > li').nth(1);
+    const box = await item.boundingBox();
+    if (!box) throw new Error('the tile has no box');
+    await app.home.mouse.move(box.x + box.width * 0.75, box.y + box.height * 0.5);
+    await expect
+      .poll(() =>
+        item.evaluate((element) => parseFloat(element.style.getPropertyValue('--light-x'))),
+      )
+      .toBeGreaterThan(60);
+  } finally {
+    await app.stop();
+  }
+});
+
 test('an own page becomes a tile, survives a restart and can be removed', async () => {
   const profile = freshProfile();
   const first = await launch(profile);
