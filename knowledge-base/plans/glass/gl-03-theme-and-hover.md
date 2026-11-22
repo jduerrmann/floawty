@@ -75,21 +75,23 @@ pointer with light and a gentle tilt that never leaves their box.
   93 %). Theme spec fixed: Playwright emulates light over CDP, `windowsDark` lifts it
   (also makes the services' scheme check real). Follow-up review (advisor): no findings.
 - App run 2 (quiet PC): 44/46, no launch failed, theme spec green. Start 33 ms, 3.3 MiB.
-- App run 3 (quiet PC), stopped after idle: **regression in gl-03** – on-top show/hide
-  (`:82`) and sign-in background (`:171`) pass on be9a7b0 and fail here: a click no
-  longer activates the helper window. Other 44 green. Idle, three starts each:
+- App run 3 (quiet PC), stopped after idle: on-top show/hide (`:82`) and sign-in
+  background (`:171`) red here, green once on be9a7b0; other 44 green. Idle, three starts each:
   be9a7b0 258.7, 243.1, 257.6 (median 257.6); gl-03 261.9, 244.3, 225.1 (median
   244.3, within budget). be9a7b0 after hover: 235.2 MB (run 2).
+- The two specs again, order swapped and observed: 4/4 green, twice with the exe that
+  was red, **so no gl-03 regression shown**. In all 12 clicks the helper window was in
+  front before the click: the specs rely on Windows activating it when it opens. Why
+  that and the click sometimes fail is not captured yet.
+- App run 4, all app tests on the same exe: **46/46 green**, no launch failed.
 
 ## Resume here
-On `claude/cool-noyce-12b84f`: 9720b97 plus the start-race and theme-test fixes and
-the app-run rules, not pushed. **gl-03 must not merge yet.** Next:
-1. Find the regression's cause and fix it, test first. Stage 1 (AGENTS.md rule 10):
-   only the two red specs, after the maintainer's yes.
-2. All app tests once.
-3. Measure hover on both builds, YouTube and hidden once; idle again only if the fix
-   touches startup or the tiles. Then the maintainer decides open question 10; tick
-   the criteria, record the numbers, set `done`.
+On `claude/cool-noyce-12b84f`, not pushed. App tests are green. Next:
+1. After the maintainer's yes: measure hover on both builds, YouTube and hidden once.
+2. The maintainer decides open question 10; tick the criteria, record the numbers, set
+   `done`. Not merged before that.
+If `on-top:82` or `sign-in:171` turn red again: run them with an observer of cursor
+and foreground before blaming the build.
 Found, not fixed: `budgets.spec.ts` divides frames by 60 s even when sampling takes
 longer.
 Also open from gl-01: the maintainer's live light/dark switch check.
