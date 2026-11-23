@@ -34,7 +34,7 @@ Nachher: flow: Änderung -> 45 Tests unsichtbar, lokal! -> Ergebnis -> vor Relea
 - Ein App-Lauf gleichzeitig
 - gl-05 wartet auf die Testumgebung
 
-## Plan (wartet auf Freigabe)
+## Plan (freigegeben am 23.11.2026 im Chat: „lass uns erstmal die Tests ohne Bildschirm umsetzen“)
 1. Probelauf mit floawty: die 35 Tests unverändert auf dem unsichtbaren Desktop
 2. Starter und Helfer für Klick, Tippen, Hotkey, Tests zuerst
 3. Test-Build: Cargo-Feature nur für Zeiger und Vordergrund, ein Test beweist, dass die Release-Exe ihn nicht enthält

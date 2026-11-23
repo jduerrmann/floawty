@@ -2,7 +2,7 @@
 type: moc
 tags: [index]
 created: 2026-11-16
-updated: 2026-11-22
+updated: 2026-11-23
 source: conversation
 ---
 
@@ -48,6 +48,7 @@ Vault conventions and budgets: `CLAUDE.md` in this folder.
 
 - [[stack-spike-results]] – measured numbers and service checks for Tauri and Electron
 - [[drm-in-desktop-webviews]] – Widevine/PlayReady in castlabs Electron and WebView2 (mostly observed)
+- [[isolated-test-input]] – cursor, foreground and hotkeys for app tests without the real screen: test shim DLL (probed)
 
 ## Tech
 
