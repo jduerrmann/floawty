@@ -1,4 +1,4 @@
-# The same checks as `npm run verify`, for every pull request and every push to main.
+# `npm run check` and the release build, for every pull request and every push to main.
 name: CI
 
 on:
@@ -41,13 +41,12 @@ jobs:
           cache-on-failure: true
 
       - run: npm ci
-      # The steps of `npm run verify`, split so a red check shows which part failed.
       - run: npm run check
 
       # Cargo has no --locked through the npm scripts; check resolved both workspaces, so a stale lockfile shows here.
       - name: Cargo lockfiles unchanged
         run: git diff --exit-code -- src-tauri/Cargo.lock tools/test-input/Cargo.lock
 
+      # No app tests here: WebView2 cannot create its window on the runner's hidden desktop
+      # (0x80070578), so `npm run verify` runs them locally before a merge or release.
       - run: npm run build
-      - run: npm run build:test-input
-      - run: npm run smoke:hidden

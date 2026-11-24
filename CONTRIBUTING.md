@@ -27,9 +27,11 @@ Thanks for helping! floawty is a small hobby project, so please keep changes foc
   GPL-3.0-compatible.
 - New logic and bug fixes start with a failing test (see
   [engineering standards](knowledge-base/engineering-standards.md)).
-- Lint and tests must pass. GitHub runs the same checks as `npm run verify` on
+- Lint and tests must pass. GitHub runs `npm run check` and the release build on
   Windows for every pull request (`.github/workflows/ci.yml`); a changed lockfile
-  fails it. User-facing changes get a line in `CHANGELOG.md`.
+  fails it. The app tests cannot run there (WebView2 gets no window on the runner's
+  hidden desktop), so run `npm run verify` yourself before asking for a merge.
+  User-facing changes get a line in `CHANGELOG.md`.
 
 By contributing you agree that your contribution is licensed under GPL-3.0.
 
