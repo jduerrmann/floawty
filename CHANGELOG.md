@@ -6,6 +6,8 @@ User-facing changes, in plain language. Format based on
 
 ## [Unreleased]
 
+- A change right after floawty starts, such as switching to window mode, now always
+  shows in the bar and on the start screen instead of being missed now and then.
 - A new switch turns floawty's animations off: tiles then only glow, and from the next
   start pointing at them takes less memory.
 - The notice at the first start lies over the start screen instead of pushing the
