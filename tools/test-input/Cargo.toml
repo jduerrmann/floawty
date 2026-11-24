@@ -1,0 +1,19 @@
+[workspace]
+members = ["shared", "launcher", "shim"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+license = "GPL-3.0-only"
+edition = "2021"
+rust-version = "1.90"
+
+[workspace.dependencies]
+windows-sys = "0.61"
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true

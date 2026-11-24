@@ -1,13 +1,12 @@
 // "Use graphics acceleration": WebView2 gets its arguments from floawty, so this starts the
 // app without the test's argument override and reads them from the WebView2 processes.
-import { execFileSync, spawn, type ChildProcess } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import path from 'node:path';
 import { expect, test } from '@playwright/test';
-import { freshProfile, type Profile } from './app';
-import { EXE } from './tested-exe';
+import { freshProfile, startFloawty, type Floawty, type Profile } from './app';
 
 function browserCommandLines(profile: Profile): string[] {
   const query =
@@ -26,14 +25,14 @@ function writeSettings(profile: Profile, graphicsAcceleration: boolean, url: str
   writeFileSync(path.join(profile.dataDir, 'settings.json'), JSON.stringify(settings));
 }
 
-function start(profile: Profile): ChildProcess {
+function start(profile: Profile): Promise<Floawty> {
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     FLOAWTY_DATA_DIR: profile.dataDir,
     WEBVIEW2_USER_DATA_FOLDER: profile.webviewDir,
   };
   delete env.WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS;
-  return spawn(EXE, [], { env });
+  return startFloawty(env);
 }
 
 function logOf(profile: Profile): string {
@@ -58,7 +57,7 @@ for (const on of [true, false]) {
     const profile = freshProfile();
     const page = await servePage();
     writeSettings(profile, on, page.url);
-    const app = start(profile);
+    const app = await start(profile);
     try {
       // The bar comes before the service, and both need the main window's arguments.
       await expect.poll(page.requests, { timeout: 15_000 }).toBeGreaterThan(0);
@@ -69,7 +68,7 @@ for (const on of [true, false]) {
       expect(logOf(profile)).not.toContain('could not');
       expect(logOf(profile).includes('graphics acceleration is off')).toBe(!on);
     } finally {
-      app.kill();
+      await app.stop();
       page.server.close();
     }
   });
@@ -79,18 +78,18 @@ test('a second floawty with other arguments logs why it cannot start', async () 
   const profile = freshProfile();
   const page = await servePage();
   writeSettings(profile, true, page.url);
-  const first = start(profile);
-  let second: ChildProcess | undefined;
+  const first = await start(profile);
+  let second: Floawty | undefined;
   try {
     await expect.poll(page.requests, { timeout: 15_000 }).toBeGreaterThan(0);
     writeSettings(profile, false, page.url);
-    second = start(profile);
+    second = await start(profile);
     await expect
       .poll(() => logOf(profile), { timeout: 15_000 })
       .toContain('could not create the main window');
   } finally {
-    second?.kill();
-    first.kill();
+    await second?.stop();
+    await first.stop();
     page.server.close();
   }
 });

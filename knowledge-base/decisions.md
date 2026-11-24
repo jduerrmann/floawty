@@ -2,7 +2,7 @@
 type: moc
 tags: [decisions]
 created: 2026-11-16
-updated: 2026-11-22
+updated: 2026-11-24
 source: conversation
 ---
 
@@ -21,7 +21,9 @@ One line per decision record in `decisions/`. Template: `templates/t-decision.md
 - [[leaner-reviews]] – advisor at effort high with a reading budget; one independent review per UI plan, plan check only if hard to reverse
 - [[app-tests-ask-first]] – app tests only after the maintainer's yes, muted, one agent at a time; `npm run check` while working
 - [[app-runs-smallest-first]] – red specs first, then all app tests, measurement last; one yes for repeated targeted runs
+- [[app-tests-run-hidden]] – hidden app runs start without asking; visible runs and measurements ask; real set before releases
 - [[idle-budget-260]] – idle RAM ≤ 260 MB instead of 250; median of three when one value is over
+- [[start-budget-main-window]] – start measured to the real main window, ≤ 400 ms; old values timed a helper window
 
 ## services
 

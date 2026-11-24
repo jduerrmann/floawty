@@ -143,24 +143,30 @@ through the service's own next control the way a user would, and is configurable
 ## 10. Verify before reporting completion
 
 - `npm run verify` must pass: `npm run check` (types, lint, format, Vitest, adapter
-  tests, `cargo clippy`, `cargo test`), build, Playwright smoke test.
-- App tests take over the maintainer's mouse, keyboard and screen: `npm run smoke`
-  and `verify`, any spec in the Playwright app project, `npm run measure`, and live
-  probes (which start floawty through `launch()` in `tests/app.ts`, so they are muted
-  and use a fresh profile). Never two agents at once. While working, use
-  `npm run check` and single unit or adapter tests (`npm run test:adapters -- <file>`).
+  tests, `cargo clippy`, `cargo test`), build, `build:test-input`, `smoke:hidden`.
+- **Hidden runs** start floawty on a desktop nobody sees, through `tools/test-input`
+  ([app-tests-run-hidden](knowledge-base/decisions/app-tests-run-hidden.md)):
+  `npm run smoke:hidden` with optional spec filters, and `verify`. Start them without
+  asking; announce what runs.
+- **Ask first**, one yes per run, a re-run after a failure asks again:
+  `npm run measure` (hidden, but needs a quiet PC); the visible runs that take over
+  the maintainer's mouse, keyboard and screen – `npm run smoke:real` (the `@real`
+  release set), `npm run smoke` (all tests visible, optional) – and live probes on
+  real services, even when they run hidden. Say how long mouse and keyboard are needed.
+- App tests and measurements start only through these scripts, never with a direct
+  `playwright test`. One app run at a time: every run holds the run lock, a second one
+  is refused; never work around it. While working, use `npm run check` and single
+  unit or adapter tests (`npm run test:adapters -- <file>`). App tests start floawty
+  muted with a fresh profile (`launch()` in `tests/app.ts`).
 - App runs go **smallest first**, as separate stages on a build of the current code
   (`npm run build` first; engineering standards §2):
-  1. **Red or new test:** only those specs, under a minute per run; a failure of
-     unclear cause also runs on the last good build before anything wider.
-  2. **Code final and reviewed:** all app tests, normally once per package.
+  1. **Red or new test:** only those specs; a failure of unclear cause also runs on
+     the last good build before anything wider.
+  2. **Code final and reviewed:** all hidden app tests, normally once per package.
   3. **All app tests green:** measure, if the change needs it, only the affected
-     scenarios.
-- Ask the maintainer before each stage, with its duration and how long it needs mouse
-  and keyboard. One yes covers one run of a stage. Exception: a yes for stage 1
-  covers, in that session, repeated runs of those named specs while each stays under
-  a minute, until their failure is fixed; announce each before it starts. A wider or
-  longer run asks again.
+     scenarios, compared with the predecessor build measured hidden.
+- Before a release, `npm run smoke:real` runs once on a local build of the commit to
+  be tagged.
 - Report after each stage. Stop at the first result that means the code must change;
   never start a wider stage on code that will change.
 - Within these limits, verify yourself – run the app, drive it with Playwright or the
@@ -170,8 +176,8 @@ through the service's own next control the way a user would, and is configurable
 - Report what was verified and what was not; never call an unrun check passed.
 
 Completion order: `npm run check` (10) → tech notes and CHANGELOG (11) → decisions
-and open questions (11, 3) → final diff review → independent review (14) → all app
-tests, then the measurement, after the maintainer's yes (10) → commit proposal (12).
+and open questions (11, 3) → final diff review → independent review (14) → all hidden
+app tests, then the measurement after the maintainer's yes (10) → commit proposal (12).
 
 ## 11. Keep the knowledge current
 

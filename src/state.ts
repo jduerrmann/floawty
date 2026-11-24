@@ -64,17 +64,23 @@ function showMotion(animations: boolean): void {
 export async function startWithState(
   start: (state: OverlayState, language: Language) => StateView,
 ): Promise<void> {
-  const state = await invoke<OverlayState>('overlay_state');
+  let heard: OverlayState | undefined;
+  let showChange: StateView = (payload) => (heard = payload);
+  // Listening before fetching: a change in between would otherwise never reach this page.
+  await listen<OverlayState>('overlay-state', ({ payload }) => showChange(payload));
+  const fetched = await invoke<OverlayState>('overlay_state');
+  // Every change is emitted, so a change heard while fetching is at least as new as the reply.
+  const state = heard ?? fetched;
   const language = resolveLanguage(state.language, navigator.languages);
   document.documentElement.lang = language;
   showTheme(state.theme);
   showMotion(state.animations);
   const show = start(state, language);
   show(state);
-  await listen<OverlayState>('overlay-state', ({ payload }) => {
+  showChange = (payload) => {
     showTheme(payload.theme);
     showMotion(payload.animations);
     if (resolveLanguage(payload.language, navigator.languages) !== language) location.reload();
     else show(payload);
-  });
+  };
 }

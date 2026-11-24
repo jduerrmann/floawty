@@ -1,16 +1,10 @@
 // The bar over a service: hover, back to the tiles, opacity and the click-through dot.
 import { expect, test, type Page } from '@playwright/test';
-import { freshProfile, launch, type RunningApp } from './app';
-import {
-  clickAt,
-  dragBy,
-  ownedPopups,
-  pointAt,
-  pointAway,
-  pressKeys,
-  resizeWindow,
-  windowPosition,
-} from './desktop';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { freshProfile, launch, type Profile, type RunningApp } from './app';
+import { moveWindow, ownedPopups, resizeWindow, windowPosition } from './desktop';
+import { dragBy, pointAt } from './real-input';
 
 const EXAMPLE = {
   service: { id: 'example', url: 'https://example.com/', allowedDomains: ['example.com'] },
@@ -29,22 +23,21 @@ async function openExample(app: RunningApp): Promise<void> {
 const barShown = (bar: Page) => bar.evaluate(() => document.body.dataset.visible);
 
 async function hoverVideo(app: RunningApp): Promise<void> {
-  pointAt(app.pid, 0.5, 0.6);
-  pointAt(app.pid, 0.52, 0.62);
+  await app.point(0.5, 0.6);
+  await app.point(0.52, 0.62);
   await expect.poll(() => barShown(app.bar)).toBe('true');
 }
 
 test('over a service the bar shows while the cursor is on floawty', async () => {
   const app = await launch(freshProfile());
   try {
-    pointAway(app.pid);
+    await app.pointAway();
     await openExample(app);
     await expect.poll(() => barShown(app.bar)).toBe('false');
     await hoverVideo(app);
-    pointAway(app.pid);
+    await app.pointAway();
     await expect.poll(() => barShown(app.bar)).toBe('false');
   } finally {
-    pointAway(app.pid);
     await app.stop();
   }
 });
@@ -61,7 +54,6 @@ test('◀ in the bar closes the service and shows the tiles with the bar', async
     await expect(app.bar.locator('#back')).toBeHidden();
     await expect.poll(() => barShown(app.bar)).toBe('true');
   } finally {
-    pointAway(app.pid);
     await app.stop();
   }
 });
@@ -92,7 +84,6 @@ test('click-through shows the dot over a service with its hotkey', async () => {
     await app.home.evaluate(() => window.__TAURI_INTERNALS__.invoke('toggle_click_through'));
     await expect(app.bar.locator('#click-through-dot')).toBeHidden();
   } finally {
-    pointAway(app.pid);
     await app.stop();
   }
 });
@@ -116,7 +107,6 @@ test('the bar is dark over a service, and follows Windows on the tiles and in th
     await expect.poll(scheme).not.toBe('dark');
     expect(await pillColor()).toBe(lightText);
   } finally {
-    pointAway(app.pid);
     await app.stop();
   }
 });
@@ -142,7 +132,6 @@ test('the bar leaves the page clickable: narrow over a service, above it in wind
     await expect.poll(async () => (await width(app.bar)) === (await width(app.home))).toBe(true);
     await expect.poll(async () => (await height(app.home)) - (await height(service))).toBe(40);
   } finally {
-    pointAway(app.pid);
     await app.stop();
   }
 });
@@ -157,39 +146,101 @@ test("a page's suggestion list stays open when the bar hides", async () => {
       '<input id="mail" list="mails" style="margin: 80px 20px; width: 300px">' +
         '<datalist id="mails"><option value="a@example.com"><option value="b@example.com"></datalist>',
     );
-    clickAt(app.pid, 0.35, 0.34);
-    pressKeys('a');
+    await app.click(0.35, 0.34);
+    await service.keyboard.press('a');
     await expect.poll(() => ownedPopups(app.pid)).toBe(1);
     // The resting cursor hides the bar after 3 s; the list must survive that.
     await expect.poll(() => barShown(app.bar), { timeout: 6000 }).toBe('false');
     expect(ownedPopups(app.pid)).toBe(1);
   } finally {
-    pointAway(app.pid);
     await app.stop();
   }
 });
 
-test('the grip in the bar moves the window over a service', async () => {
+/** The grip's centre in the bar page, and where that is as a fraction of floawty's window. */
+async function gripOf(app: RunningApp) {
+  const windowWidth = await app.home.evaluate(() => innerWidth);
+  const windowHeight = await app.home.evaluate(() => innerHeight);
+  const barWidth = await app.bar.evaluate(() => innerWidth);
+  const grip = await app.bar.evaluate(() => {
+    const rect = document.getElementById('grip')?.getBoundingClientRect();
+    return rect ? { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 } : null;
+  });
+  if (!grip) throw new Error('the grip is missing');
+  const offset = Math.floor((windowWidth - barWidth) / 2);
+  return { ...grip, fx: (offset + grip.x) / windowWidth, fy: grip.y / windowHeight };
+}
+
+test('the grip in the bar moves the window over a service', { tag: '@real' }, async () => {
   const app = await launch(freshProfile());
   try {
     await openExample(app);
     await hoverVideo(app);
-    const windowWidth = await app.home.evaluate(() => innerWidth);
-    const windowHeight = await app.home.evaluate(() => innerHeight);
-    const barWidth = await app.bar.evaluate(() => innerWidth);
-    const grip = await app.bar.evaluate(() => {
-      const rect = document.getElementById('grip')?.getBoundingClientRect();
-      return rect ? { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 } : null;
-    });
-    if (!grip) throw new Error('the grip is missing');
-    const offset = Math.floor((windowWidth - barWidth) / 2);
-    pointAt(app.pid, (offset + grip.x) / windowWidth, grip.y / windowHeight);
+    const grip = await gripOf(app);
+    pointAt(app.pid, grip.fx, grip.fy);
     const before = windowPosition(app.pid);
     const after = dragBy(app.pid, -120, -90);
     expect(before.x - after.x).toBeGreaterThan(100);
     expect(before.y - after.y).toBeGreaterThan(70);
   } finally {
-    pointAway(app.pid);
+    await app.pointAway();
+    await app.stop();
+  }
+});
+
+/** The floaty rectangle floawty saved, or none before it saved one. */
+function savedFloaty(profile: Profile): { x: number; y: number } | null {
+  try {
+    const saved = JSON.parse(readFileSync(path.join(profile.dataDir, 'settings.json'), 'utf8'));
+    return saved.floaty ?? null;
+  } catch {
+    return null;
+  }
+}
+
+const apart = (a: { x: number; y: number } | null, b: { x: number; y: number }) =>
+  a ? Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y)) : Infinity;
+
+// The launcher's shim swallows the request for Windows' move loop, so a plain window move stands
+// in for the drag; the real drag is the @real test above.
+test('the grip asks for a window move, and floawty settles the window once the button is up', async () => {
+  test.skip(
+    process.env.FLOAWTY_TEST_HIDDEN !== '1',
+    'needs the hidden launcher for the drag count',
+  );
+  const profile = freshProfile();
+  const app = await launch(profile);
+  try {
+    await openExample(app);
+    await hoverVideo(app);
+    const grip = await gripOf(app);
+    await app.point(grip.fx, grip.fy);
+    expect((await app.counts())?.drag).toBe(0);
+    await app.press(app.bar, grip.x, grip.y);
+    await expect.poll(async () => (await app.counts())?.drag).toBe(1);
+
+    // A move close to the work area's top left corner: the snap would pull it into the corner.
+    const corner = await app.home.evaluate(() => {
+      const { availLeft, availTop } = screen as unknown as { availLeft: number; availTop: number };
+      return {
+        x: Math.round(availLeft * devicePixelRatio),
+        y: Math.round(availTop * devicePixelRatio),
+      };
+    });
+    moveWindow(app.pid, corner.x, corner.y + 10);
+    const moved = windowPosition(app.pid);
+    expect(moved).toEqual({ x: corner.x, y: corner.y + 10 });
+    // Several settle ticks (250 ms each) pass; with the button down none may settle the window.
+    await app.home.waitForTimeout(1200);
+    expect(windowPosition(app.pid)).toEqual(moved);
+    expect(apart(savedFloaty(profile), corner)).toBeGreaterThan(1);
+
+    await app.release();
+    await expect.poll(() => apart(savedFloaty(profile), corner)).toBeLessThanOrEqual(1);
+    expect(windowPosition(app.pid)).not.toEqual(moved);
+  } finally {
+    await app.release();
+    await app.pointAway();
     await app.stop();
   }
 });
@@ -222,22 +273,28 @@ test('the bar fits all nine controls at the minimum width and grows back when wi
       }),
     );
     await expect(app.bar.locator('#video-only')).toBeVisible();
-    const fits = () =>
+    const layout = () =>
       app.bar.evaluate(() => {
         const controls = document.getElementById('controls') as HTMLElement;
-        return controls.scrollWidth <= controls.clientWidth;
+        const width = (id: string) => document.getElementById(id)?.getBoundingClientRect().width;
+        return {
+          bar: innerWidth,
+          fits: controls.scrollWidth <= controls.clientWidth,
+          button: width('quit'),
+          slider: width('opacity'),
+        };
       });
-    const sliderWidth = () =>
-      app.bar.evaluate(() => document.getElementById('opacity')?.getBoundingClientRect().width);
+    // Without the cursor on it the bar is hidden and lays itself out late, so the whole layout is
+    // polled; the bar's own width tells a late page from a stale width in the shell.
     // The smallest overlay a user can drag: 240 px inside, plus the 2 × 8 px invisible border.
     resizeWindow(app.pid, 256, 151);
     await expect.poll(() => app.home.evaluate(() => innerWidth)).toBe(240);
     await app.bar.evaluate(() => window.__TAURI_INTERNALS__.invoke('set_opacity', { value: 0.8 }));
-    await expect.poll(fits).toBe(true);
+    await expect.poll(layout).toEqual({ bar: 240, fits: true, button: 20, slider: 24 });
     resizeWindow(app.pid, 800, 450);
     await expect.poll(() => app.home.evaluate(() => innerWidth)).toBeGreaterThan(600);
-    await expect.poll(sliderWidth).toBe(88);
-    expect(await fits()).toBe(true);
+    // 88 px alone would also pass in the compact layout, so the buttons must be full size too.
+    await expect.poll(layout).toEqual({ bar: 400, fits: true, button: 28, slider: 88 });
   } finally {
     await app.stop();
   }

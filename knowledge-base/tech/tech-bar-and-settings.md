@@ -4,7 +4,7 @@ area: ui
 tags: [bar, settings, i18n, hotkeys, reset]
 status: active
 created: 2026-11-17
-updated: 2026-11-22
+updated: 2026-11-24
 source: mvp-05 implementation
 ---
 
@@ -39,6 +39,8 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
   their natural width is measured under `.measuring`, free of the current width.
 - A hidden webview keeps `document.visibilityState` "visible"; the bar learns its
   visibility from the event `bar-visible` (also `body[data-visible]` for tests).
+  While hidden, its page sees a new size late (about 1 s measured) and the `resize`
+  event later still, so a hidden bar's compact layout can be stale; app tests poll it.
 - **Look** ([[glass-design-follows-windows-theme]]): bar, settings and tiles use the
   `light-dark()` tokens of `src/tokens.css` and follow Windows. Over a visible service
   (`serviceId` set, settings closed) `bar.ts` sets `body.over-service`, which pins
@@ -122,7 +124,9 @@ the settings.
 `OverlayState` (command `overlay_state`, event `overlay-state`): mode, opacity,
 clickThrough, serviceId, settingsOpen, hotkeys, language, theme, animations, shorts (auto, pauseSeconds,
 holdOnHover, portraitSize), updateCheck, graphicsAcceleration, videoOnly, zoom,
-alwaysOnTop, pageProblems.
+alwaysOnTop, pageProblems. Every change to it is emitted. Home and bar start through
+`startWithState` (`src/state.ts`): they listen first, then fetch, and a state heard
+while fetching wins over the reply, so no change during startup is lost.
 
 ## Working on X → read Y
 

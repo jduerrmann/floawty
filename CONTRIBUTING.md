@@ -44,8 +44,9 @@ npm install
 npm run dev       # app with hot reload
 npm run check     # quiet checks while you work: types, lint, format, Vitest,
                   # adapter tests, cargo fmt, clippy, cargo test
-npm run verify    # check + release build + Playwright smoke test, which moves your
-                  # mouse and opens windows for a few minutes
+npm run verify    # check + release build + test launcher + app tests on a hidden
+                  # desktop (smoke:hidden); nothing appears on your screen
+npm run smoke:real  # the few tests that need your real mouse (before a release)
 ```
 
 | Path | What |

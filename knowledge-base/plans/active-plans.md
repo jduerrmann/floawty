@@ -3,7 +3,7 @@ type: moc
 tags: [plans]
 status: active
 created: 2026-11-16
-updated: 2026-11-22
+updated: 2026-11-24
 source: conversation
 ---
 
@@ -18,4 +18,5 @@ Single resume entry for multi-session work. Rules: [[planning]].
 
 Archived: stack spike ([[plan-stack-spike]]), done 2026-11-17; MVP ([[plan-mvp]]), done
 2026-11-20; always on top as a switch ([[plan-on-top]]), done 2026-11-20; short feeds
-([[plan-short-feeds]]), done 2026-11-21.
+([[plan-short-feeds]]), done 2026-11-21; app tests without the maintainer's screen
+([[plan-quiet-tests]]), done 2026-11-24.

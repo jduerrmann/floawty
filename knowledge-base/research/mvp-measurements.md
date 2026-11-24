@@ -3,7 +3,7 @@ type: research
 tags: [mvp, performance, network, services]
 status: active
 created: 2026-11-18
-updated: 2026-11-22
+updated: 2026-11-24
 source: npm run measure and maintainer checks, 2026-11-18
 ---
 
@@ -19,7 +19,7 @@ Budgets: [[stack-by-spike]]; spike values: [[stack-spike-results]].
 | Metric | MVP | Budget | Spike |
 |---|---|---|---|
 | Download (portable exe) | 3.3 MiB | ≤ 10 MiB | 4.2 MiB |
-| Start → visible window (median of 5) | 46 ms | ≤ 200 ms | 46 ms |
+| Start → visible window (median of 5; a helper window, see [[start-budget-main-window]]) | 46 ms | ≤ 200 ms | 46 ms |
 | RAM idle on the tiles | 224 MB, 216 MB after round 2 | ≤ 250 MB (now 260, [[idle-budget-260]]) | 188 MB |
 | RAM YouTube 1080p60, 70 % opacity | 734 MB, 727 MB after round 2 | ≤ 850 MB | 682 MB |
 | RAM hidden, paused | 723 MB, 721 MB after round 2 | – | 659 MB |

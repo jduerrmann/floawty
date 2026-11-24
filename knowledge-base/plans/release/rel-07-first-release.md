@@ -3,7 +3,7 @@ type: plan
 tags: [package, release, dist]
 status: planned
 created: 2026-11-20
-updated: 2026-11-20
+updated: 2026-11-24
 source: visual plan "Phase 3 – Release-Pipeline", approved 2026-11-20; advisor review
 ---
 
@@ -35,11 +35,14 @@ and README, CHANGELOG and the notes describe the released state.
       pre-releases).
 - [ ] Live service checks by the maintainer on the installed, CI-built rc.
 - [ ] Budgets met on the CI-built exe (`npm run measure`).
+- [ ] `npm run smoke:real` (the `@real` set, about a minute, asked) green on a local
+      build of the commit to be tagged ([[app-tests-run-hidden]]).
 - [ ] Minimum tested WebView2 version written down.
 - [ ] Tag `v0.1.0` pushed on the maintainer's explicit request; release public.
 
 ## Checks
-- `npm run verify`, `npm run measure`, fresh-Windows run, live checks (maintainer).
+- `npm run verify`, `npm run smoke:real`, `npm run measure`, fresh-Windows run, live
+  checks (maintainer).
 
 ## Resume here
 Not started; waits for rel-04 to rel-06 and sf-01 to sf-04.
