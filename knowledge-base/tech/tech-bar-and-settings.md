@@ -4,7 +4,7 @@ area: ui
 tags: [bar, settings, i18n, hotkeys, reset]
 status: active
 created: 2026-11-17
-updated: 2026-11-22
+updated: 2026-11-24
 source: mvp-05 implementation
 ---
 
@@ -122,7 +122,9 @@ the settings.
 `OverlayState` (command `overlay_state`, event `overlay-state`): mode, opacity,
 clickThrough, serviceId, settingsOpen, hotkeys, language, theme, animations, shorts (auto, pauseSeconds,
 holdOnHover, portraitSize), updateCheck, graphicsAcceleration, videoOnly, zoom,
-alwaysOnTop, pageProblems.
+alwaysOnTop, pageProblems. Every change to it is emitted. Home and bar start through
+`startWithState` (`src/state.ts`): they listen first, then fetch, and a state heard
+while fetching wins over the reply, so no change during startup is lost.
 
 ## Working on X → read Y
 
