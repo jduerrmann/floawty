@@ -1,5 +1,6 @@
 // Window queries and actions that work on any desktop: where a window is, its flags, its size, its popups.
 import { execFileSync } from 'node:child_process';
+import type { Rect } from './screen-point';
 
 const OWNED_POPUPS = `
 param([int]$ProcessId)
@@ -46,21 +47,32 @@ $h = (Get-Process -Id $ProcessId).MainWindowHandle
 $r = New-Object Frame
 [Win]::GetWindowRect($h, [ref]$r) | Out-Null
 if ($Action -eq 'resize') { [Win]::MoveWindow($h, $r.L, $r.T, $A, $B, $true) | Out-Null }
-"$($r.L) $($r.T)"
+"$($r.L) $($r.T) $($r.R) $($r.B)"
 `;
 
-function windowCall(pid: number, action: string, a = 0, b = 0): { x: number; y: number } {
+function windowCall(pid: number, action: string, a = 0, b = 0): Rect {
   const command = `& {${WINDOW}} ${pid} ${action} ${a} ${b}`;
   const out = execFileSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', command], {
     encoding: 'utf8',
   });
-  const [x, y] = out.trim().split(' ').map(Number);
-  return { x: x ?? NaN, y: y ?? NaN };
+  const [left, top, right, bottom] = out.trim().split(' ').map(Number);
+  return { left: left ?? NaN, top: top ?? NaN, right: right ?? NaN, bottom: bottom ?? NaN };
 }
 
 /** floawty's window position in screen pixels. */
 export function windowPosition(pid: number): { x: number; y: number } {
-  return windowCall(pid, 'where');
+  const { left, top } = windowCall(pid, 'where');
+  return { x: left, y: top };
+}
+
+/** floawty's window frame in physical screen pixels, the frame its cursor and clicks are set in. */
+export function windowRect(pid: number): Rect {
+  const rect = windowCall(pid, 'where');
+  // A hidden window has no main window handle, and its rect reads as all zero.
+  if (rect.right <= rect.left || rect.bottom <= rect.top) {
+    throw new Error(`floawty ${pid} has no visible window to point at`);
+  }
+  return rect;
 }
 
 /** Resizes floawty's window in screen pixels, as Windows does for a drag on its border. */

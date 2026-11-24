@@ -2,7 +2,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { freshProfile, launch, type RunningApp } from './app';
 import { ownedPopups, resizeWindow, windowPosition } from './desktop';
-import { clickAt, dragBy, pointAt, pointAway, pressKeys } from './real-input';
+import { dragBy, pointAt } from './real-input';
 
 const EXAMPLE = {
   service: { id: 'example', url: 'https://example.com/', allowedDomains: ['example.com'] },
@@ -21,46 +21,40 @@ async function openExample(app: RunningApp): Promise<void> {
 const barShown = (bar: Page) => bar.evaluate(() => document.body.dataset.visible);
 
 async function hoverVideo(app: RunningApp): Promise<void> {
-  pointAt(app.pid, 0.5, 0.6);
-  pointAt(app.pid, 0.52, 0.62);
+  await app.point(0.5, 0.6);
+  await app.point(0.52, 0.62);
   await expect.poll(() => barShown(app.bar)).toBe('true');
 }
 
-test('over a service the bar shows while the cursor is on floawty', { tag: '@real' }, async () => {
+test('over a service the bar shows while the cursor is on floawty', async () => {
   const app = await launch(freshProfile());
   try {
-    pointAway(app.pid);
+    await app.pointAway();
     await openExample(app);
     await expect.poll(() => barShown(app.bar)).toBe('false');
     await hoverVideo(app);
-    pointAway(app.pid);
+    await app.pointAway();
     await expect.poll(() => barShown(app.bar)).toBe('false');
   } finally {
-    pointAway(app.pid);
     await app.stop();
   }
 });
 
-test(
-  '◀ in the bar closes the service and shows the tiles with the bar',
-  { tag: '@real' },
-  async () => {
-    const app = await launch(freshProfile());
-    try {
-      await openExample(app);
-      await hoverVideo(app);
-      await app.bar.locator('#back').click();
-      await expect
-        .poll(() => app.pages().some((page) => page.url().startsWith('https://example.com')))
-        .toBe(false);
-      await expect(app.bar.locator('#back')).toBeHidden();
-      await expect.poll(() => barShown(app.bar)).toBe('true');
-    } finally {
-      pointAway(app.pid);
-      await app.stop();
-    }
-  },
-);
+test('◀ in the bar closes the service and shows the tiles with the bar', async () => {
+  const app = await launch(freshProfile());
+  try {
+    await openExample(app);
+    await hoverVideo(app);
+    await app.bar.locator('#back').click();
+    await expect
+      .poll(() => app.pages().some((page) => page.url().startsWith('https://example.com')))
+      .toBe(false);
+    await expect(app.bar.locator('#back')).toBeHidden();
+    await expect.poll(() => barShown(app.bar)).toBe('true');
+  } finally {
+    await app.stop();
+  }
+});
 
 test('the opacity slider sets the opacity', async () => {
   const app = await launch(freshProfile());
@@ -74,7 +68,7 @@ test('the opacity slider sets the opacity', async () => {
   }
 });
 
-test('click-through shows the dot over a service with its hotkey', { tag: '@real' }, async () => {
+test('click-through shows the dot over a service with its hotkey', async () => {
   const app = await launch(freshProfile());
   try {
     await openExample(app);
@@ -88,7 +82,6 @@ test('click-through shows the dot over a service with its hotkey', { tag: '@real
     await app.home.evaluate(() => window.__TAURI_INTERNALS__.invoke('toggle_click_through'));
     await expect(app.bar.locator('#click-through-dot')).toBeHidden();
   } finally {
-    pointAway(app.pid);
     await app.stop();
   }
 });
@@ -141,7 +134,7 @@ test('the bar leaves the page clickable: narrow over a service, above it in wind
   }
 });
 
-test("a page's suggestion list stays open when the bar hides", { tag: '@real' }, async () => {
+test("a page's suggestion list stays open when the bar hides", async () => {
   const app = await launch(freshProfile());
   try {
     await openExample(app);
@@ -151,14 +144,13 @@ test("a page's suggestion list stays open when the bar hides", { tag: '@real' },
       '<input id="mail" list="mails" style="margin: 80px 20px; width: 300px">' +
         '<datalist id="mails"><option value="a@example.com"><option value="b@example.com"></datalist>',
     );
-    clickAt(app.pid, 0.35, 0.34);
-    pressKeys('a');
+    await app.click(0.35, 0.34);
+    await service.keyboard.press('a');
     await expect.poll(() => ownedPopups(app.pid)).toBe(1);
     // The resting cursor hides the bar after 3 s; the list must survive that.
     await expect.poll(() => barShown(app.bar), { timeout: 6000 }).toBe('false');
     expect(ownedPopups(app.pid)).toBe(1);
   } finally {
-    pointAway(app.pid);
     await app.stop();
   }
 });
@@ -183,7 +175,7 @@ test('the grip in the bar moves the window over a service', { tag: '@real' }, as
     expect(before.x - after.x).toBeGreaterThan(100);
     expect(before.y - after.y).toBeGreaterThan(70);
   } finally {
-    pointAway(app.pid);
+    await app.pointAway();
     await app.stop();
   }
 });

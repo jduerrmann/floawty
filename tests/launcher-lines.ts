@@ -61,3 +61,19 @@ export class LineQueue {
 }
 
 const ENDED = () => new Error('the launcher ended before it answered');
+
+export type ForegroundName = 'main' | 'sign-in' | 'other' | 'none';
+export type MouseButton = 'left' | 'right';
+
+/** The cursor at a physical screen point, or none, as the hidden desktop has it. */
+export function cursorCommand(point: { x: number; y: number } | null): string {
+  return point ? `cursor ${Math.round(point.x)} ${Math.round(point.y)}` : 'cursor none';
+}
+
+export function buttonCommand(button: MouseButton, down: boolean): string {
+  return `button ${button} ${down ? 'down' : 'up'}`;
+}
+
+export function foregroundCommand(name: ForegroundName): string {
+  return `foreground ${name}`;
+}

@@ -23,6 +23,18 @@ test('the language changes both pages and is kept', async () => {
     await app.home.locator('#language').selectOption('en');
     await expect(app.home.locator('#settings-title')).toHaveText('Settings');
     await expect(app.bar.locator('#quit')).toHaveAttribute('aria-label', 'Close floawty');
+    // Right after the language reload a hidden WebView2 drops keys for a moment: wait until a
+    // neutral key arrives, then one Escape must close the panel.
+    await app.home.evaluate(() => {
+      const page = window as unknown as { keyArrived: boolean };
+      page.keyArrived = false;
+      addEventListener('keydown', () => (page.keyArrived = true), { capture: true, once: true });
+    });
+    await expect(async () => {
+      await app.home.locator('#language').press('Shift');
+      const arrived = () => (window as unknown as { keyArrived: boolean }).keyArrived;
+      expect(await app.home.evaluate(arrived)).toBe(true);
+    }).toPass();
     await app.home.locator('#language').press('Escape');
     await expect(app.home.locator('#settings-panel')).toBeHidden();
     await expect(app.home.locator('#home')).toBeVisible();

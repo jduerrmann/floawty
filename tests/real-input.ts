@@ -1,8 +1,9 @@
-// Real mouse and keyboard input and the real foreground: the bar reacts to where Windows sees the
-// cursor, global hotkeys to real key presses. A test that uses these carries `@real` and stays out
-// of the hidden run; using the mouse yourself while it runs makes it fail.
+// Real mouse and keyboard input and the real foreground. A spec that calls these directly carries
+// `@real` and stays out of the hidden run; `visibleInput` is the same through app.ts in a visible
+// run, which the tag scan does not see. Using the mouse yourself while they run makes them fail.
 import { execFileSync, spawn, type ChildProcess } from 'node:child_process';
-import { windowPosition } from './desktop';
+import type { AppInput } from './app-input';
+import { windowFlags, windowPosition } from './desktop';
 
 const SCRIPT = `
 param([int]$ProcessId, [double]$Fx, [double]$Fy)
@@ -94,4 +95,51 @@ $form.Size = New-Object System.Drawing.Size(320, 200)
 export function openOtherWindow(): ChildProcess {
   // windowsHide would hide the form as well, not only the console.
   return spawn('powershell', ['-NoProfile', '-NonInteractive', '-Command', OTHER_WINDOW]);
+}
+
+async function until(check: () => boolean, what: string): Promise<void> {
+  const deadline = Date.now() + 15_000;
+  for (;;) {
+    try {
+      if (check()) return;
+    } catch {
+      // The window is not there yet.
+    }
+    if (Date.now() > deadline) throw new Error(`timed out waiting for ${what}`);
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+}
+
+/** A visible run's cursor, click and foreground: the real ones, on the maintainer's screen. */
+export function visibleInput(pid: number): AppInput {
+  let other: ChildProcess | undefined;
+  let moved = false;
+  return {
+    point: async (fx, fy) => {
+      moved = true;
+      pointAt(pid, fx, fy);
+    },
+    pointAway: async () => {
+      moved = false;
+      pointAway(pid);
+    },
+    click: async (fx, fy) => {
+      moved = true;
+      clickAt(pid, fx, fy);
+    },
+    foreground: async (name) => {
+      if (name !== 'other') throw new Error(`foreground "${name}" is not supported visibly`);
+      other ??= openOtherWindow();
+      const otherPid = other.pid ?? 0;
+      await until(() => windowFlags(otherPid, OTHER_TITLE).visible, 'the other window');
+      moved = true;
+      clickAt(otherPid, 0.5, 0.5);
+      await until(() => windowFlags(otherPid, OTHER_TITLE).foreground, 'the other window in front');
+    },
+    // A cursor left over floawty would show the next test's bar before it asks for it.
+    stop: () => {
+      other?.kill();
+      if (moved) pointAway(pid);
+    },
+  };
 }

@@ -44,6 +44,10 @@ pub extern "system" fn unregister_hot_key(hwnd: HWND, id: i32) -> BOOL {
 pub extern "system" fn send_input(count: u32, _inputs: *const c_void, _size: i32) -> u32 {
     if let Some(context) = context() {
         context.shared.add_send_input();
+        // Windows lets the process that sent input take the foreground next.
+        if let Ok(mut guard) = context.shared.lock() {
+            guard.input.note_send_input();
+        }
     }
     count
 }

@@ -7,6 +7,7 @@ use test_input_shared::process::{entry_is_live, os_error};
 use test_input_shared::protocol;
 use test_input_shared::state::{Shared, ENV_NAME};
 use test_input_shared::table::Entry;
+use test_input_shared::windows::find_on_desktop;
 use windows_sys::Win32::Foundation::HWND;
 use windows_sys::Win32::UI::WindowsAndMessaging::{PostMessageW, PostThreadMessageW, WM_HOTKEY};
 
@@ -78,9 +79,11 @@ fn shim_path() -> Result<std::path::PathBuf, String> {
 
 /// Answers commands until `quit` or the end of stdin, then ends floawty and everything it started.
 fn serve(started: Started) -> i32 {
+    let ours = |pid: u32| pid == started.child.pid || started.shared.children().contains(&pid);
     let outside = Outside {
         is_live: &entry_is_live,
         post: &post_hotkey,
+        windows: &|| find_on_desktop(&ours),
     };
     for line in std::io::stdin().lock().lines() {
         let Ok(line) = line else { break };

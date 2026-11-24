@@ -1,13 +1,17 @@
 //! Answers the commands of the line protocol from the shared state.
 use test_input_shared::hotkey_text::{self, Combo};
+use test_input_shared::input::Foreground;
 use test_input_shared::protocol::{self, Command};
 use test_input_shared::state::Shared;
 use test_input_shared::table::{Entry, HotkeyError};
+use test_input_shared::windows::Windows;
 
-/// What the session needs from the outside: who still lives and how a press reaches a window.
+/// What the session needs from the outside: who still lives, how a press reaches a window and
+/// which of floawty's windows are there.
 pub struct Outside<'a> {
     pub is_live: &'a dyn Fn(&Entry) -> bool,
     pub post: &'a dyn Fn(&Entry, Combo) -> Result<(), String>,
+    pub windows: &'a dyn Fn() -> Windows,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -41,6 +45,11 @@ pub fn handle(shared: &Shared, outside: &Outside, line: &str) -> Handled {
         Command::Hotkey(text) => answered(press(shared, outside, &text)),
         Command::Hold(text) => answered(hold(shared, outside, &text)),
         Command::Release(text) => answered(release(shared, &text)),
+        Command::Cursor(point) => answered(with_input(shared, |input| input.set_cursor(point))),
+        Command::Button(button, down) => {
+            answered(with_input(shared, |input| input.set_button(button, down)))
+        }
+        Command::Foreground(foreground) => answered(bring_forward(shared, outside, foreground)),
     }
 }
 
@@ -78,6 +87,29 @@ fn release(shared: &Shared, text: &str) -> Result<(), String> {
     released.map_err(|_| format!("not held: {text}"))
 }
 
+fn with_input(
+    shared: &Shared,
+    change: impl FnOnce(&mut test_input_shared::input::Input),
+) -> Result<(), String> {
+    change(&mut shared.lock()?.input);
+    Ok(())
+}
+
+/// Refuses a foreground floawty's windows cannot be in: Windows has none in front that is not there.
+fn bring_forward(shared: &Shared, outside: &Outside, foreground: Foreground) -> Result<(), String> {
+    let windows = (outside.windows)();
+    match foreground {
+        Foreground::Main if windows.main.is_none() => {
+            return Err("floawty's main window is not visible".to_string());
+        }
+        Foreground::SignIn if windows.sign_in.is_none() => {
+            return Err("floawty has no sign-in window".to_string());
+        }
+        _ => {}
+    }
+    with_input(shared, |input| input.set_foreground(foreground))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -109,12 +141,30 @@ mod tests {
             .unwrap();
     }
 
+    const BOTH: Windows = Windows {
+        main: Some(1),
+        sign_in: Some(2),
+    };
+
     fn ask(shared: &Shared, line: &str) -> String {
+        ask_windows(shared, line, BOTH)
+    }
+
+    fn ask_windows(shared: &Shared, line: &str, windows: Windows) -> String {
         let posted = RefCell::new(Vec::new());
-        ask_with(shared, line, &posted).reply
+        answer(shared, line, &posted, windows).reply
     }
 
     fn ask_with(shared: &Shared, line: &str, posted: &RefCell<Vec<(u64, i32, Combo)>>) -> Handled {
+        answer(shared, line, posted, BOTH)
+    }
+
+    fn answer(
+        shared: &Shared,
+        line: &str,
+        posted: &RefCell<Vec<(u64, i32, Combo)>>,
+        windows: Windows,
+    ) -> Handled {
         let post = |entry: &Entry, combo: Combo| {
             posted.borrow_mut().push((entry.hwnd, entry.id, combo));
             Ok(())
@@ -124,6 +174,7 @@ mod tests {
             &Outside {
                 is_live: &|_| true,
                 post: &post,
+                windows: &|| windows,
             },
             line,
         )
@@ -172,6 +223,7 @@ mod tests {
         let outside = Outside {
             is_live: &|_| true,
             post: &post,
+            windows: &|| BOTH,
         };
         assert_eq!(
             handle(&shared, &outside, "hotkey Ctrl+Alt+T").reply,
@@ -274,5 +326,89 @@ mod tests {
                 quit: false
             }
         );
+    }
+
+    fn input_of(shared: &Shared) -> test_input_shared::input::Input {
+        shared.lock().unwrap().input
+    }
+
+    #[test]
+    fn the_cursor_is_set_at_a_point_and_taken_away_again() {
+        let shared = shared();
+        assert_eq!(ask(&shared, "cursor -30 700"), "ok");
+        assert_eq!(input_of(&shared).cursor(), Some((-30, 700)));
+        assert_eq!(ask(&shared, "cursor none"), "ok");
+        assert_eq!(input_of(&shared).cursor(), None);
+    }
+
+    #[test]
+    fn a_button_is_held_down_until_it_goes_up() {
+        let shared = shared();
+        assert_eq!(ask(&shared, "button left down"), "ok");
+        assert_eq!(input_of(&shared).async_key(0x01), Some(i16::MIN));
+        assert_eq!(input_of(&shared).async_key(0x02), Some(0));
+        assert_eq!(ask(&shared, "button left up"), "ok");
+        assert_eq!(input_of(&shared).async_key(0x01), Some(0));
+    }
+
+    #[test]
+    fn bad_cursor_and_button_lines_are_errors_that_change_nothing() {
+        let shared = shared();
+        let before = input_of(&shared);
+        assert!(ask(&shared, "cursor 5").starts_with("error cursor needs"));
+        assert!(ask(&shared, "button left sideways").starts_with("error button needs"));
+        assert_eq!(input_of(&shared), before);
+    }
+
+    #[test]
+    fn the_foreground_moves_to_a_window_that_is_there() {
+        let shared = shared();
+        assert_eq!(ask(&shared, "foreground sign-in"), "ok");
+        assert_eq!(input_of(&shared).foreground(), Foreground::SignIn);
+        assert_eq!(ask(&shared, "foreground main"), "ok");
+        assert_eq!(input_of(&shared).foreground(), Foreground::Main);
+    }
+
+    #[test]
+    fn other_and_none_need_no_window_of_floawty() {
+        let shared = shared();
+        let gone = Windows::default();
+        assert_eq!(ask_windows(&shared, "foreground other", gone), "ok");
+        assert_eq!(input_of(&shared).foreground(), Foreground::Other);
+        assert_eq!(ask_windows(&shared, "foreground none", gone), "ok");
+        assert_eq!(input_of(&shared).foreground(), Foreground::None);
+    }
+
+    #[test]
+    fn the_main_window_cannot_be_in_front_while_it_is_not_visible() {
+        let shared = shared();
+        let hidden = Windows {
+            main: None,
+            sign_in: None,
+        };
+        let reply = ask_windows(&shared, "foreground main", hidden);
+        assert!(
+            reply.starts_with("error ") && reply.contains("main window"),
+            "{reply}"
+        );
+        assert_eq!(input_of(&shared).foreground(), Foreground::Main);
+        ask(&shared, "foreground other");
+        ask_windows(&shared, "foreground main", hidden);
+        assert_eq!(input_of(&shared).foreground(), Foreground::Other);
+    }
+
+    #[test]
+    fn the_sign_in_window_cannot_be_in_front_without_one() {
+        let shared = shared();
+        let only_main = Windows {
+            main: Some(1),
+            sign_in: None,
+        };
+        let reply = ask_windows(&shared, "foreground sign-in", only_main);
+        assert!(
+            reply.starts_with("error ") && reply.contains("sign-in window"),
+            "{reply}"
+        );
+        assert_eq!(input_of(&shared).foreground(), Foreground::Main);
     }
 }

@@ -7,8 +7,12 @@ import path from 'node:path';
 import { createInterface } from 'node:readline';
 import { setTimeout as delay } from 'node:timers/promises';
 import { chromium, expect, type Browser, type Page } from '@playwright/test';
+import { hiddenInput, type AppInput, type LauncherInput } from './app-input';
 import { startOnFreePort } from './debug-port';
 import {
+  buttonCommand,
+  cursorCommand,
+  foregroundCommand,
   LineQueue,
   parseChildren,
   parseCounts,
@@ -16,7 +20,7 @@ import {
   parseReply,
   type Counts,
 } from './launcher-lines';
-import { pressKeys } from './real-input';
+import { pressKeys, visibleInput } from './real-input';
 import { sendKeysFor } from './send-keys';
 import { EXE } from './tested-exe';
 
@@ -55,9 +59,11 @@ export interface Floawty {
   counts: () => Promise<Counts | null>;
   /** The floawtys this one started by restarting itself; `stop` ends them too. */
   children: () => Promise<number[]>;
+  /** The launcher's cursor, button and foreground; `null` when no launcher is in between. */
+  input: LauncherInput | null;
 }
 
-export interface RunningApp {
+export interface RunningApp extends Omit<AppInput, 'stop'> {
   browser: Browser;
   home: Page;
   bar: Page;
@@ -112,6 +118,7 @@ function startVisible(env: NodeJS.ProcessEnv, args: string[]): Floawty {
       pids.forEach((child) => seen.add(child));
       return pids;
     },
+    input: null,
   };
 }
 
@@ -161,6 +168,11 @@ async function startHidden(env: NodeJS.ProcessEnv, args: string[]): Promise<Floa
     hotkey: async (text) => void (await ask(`hotkey ${text}`)),
     counts,
     children: async () => parseChildren((await ask('children')).trim()),
+    input: {
+      cursor: async (point) => void (await ask(cursorCommand(point))),
+      button: async (button, down) => void (await ask(buttonCommand(button, down))),
+      foreground: async (name) => void (await ask(foregroundCommand(name))),
+    },
   };
 }
 
@@ -195,14 +207,30 @@ export async function launch(profile: Profile): Promise<RunningApp> {
       (page) => new URL(page.url()).pathname === file && page.url().includes('tauri.localhost'),
     );
   await expect.poll(() => Boolean(find('/') && find('/bar.html'))).toBe(true);
+  const [home, bar] = [find('/'), find('/bar.html')] as [Page, Page];
+  const { pid, hotkey, children } = floawty;
+  const input = floawty.input ? hiddenInput(pid, floawty.input, pages, home) : visibleInput(pid);
   const stop = async () => {
     try {
+      input.stop();
       await browser.close();
     } finally {
       await floawty.stop();
     }
   };
-  const [home, bar] = [find('/'), find('/bar.html')] as [Page, Page];
-  const { pid, hotkey, children } = floawty;
-  return { browser, home, bar, pid, pages, hotkey, children, stop };
+  const { point, pointAway, click, foreground } = input;
+  return {
+    browser,
+    home,
+    bar,
+    pid,
+    pages,
+    hotkey,
+    children,
+    stop,
+    point,
+    pointAway,
+    click,
+    foreground,
+  };
 }

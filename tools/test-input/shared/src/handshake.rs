@@ -1,6 +1,6 @@
 //! What the shim reports about itself, and whether the launcher accepts it.
 
-pub const STATE_VERSION: u32 = 1;
+pub const STATE_VERSION: u32 = 2;
 
 /// The functions the shim replaces in floawty's import table, one bit each.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -10,15 +10,25 @@ pub enum Hook {
     SendInput,
     ShellExecuteW,
     CreateProcessW,
+    GetCursorPos,
+    GetAsyncKeyState,
+    GetForegroundWindow,
+    GetGUIThreadInfo,
+    SetForegroundWindow,
 }
 
 impl Hook {
-    pub const ALL: [Hook; 5] = [
+    pub const ALL: [Hook; 10] = [
         Hook::RegisterHotKey,
         Hook::UnregisterHotKey,
         Hook::SendInput,
         Hook::ShellExecuteW,
         Hook::CreateProcessW,
+        Hook::GetCursorPos,
+        Hook::GetAsyncKeyState,
+        Hook::GetForegroundWindow,
+        Hook::GetGUIThreadInfo,
+        Hook::SetForegroundWindow,
     ];
 
     pub fn bit(self) -> u32 {
@@ -32,6 +42,11 @@ impl Hook {
             Hook::SendInput => "SendInput",
             Hook::ShellExecuteW => "ShellExecuteW",
             Hook::CreateProcessW => "CreateProcessW",
+            Hook::GetCursorPos => "GetCursorPos",
+            Hook::GetAsyncKeyState => "GetAsyncKeyState",
+            Hook::GetForegroundWindow => "GetForegroundWindow",
+            Hook::GetGUIThreadInfo => "GetGUIThreadInfo",
+            Hook::SetForegroundWindow => "SetForegroundWindow",
         }
     }
 }
@@ -125,13 +140,15 @@ mod tests {
 
     #[test]
     fn every_hook_has_its_own_bit_and_a_name() {
-        assert_eq!(all().count_ones(), 5);
+        assert_eq!(all().count_ones(), 10);
         assert_eq!(Hook::SendInput.name(), "SendInput");
         assert_eq!(Hook::CreateProcessW.name(), "CreateProcessW");
+        assert_eq!(Hook::GetCursorPos.name(), "GetCursorPos");
+        assert_eq!(Hook::SetForegroundWindow.name(), "SetForegroundWindow");
     }
 
     #[test]
-    fn all_five_patched_with_the_right_version_is_accepted() {
+    fn all_ten_patched_with_the_right_version_is_accepted() {
         assert_eq!(check(STATE_VERSION, report(STATE_VERSION, all())), Ok(()));
     }
 

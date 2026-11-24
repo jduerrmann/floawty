@@ -1,5 +1,6 @@
-//! DLL that answers floawty's hotkey, input and process-start calls for app tests.
+//! DLL that answers floawty's hotkey, input, cursor, foreground and process-start calls for app tests.
 mod hooks;
+mod input_hooks;
 mod patch;
 
 use std::ffi::c_void;
@@ -81,29 +82,24 @@ fn report(shared: &Shared, patched: u32) -> bool {
     handshake::record(&mut guard.slots, report, &is_process_alive).is_ok()
 }
 
-fn import_patches() -> [ImportPatch; 5] {
+fn import_patches() -> [ImportPatch; 10] {
     let patch = |hook: Hook, dll, replacement: usize| ImportPatch {
         bit: hook.bit(),
         dll,
         function: hook.name(),
         replacement,
     };
+    let user32 = |hook: Hook, replacement: usize| patch(hook, "user32.dll", replacement);
     [
-        patch(
+        user32(
             Hook::RegisterHotKey,
-            "user32.dll",
             hooks::register_hot_key as *const () as usize,
         ),
-        patch(
+        user32(
             Hook::UnregisterHotKey,
-            "user32.dll",
             hooks::unregister_hot_key as *const () as usize,
         ),
-        patch(
-            Hook::SendInput,
-            "user32.dll",
-            hooks::send_input as *const () as usize,
-        ),
+        user32(Hook::SendInput, hooks::send_input as *const () as usize),
         patch(
             Hook::ShellExecuteW,
             "shell32.dll",
@@ -113,6 +109,26 @@ fn import_patches() -> [ImportPatch; 5] {
             Hook::CreateProcessW,
             "kernel32.dll",
             hooks::create_process as *const () as usize,
+        ),
+        user32(
+            Hook::GetCursorPos,
+            input_hooks::get_cursor_pos as *const () as usize,
+        ),
+        user32(
+            Hook::GetAsyncKeyState,
+            input_hooks::get_async_key_state as *const () as usize,
+        ),
+        user32(
+            Hook::GetForegroundWindow,
+            input_hooks::get_foreground_window as *const () as usize,
+        ),
+        user32(
+            Hook::GetGUIThreadInfo,
+            input_hooks::get_gui_thread_info as *const () as usize,
+        ),
+        user32(
+            Hook::SetForegroundWindow,
+            input_hooks::set_foreground_window as *const () as usize,
         ),
     ]
 }

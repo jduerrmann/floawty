@@ -4,7 +4,6 @@ import path from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 import { freshProfile, launch, type RunningApp } from './app';
 import { ownedPopups, windowFlags } from './desktop';
-import { clickAt, openOtherWindow, OTHER_TITLE, pointAway, pressKeys } from './real-input';
 
 const PROVIDER = 'https://www.example.org/';
 const SERVICE = {
@@ -52,7 +51,7 @@ async function evaluateIn(target: Target, expression: string): Promise<unknown> 
   return reply.result?.result?.value;
 }
 
-// A page-wide button, so a real click both opens the pop-up and brings floawty to the front.
+// A page-wide button, so a click at any point of the window opens the pop-up.
 async function openService(app: RunningApp, opens: string[]): Promise<Page> {
   await app.home.evaluate(
     (args) => window.__TAURI_INTERNALS__.invoke('open_service', args),
@@ -100,121 +99,94 @@ const titled = (app: RunningApp, host: string) => () => {
 const TRY_COMMANDS = `Promise.all(['tiles_state', 'plugin:app|version'].map((command) =>
   window.__TAURI_INTERNALS__.invoke(command).then(() => 'allowed', () => 'refused')))`;
 
-test(
-  'a listed sign-in pop-up opens one owned window, without floawty commands',
-  { tag: '@real' },
-  async () => {
-    const app = await launch(freshProfile());
-    try {
-      const page = await openService(app, [PROVIDER, PROVIDER]);
-      clickAt(app.pid, 0.5, 0.6);
-      await expect.poll(() => ownedPopups(app.pid), { timeout: 10_000 }).toBe(1);
-      // A second request while the window is open gets no second window.
-      await expect.poll(() => tried(page)).toBe(2);
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      expect(ownedPopups(app.pid)).toBe(1);
-      await expect.poll(titled(app, 'www.example.org')).toBe(true);
-      await expect.poll(signInTarget).toBeTruthy();
-      const target = (await signInTarget()) as Target;
-      expect(await evaluateIn(target, TRY_COMMANDS)).toEqual(['refused', 'refused']);
-      // The provider closes its page after the sign-in; the window must go with it.
-      await evaluateIn(target, 'window.close()');
-      await expect.poll(() => ownedPopups(app.pid), { timeout: 5000 }).toBe(0);
-    } finally {
-      pointAway(app.pid);
-      await app.stop();
-    }
-  },
-);
+test('a listed sign-in pop-up opens one owned window, without floawty commands', async () => {
+  const app = await launch(freshProfile());
+  try {
+    const page = await openService(app, [PROVIDER, PROVIDER]);
+    await app.click(0.5, 0.6);
+    await expect.poll(() => ownedPopups(app.pid), { timeout: 10_000 }).toBe(1);
+    // A second request while the window is open gets no second window.
+    await expect.poll(() => tried(page)).toBe(2);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    expect(ownedPopups(app.pid)).toBe(1);
+    await expect.poll(titled(app, 'www.example.org')).toBe(true);
+    await expect.poll(signInTarget).toBeTruthy();
+    const target = (await signInTarget()) as Target;
+    expect(await evaluateIn(target, TRY_COMMANDS)).toEqual(['refused', 'refused']);
+    // The provider closes its page after the sign-in; the window must go with it.
+    await evaluateIn(target, 'window.close()');
+    await expect.poll(() => ownedPopups(app.pid), { timeout: 5000 }).toBe(0);
+  } finally {
+    await app.stop();
+  }
+});
 
-test(
-  'the window stays on its hosts, its title follows the page, a page elsewhere is logged by host',
-  { tag: '@real' },
-  async () => {
-    const profile = freshProfile();
-    const app = await launch(profile);
-    try {
-      await openService(app, [PROVIDER]);
-      clickAt(app.pid, 0.5, 0.6);
-      await expect.poll(signInTarget, { timeout: 10_000 }).toBeTruthy();
-      const target = (await signInTarget()) as Target;
-      await evaluateIn(target, "location.href = 'https://www.iana.org/domains/example'");
-      await new Promise((resolve) => setTimeout(resolve, 2500));
-      expect((await targets()).some((t) => t.url.includes('iana.org'))).toBe(false);
-      const log = readFileSync(path.join(profile.dataDir, 'logs', 'floawty.log'), 'utf8');
-      expect(log).toContain('sign-in window stayed off: www.iana.org');
-      expect(log).not.toContain('domains/example');
-      // The service's own domain is allowed; the title then names it.
-      await evaluateIn(target, "location.href = 'https://example.com/'");
-      await expect.poll(titled(app, 'example.com'), { timeout: 10_000 }).toBe(true);
-    } finally {
-      pointAway(app.pid);
-      await app.stop();
-    }
-  },
-);
+test('the window stays on its hosts, its title follows the page, a page elsewhere is logged by host', async () => {
+  const profile = freshProfile();
+  const app = await launch(profile);
+  try {
+    await openService(app, [PROVIDER]);
+    await app.click(0.5, 0.6);
+    await expect.poll(signInTarget, { timeout: 10_000 }).toBeTruthy();
+    const target = (await signInTarget()) as Target;
+    await evaluateIn(target, "location.href = 'https://www.iana.org/domains/example'");
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+    expect((await targets()).some((t) => t.url.includes('iana.org'))).toBe(false);
+    const log = readFileSync(path.join(profile.dataDir, 'logs', 'floawty.log'), 'utf8');
+    expect(log).toContain('sign-in window stayed off: www.iana.org');
+    expect(log).not.toContain('domains/example');
+    // The service's own domain is allowed; the title then names it.
+    await evaluateIn(target, "location.href = 'https://example.com/'");
+    await expect.poll(titled(app, 'example.com'), { timeout: 10_000 }).toBe(true);
+  } finally {
+    await app.stop();
+  }
+});
 
-test('a pop-up of an unlisted host opens nothing', { tag: '@real' }, async () => {
+test('a pop-up of an unlisted host opens nothing', async () => {
   const app = await launch(freshProfile());
   try {
     const page = await openService(app, ['https://www.iana.org/']);
-    clickAt(app.pid, 0.5, 0.6);
+    await app.click(0.5, 0.6);
     await expect.poll(() => tried(page)).toBe(1);
     await new Promise((resolve) => setTimeout(resolve, 2500));
     expect(ownedPopups(app.pid)).toBe(0);
     expect((await targets()).some((target) => target.url.includes('iana.org'))).toBe(false);
   } finally {
-    pointAway(app.pid);
     await app.stop();
   }
 });
 
-test(
-  'a sign-in pop-up while floawty is in the background opens nothing',
-  { tag: '@real' },
-  async () => {
-    // A cold WinForms start and several PowerShell calls.
-    test.slow();
-    const app = await launch(freshProfile());
-    const other = openOtherWindow();
-    try {
-      const page = await openService(app, [PROVIDER]);
-      const otherPid = other.pid ?? 0;
-      await expect
-        .poll(() => windowFlags(otherPid, OTHER_TITLE).visible, { timeout: 15_000 })
-        .toBe(true);
-      clickAt(otherPid, 0.5, 0.5);
-      await expect.poll(() => windowFlags(otherPid, OTHER_TITLE).foreground).toBe(true);
-      await page.evaluate((url) => void window.open(url), PROVIDER);
-      await new Promise((resolve) => setTimeout(resolve, 2500));
-      expect(ownedPopups(app.pid)).toBe(0);
-    } finally {
-      other.kill();
-      await app.stop();
-    }
-  },
-);
+test('a sign-in pop-up while floawty is in the background opens nothing', async () => {
+  // A visible run starts a WinForms window and calls PowerShell several times.
+  test.slow();
+  const app = await launch(freshProfile());
+  try {
+    const page = await openService(app, [PROVIDER]);
+    await app.foreground('other');
+    await page.evaluate((url) => void window.open(url), PROVIDER);
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+    expect(ownedPopups(app.pid)).toBe(0);
+  } finally {
+    await app.stop();
+  }
+});
 
-test(
-  'closing the service or hiding floawty closes its sign-in window',
-  { tag: '@real' },
-  async () => {
-    const app = await launch(freshProfile());
-    try {
-      await openService(app, [PROVIDER]);
-      clickAt(app.pid, 0.5, 0.6);
-      await expect.poll(() => ownedPopups(app.pid), { timeout: 10_000 }).toBe(1);
-      await app.home.evaluate(() => window.__TAURI_INTERNALS__.invoke('close_service'));
-      await expect.poll(() => ownedPopups(app.pid), { timeout: 5000 }).toBe(0);
-      await openService(app, [PROVIDER]);
-      clickAt(app.pid, 0.5, 0.6);
-      await expect.poll(() => ownedPopups(app.pid), { timeout: 10_000 }).toBe(1);
-      pressKeys('^%+o');
-      await expect.poll(() => windowFlags(app.pid).visible).toBe(false);
-      expect(ownedPopups(app.pid)).toBe(0);
-    } finally {
-      pointAway(app.pid);
-      await app.stop();
-    }
-  },
-);
+test('closing the service or hiding floawty closes its sign-in window', async () => {
+  const app = await launch(freshProfile());
+  try {
+    await openService(app, [PROVIDER]);
+    await app.click(0.5, 0.6);
+    await expect.poll(() => ownedPopups(app.pid), { timeout: 10_000 }).toBe(1);
+    await app.home.evaluate(() => window.__TAURI_INTERNALS__.invoke('close_service'));
+    await expect.poll(() => ownedPopups(app.pid), { timeout: 5000 }).toBe(0);
+    await openService(app, [PROVIDER]);
+    await app.click(0.5, 0.6);
+    await expect.poll(() => ownedPopups(app.pid), { timeout: 10_000 }).toBe(1);
+    await app.hotkey('Ctrl+Alt+Shift+O');
+    await expect.poll(() => windowFlags(app.pid).visible).toBe(false);
+    expect(ownedPopups(app.pid)).toBe(0);
+  } finally {
+    await app.stop();
+  }
+});

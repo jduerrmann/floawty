@@ -1,5 +1,14 @@
 import { expect, test } from 'vitest';
-import { LineQueue, parseChildren, parseCounts, parsePidLine, parseReply } from './launcher-lines';
+import {
+  buttonCommand,
+  cursorCommand,
+  foregroundCommand,
+  LineQueue,
+  parseChildren,
+  parseCounts,
+  parsePidLine,
+  parseReply,
+} from './launcher-lines';
 
 test('the first line names floawty by its pid', () => {
   expect(parsePidLine('pid 4242')).toBe(4242);
@@ -56,4 +65,13 @@ test('the children reply lists the pids of restarted floawtys, or none', () => {
   expect(parseChildren('')).toEqual([]);
   expect(parseChildren('11 22')).toEqual([11, 22]);
   expect(() => parseChildren('11 x')).toThrow('11 x');
+});
+
+test('the cursor, button and foreground commands are the lines the launcher parses', () => {
+  expect(cursorCommand({ x: 100, y: -5 })).toBe('cursor 100 -5');
+  expect(cursorCommand({ x: 10.6, y: 3.2 })).toBe('cursor 11 3');
+  expect(cursorCommand(null)).toBe('cursor none');
+  expect(buttonCommand('left', true)).toBe('button left down');
+  expect(buttonCommand('right', false)).toBe('button right up');
+  expect(foregroundCommand('sign-in')).toBe('foreground sign-in');
 });

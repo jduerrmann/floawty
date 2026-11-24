@@ -2,9 +2,11 @@
 pub mod handshake;
 pub mod hotkey_text;
 pub mod inject;
+pub mod input;
 pub mod keys;
 pub mod process;
 pub mod process_image;
 pub mod protocol;
 pub mod state;
 pub mod table;
+pub mod windows;

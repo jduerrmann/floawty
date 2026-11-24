@@ -15,6 +15,7 @@ use windows_sys::Win32::System::Threading::{
 };
 
 use crate::handshake::{Handshake, STATE_VERSION};
+use crate::input::Input;
 use crate::process::{os_error, wide};
 use crate::table::HotkeyTable;
 
@@ -36,6 +37,7 @@ pub struct Locked {
     pub slots: [Handshake; HANDSHAKE_SLOTS],
     pub table: HotkeyTable,
     child_error: [u8; ERROR_TEXT],
+    pub input: Input,
 }
 
 #[repr(C)]
@@ -271,6 +273,7 @@ impl Drop for Guard<'_> {
 mod tests {
     use super::*;
     use crate::hotkey_text::{Combo, MOD_ALT};
+    use crate::input::Foreground;
     use crate::table::Owner;
 
     const COMBO: Combo = Combo {
@@ -378,5 +381,20 @@ mod tests {
         first.report_child_error(&"x".repeat(1000)).unwrap();
         let text = second.child_error().unwrap();
         assert!(!text.is_empty() && text.len() < 1000);
+    }
+
+    #[test]
+    fn the_input_starts_with_floawty_in_front_and_is_one_state_for_both_handles() {
+        let (first, second) = pair();
+        assert_eq!(second.lock().unwrap().input.foreground(), Foreground::Main);
+        assert_eq!(second.lock().unwrap().input.cursor(), None);
+        first.lock().unwrap().input.set_cursor(Some((-5, 7)));
+        first
+            .lock()
+            .unwrap()
+            .input
+            .set_foreground(Foreground::Other);
+        assert_eq!(second.lock().unwrap().input.cursor(), Some((-5, 7)));
+        assert_eq!(second.lock().unwrap().input.foreground(), Foreground::Other);
     }
 }
