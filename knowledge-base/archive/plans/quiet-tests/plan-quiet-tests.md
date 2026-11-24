@@ -1,9 +1,9 @@
 ---
 type: plan
 tags: [plan-map, tests, process]
-status: active
+status: done
 created: 2026-11-23
-updated: 2026-11-23
+updated: 2026-11-24
 source: visual plan "Testen ohne deinen Bildschirm", rounds 1–4, approved in chat 2026-11-23; re-cut in chat the same day
 ---
 

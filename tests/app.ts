@@ -199,6 +199,12 @@ export async function startFloawty(
   args: string[] = [],
   reportStart = false,
 ): Promise<Floawty> {
+  // Set by `test-input run`: a direct `playwright test` would hold no run lock.
+  if (env.FLOAWTY_TEST_RUN !== '1') {
+    throw new Error(
+      'start app tests through npm run smoke:hidden, smoke:real, smoke or measure, which hold the run lock',
+    );
+  }
   if (env.FLOAWTY_TEST_HIDDEN !== '1') {
     if (reportStart) throw new Error('the start time is measured by the hidden launcher');
     return startVisible(env, args);

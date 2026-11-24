@@ -71,6 +71,16 @@ test('another config is refused in every mode, long or short, so no run turns in
   }
 });
 
+test('every UI flag and attached short values are refused too', () => {
+  expect(refused('hidden', ['--ui-port=0', '--ui-host', 'x'])).toEqual([
+    '--ui-port=0',
+    '--ui-host',
+  ]);
+  expect(refused('hidden', ['-cother.config.ts'])).toEqual(['-cother.config.ts']);
+  expect(refused('real', ['-gx'])).toEqual(['-gx']);
+  expect(refused('hidden', ['-j', '2', '-x'])).toBeNull();
+});
+
 test('short greps count like long ones', () => {
   expect(refused('real', ['-g', 'x'])).toEqual(['-g']);
   expect(refused('hidden', ['-gv', 'x'])).toEqual(['-gv']);

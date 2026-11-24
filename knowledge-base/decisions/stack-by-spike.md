@@ -4,11 +4,13 @@ area: process
 tags: [stack, drm, performance, tauri]
 status: active
 created: 2026-11-16
-updated: 2026-11-22
+updated: 2026-11-24
 source: conversation; spike results in [[stack-spike-results]]; visual plan "Auswertung Testprototyp"
 ---
 
 # floawty is built with Tauri 2 on WebView2, Windows first
+
+Start budget amended by [[start-budget-main-window]] (≤ 400 ms to the main window).
 
 ## Context
 

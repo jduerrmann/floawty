@@ -2,7 +2,7 @@
 type: moc
 tags: [index]
 created: 2026-11-16
-updated: 2026-11-23
+updated: 2026-11-24
 source: conversation
 ---
 
@@ -16,6 +16,7 @@ Vault conventions and budgets: `CLAUDE.md` in this folder.
 | Task | Read |
 |---|---|
 | Any code change | [[engineering-standards]] (§1 test first, §3–5 code, §7 resources) |
+| App tests, measurements, test tool | [[tech-app-tests]], [[app-tests-run-hidden]] |
 | Window, settings, hotkeys | [[tech-window]] |
 | Services, tiles, navigation | [[tech-services]] |
 | Bar, settings panel, languages, reset, export | [[tech-bar-and-settings]], [[bar-hover-by-cursor-look]], [[settings-export-without-logins]] |
@@ -57,3 +58,4 @@ Vault conventions and budgets: `CLAUDE.md` in this folder.
 - [[tech-bar-and-settings]] – hover bar over the service, settings panel, hotkey changes, EN/DE, reset all data
 - [[tech-shorts]] – Shorts auto mode, page scripts asked by floawty, turning the overlay
 - [[tech-video-only]] – "video only": player over the page by styles, rules for YouTube and Twitch, warning dot
+- [[tech-app-tests]] – app tests and measurements on a hidden desktop: launcher, shim, scripts, `@real`

@@ -14,6 +14,7 @@ use crate::spawn::{inherited_stdio, start_suspended};
 use crate::EXIT_LAUNCHER_FAILED;
 
 const RUN_MUTEX: &str = "Global\\floawty-app-tests";
+const RUN_MARKER: &str = "FLOAWTY_TEST_RUN";
 const GENERIC_ALL: u32 = 0x1000_0000;
 /// The code `timeout` of GNU coreutils uses, so callers know it from elsewhere.
 const EXIT_TIMEOUT: i32 = 124;
@@ -28,6 +29,8 @@ pub fn run(visible: bool, timeout: Duration, command: &[String]) -> i32 {
 
 fn run_command(visible: bool, timeout: Duration, command: &[String]) -> Result<i32, String> {
     let _only_run = SingleRun::acquire()?;
+    // The tests start floawty only below a run that holds the lock.
+    std::env::set_var(RUN_MARKER, "1");
     let desktop = match visible {
         true => None,
         false => Some(Desktop::create(&format!(

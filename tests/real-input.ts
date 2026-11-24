@@ -34,7 +34,7 @@ export function pointAt(pid: number, fx: number, fy: number): void {
 }
 
 /** Moves the cursor off floawty's window. */
-export function pointAway(pid: number): void {
+function pointAway(pid: number): void {
   run(pid, -1, -1);
 }
 

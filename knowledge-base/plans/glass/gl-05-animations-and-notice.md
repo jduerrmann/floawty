@@ -1,9 +1,9 @@
 ---
 type: plan
 tags: [package, glass, motion, notice, settings]
-status: in-progress
+status: done
 created: 2026-11-22
-updated: 2026-11-22
+updated: 2026-11-24
 source: visual plan "Kachel-Animationen abschalten", approved by the maintainer 2026-11-22
 ---
 
@@ -25,16 +25,16 @@ covers the start page instead of pushing the tiles away.
 - Read first: [[animations-switch]], [[first-start-notice-over-tiles]].
 
 ## Acceptance criteria
-- [ ] Off: no tilt, floating logo, moving light, fade or bar animation, at once on
+- [x] Off: no tilt, floating logo, moving light, fade or bar animation, at once on
       home and bar; the glow stays; on again restores them.
-- [ ] The choice survives a restart; a file without the field reads as on, the rest
+- [x] The choice survives a restart; a file without the field reads as on, the rest
       intact; reset returns to on; Windows' reduced motion still wins.
-- [ ] The switch is a named switch below the theme with its note, in EN and DE.
-- [ ] The notice moves no tile; tiles take neither click nor key until OK; OK has the
+- [x] The switch is a named switch below the theme with its note, in EN and DE.
+- [x] The notice moves no tile; tiles take neither click nor key until OK; OK has the
       focus; settings open from the bar while it shows.
-- [ ] From 240 × 135 to 3440 × 1440, both languages and schemes: OK is inside the
+- [x] From 240 × 135 to 3440 × 1440, both languages and schemes: OK is inside the
       window, the text is readable and scrolls only where it cannot fit.
-- [ ] Hover RAM started with "off" is clearly below 267 MB (median of three).
+- [x] Hover RAM started with "off" is clearly below 267 MB (median of three).
 
 ## Tests first
 - Cargo: default, stored false, through the preferences. Vitest: preferences keep it.
@@ -59,10 +59,11 @@ covers the start page instead of pushing the tiles away.
   for scrolling, contrast asserted per scheme, two notes made exact. Rejected: a Rust
   gate for a reopened service (only older, unreleased builds can save one without OK).
 - App stage 1 (2026-11-22): the 8 new and edited specs, 8/8 green on first run (17 s).
+- All app tests hidden (qt-05, 2026-11-24, on the build with the startup-race fix):
+  three consecutive `smoke:hidden` runs, 47/47 each.
+- Hover measurement hidden (`npm run measure`, maintainer's yes, hover over CDP):
+  "off" 224.4, 225.7, 224.2 MB – median 224.4 MB, clearly below 267; "on" on the same
+  build 244.4 MB, the behaviour of the build before the switch.
 
 ## Resume here
-Committed and on `main`. `npm run check`, release build and app stage 1 (8 specs)
-green, review resolved. Still open: all app tests and the hover measurement with
-"off". They wait for testing without the maintainer's screen: plan
-`.claude/plans/testen-ohne-bildschirm.md` (round 4, not yet approved; probe sources
-in the session notes `quiet-test-probes/`). Then tick the criteria and set `done`.
+Done (2026-11-24): all criteria met; app tests and measurement ran hidden in qt-05.

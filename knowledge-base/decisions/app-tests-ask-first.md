@@ -11,7 +11,7 @@ source: conversation (maintainer, 2026-11-20); advisor review
 # App tests run only after the maintainer's yes, muted, one agent at a time
 
 One run per yes and one run per package: amended by [[app-runs-smallest-first]]. Asking
-before hidden runs: superseded by [[app-tests-run-hidden]].
+before hidden runs and the meaning of `verify`: superseded by [[app-tests-run-hidden]].
 
 ## Context
 Several agent sessions ran the Playwright app tests again and again, sometimes at

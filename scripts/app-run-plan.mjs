@@ -38,10 +38,15 @@ const MODES = {
   },
 };
 
+// `--ui-host` and `--ui-port` open the UI mode as well; a short flag may carry its value (`-cx`).
 const flagName = (arg) => {
   const long = /^--([\w-]+)/.exec(arg)?.[1];
-  const short = /^-(\w+)$/.exec(arg)?.[1];
-  return long ?? (short === undefined ? undefined : SHORT[short]);
+  if (long !== undefined) return long.startsWith('ui') ? 'ui' : long;
+  const short = /^-(\w+)/.exec(arg)?.[1] ?? '';
+  const key = Object.keys(SHORT)
+    .sort((a, b) => b.length - a.length)
+    .find((name) => short.startsWith(name));
+  return key === undefined ? undefined : SHORT[key];
 };
 
 /** The plan of a mode with the arguments the caller added, or the arguments it refuses. */
