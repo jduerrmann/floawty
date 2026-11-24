@@ -273,22 +273,28 @@ test('the bar fits all nine controls at the minimum width and grows back when wi
       }),
     );
     await expect(app.bar.locator('#video-only')).toBeVisible();
-    const fits = () =>
+    const layout = () =>
       app.bar.evaluate(() => {
         const controls = document.getElementById('controls') as HTMLElement;
-        return controls.scrollWidth <= controls.clientWidth;
+        const width = (id: string) => document.getElementById(id)?.getBoundingClientRect().width;
+        return {
+          bar: innerWidth,
+          fits: controls.scrollWidth <= controls.clientWidth,
+          button: width('quit'),
+          slider: width('opacity'),
+        };
       });
-    const sliderWidth = () =>
-      app.bar.evaluate(() => document.getElementById('opacity')?.getBoundingClientRect().width);
+    // Without the cursor on it the bar is hidden and lays itself out late, so the whole layout is
+    // polled; the bar's own width tells a late page from a stale width in the shell.
     // The smallest overlay a user can drag: 240 px inside, plus the 2 × 8 px invisible border.
     resizeWindow(app.pid, 256, 151);
     await expect.poll(() => app.home.evaluate(() => innerWidth)).toBe(240);
     await app.bar.evaluate(() => window.__TAURI_INTERNALS__.invoke('set_opacity', { value: 0.8 }));
-    await expect.poll(fits).toBe(true);
+    await expect.poll(layout).toEqual({ bar: 240, fits: true, button: 20, slider: 24 });
     resizeWindow(app.pid, 800, 450);
     await expect.poll(() => app.home.evaluate(() => innerWidth)).toBeGreaterThan(600);
-    await expect.poll(sliderWidth).toBe(88);
-    expect(await fits()).toBe(true);
+    // 88 px alone would also pass in the compact layout, so the buttons must be full size too.
+    await expect.poll(layout).toEqual({ bar: 400, fits: true, button: 28, slider: 88 });
   } finally {
     await app.stop();
   }
