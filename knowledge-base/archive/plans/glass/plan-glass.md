@@ -1,9 +1,9 @@
 ---
 type: plan
 tags: [plan-map, glass, ui]
-status: active
+status: done
 created: 2026-11-21
-updated: 2026-11-22
+updated: 2026-11-24
 source: visual plan "Startseite und Einstellungen neu gestalten", rounds 1–4, 2026-11-21
 ---
 

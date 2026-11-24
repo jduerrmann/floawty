@@ -1,9 +1,9 @@
 ---
 type: plan
 tags: [package, glass, ui]
-status: in-progress
+status: done
 created: 2026-11-21
-updated: 2026-11-21
+updated: 2026-11-24
 source: visual plan "Startseite und Einstellungen neu gestalten", 2026-11-21; advisor plan check
 ---
 
@@ -31,7 +31,7 @@ cards, built on shared design values the later packages reuse.
   `.claude/plans/startseite-und-einstellungen.md`.
 
 ## Acceptance criteria
-- [ ] Light: tinted glass tiles on a pale indigo-pink ground; dark: subtler tiles
+- [x] Light: tinted glass tiles on a pale indigo-pink ground; dark: subtler tiles
       with glow on indigo-pink. Switching Windows light/dark changes the page live
       (one live check).
 - [x] Every tile's name sits on a solid lower part whose colour reaches ≥ 4.5 : 1
@@ -82,6 +82,5 @@ cards, built on shared design values the later packages reuse.
   `prefers-color-scheme` in screenshots.
 
 ## Resume here
-Committed on `feat/gl-01-glass-home` (4438853, ee5a38d); app run and measurement green.
-Open: the maintainer's live light/dark switch check, then `done` and archive. The
-idle RAM rose by about 13–21 MB; gl-02 compares in its final measurement.
+Done. On `main` (4438853, ee5a38d). The maintainer's live light/dark switch check
+passed on main 8dbd458 (2026-11-24).

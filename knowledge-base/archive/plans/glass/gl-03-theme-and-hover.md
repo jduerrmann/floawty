@@ -1,9 +1,9 @@
 ---
 type: plan
 tags: [package, glass, theme, tiles, settings]
-status: awaiting-answer
+status: done
 created: 2026-11-22
-updated: 2026-11-22
+updated: 2026-11-24
 source: visual plan "Hell/Dunkel und Hover-Effekt", approved by the maintainer 2026-11-22
 ---
 
@@ -27,7 +27,7 @@ pointer with light and a gentle tilt that never leaves their box.
 - Read first: [[floawty-theme-choice]], [[tiles-tilt-with-light]].
 
 ## Acceptance criteria
-- [ ] `system` by default and following Windows live; `light`/`dark` apply at once to
+- [x] `system` by default and following Windows live; `light`/`dark` apply at once to
       tiles, settings, bar and the window-mode title bar, survive a restart and
       paint right from the first frame; reset returns to `system`.
 - [x] A forced title bar survives a Windows setting change; back to `system` takes
@@ -89,11 +89,7 @@ pointer with light and a gentle tilt that never leaves their box.
   721.6). All within budget.
 
 ## Resume here
-On `claude/cool-noyce-12b84f`, not pushed. Tests and measurements are done, open
-question 10 is answered by [[animations-switch]] (gl-05). Only the maintainer's live
-check is left: switch Windows between light and dark under "Like Windows"; then
-`done`. If `on-top:82` or `sign-in:171` turn red again: run them with an observer
-of cursor and foreground before blaming the build.
+Done. On `main` (9720b97). The maintainer's live check (Windows light/dark under
+"Like Windows") passed on main 8dbd458 (2026-11-24).
 Found, not fixed: `budgets.spec.ts` divides frames by 60 s even when sampling takes
 longer.
-Also open from gl-01: the maintainer's live light/dark switch check.

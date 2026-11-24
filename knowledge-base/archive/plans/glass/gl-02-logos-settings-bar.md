@@ -1,9 +1,9 @@
 ---
 type: plan
 tags: [package, glass, ui, logos, settings, bar]
-status: in-progress
+status: done
 created: 2026-11-21
-updated: 2026-11-22
+updated: 2026-11-24
 source: visual plan "Startseite und Einstellungen neu gestalten", 2026-11-21; advisor plan check; merged per [[leaner-reviews]]
 ---
 
@@ -109,5 +109,4 @@ glass design; the plan ends with one independent review and a resource check.
   bar spec after the maintainer's yes: 10/10 green, so a one-off hover miss.
 
 ## Resume here
-All checks done; waiting for the maintainer's OK on the commit. Afterwards: close the
-package and the plan ([[plan-glass]], [[active-plans]]).
+Done. On `main` (be9a7b0); plan closed 2026-11-24.
