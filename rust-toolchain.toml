@@ -1,0 +1,5 @@
+# One Rust version for everyone and CI, so clippy with -D warnings gives the same result.
+[toolchain]
+channel = "1.96.0"
+components = ["clippy", "rustfmt"]
+profile = "minimal"

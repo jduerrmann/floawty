@@ -27,7 +27,9 @@ Thanks for helping! floawty is a small hobby project, so please keep changes foc
   GPL-3.0-compatible.
 - New logic and bug fixes start with a failing test (see
   [engineering standards](knowledge-base/engineering-standards.md)).
-- Lint and tests must pass. User-facing changes get a line in `CHANGELOG.md`.
+- Lint and tests must pass. GitHub runs the same checks as `npm run verify` on
+  Windows for every pull request (`.github/workflows/ci.yml`); a changed lockfile
+  fails it. User-facing changes get a line in `CHANGELOG.md`.
 
 By contributing you agree that your contribution is licensed under GPL-3.0.
 
@@ -36,8 +38,8 @@ By contributing you agree that your contribution is licensed under GPL-3.0.
 floawty is built with Tauri 2 (Rust + TypeScript) on WebView2, Windows 10/11 only
 ([stack-by-spike](knowledge-base/decisions/stack-by-spike.md)).
 
-You need Node.js 24+, the Rust toolchain 1.90+ (`rustup`) and the WebView2 runtime
-(part of Windows 11).
+You need Node.js 24+, `rustup` (it installs the Rust version pinned in
+`rust-toolchain.toml`) and the WebView2 runtime (part of Windows 11).
 
 ```powershell
 npm install

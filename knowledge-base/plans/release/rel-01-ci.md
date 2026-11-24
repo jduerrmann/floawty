@@ -1,9 +1,9 @@
 ---
 type: plan
 tags: [package, release, dist]
-status: ready
+status: in-progress
 created: 2026-11-20
-updated: 2026-11-20
+updated: 2026-11-24
 source: visual plan "Phase 3 – Release-Pipeline", approved 2026-11-20
 ---
 
@@ -24,21 +24,27 @@ every pull request and every push to `main`.
   [[engineering-standards]] §1–2, [[release-pipeline]].
 
 ## Decided
-- CI runs the same steps as `npm run verify`, smoke test included.
-- If the smoke test is not stable on the runner (real mouse, global hotkeys, debug
-  port 9334), CI skips it with a stated reason and it runs locally before every
-  release ([[release-pipeline]]).
+- CI runs the same steps as `npm run verify`: `check`, release build, test launcher
+  and the app tests on a hidden desktop (`smoke:hidden`, [[app-tests-run-hidden]]).
+- If `smoke:hidden` is not stable on the runner (hidden desktop, shim, debug port
+  9334), CI skips it with a stated reason and it runs locally before every release
+  ([[release-pipeline]]). The `@real` tests never run in CI.
+- Instead of `cargo … --locked` (the npm scripts have no flag for it), CI fails when
+  `npm run check` changed a `Cargo.lock`; `npm ci` already refuses a stale npm lock.
+- No test artifact on failure: the app tests write no traces or screenshots, and
+  publishing floawty's logs from the runner needs a decision first.
 
 ## Acceptance criteria
-- [ ] A pull request shows one check that runs types, lint, format, Vitest,
-      `cargo fmt`/`clippy`, `cargo test`, build and smoke test.
+- [ ] A pull request shows one check that runs `npm run check` (types, lint, format,
+      Vitest, adapter tests, `cargo fmt`/`clippy`, `cargo test`), release build, test
+      launcher and `smoke:hidden`.
 - [ ] A deliberately broken commit (failing unit test) turns the check red.
 - [ ] Rust and npm caches keep a warm run under about 15 minutes.
-- [ ] The smoke test passes three runs in a row on the runner, or is skipped with the
+- [ ] `smoke:hidden` passes three runs in a row on the runner, or is skipped with the
       reason recorded here and in CONTRIBUTING.md.
 - [ ] The workflow runs on `pull_request` (never `pull_request_target`), has
       read-only `contents` permission, actions pinned by full SHA, `npm ci`,
-      `cargo … --locked` and a pinned Rust toolchain (clippy runs with `-D warnings`).
+      unchanged `Cargo.lock` files after `check` and a pinned Rust toolchain (clippy runs with `-D warnings`).
 - [ ] App tests that load example.com work on the runner or are stated as flaky.
 
 ## Tests first
@@ -52,5 +58,13 @@ every pull request and every push to `main`.
 - Pushing a test branch and opening a pull request needs the maintainer's OK.
 
 ## Resume here
-Not started. Next: write `ci.yml`, ask the maintainer to allow a push of
-`feat/rel-01-ci` and a draft pull request to watch the first run.
+Branch `feat/rel-01-ci` in worktree `.claude/worktrees/rel-01-ci`, moved onto `main`
+582c165 (quiet tests merged). Written, not committed: `.github/workflows/ci.yml`
+(actions pinned by SHA, `contents: read`, caches for both Cargo workspaces also on
+failure, the steps of `verify` with `smoke:hidden`, Cargo lockfile check; only pull
+request runs cancel each other), `rust-toolchain.toml` (1.96.0, same as local),
+CONTRIBUTING. `npm run check` green locally; advisor review: no must-fix, findings
+resolved (see "Decided"). Not yet run on GitHub.
+Next: maintainer's OK to commit, push and open a draft pull request; then a
+deliberately failing commit to see red, then settle `smoke:hidden` on the runner
+(three green runs, or skip with the reason).
