@@ -1,10 +1,8 @@
 // The settings panel: language, hotkeys, Shorts, graphics acceleration and "Reset all data".
-import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 import { freshProfile, launch, type Profile, type RunningApp } from './app';
-import { EXE } from './tested-exe';
 
 const settingsFile = (profile: Profile) => path.join(profile.dataDir, 'settings.json');
 
@@ -124,7 +122,6 @@ test('graphics acceleration asks before it restarts floawty, and cancelling keep
   const acceleration = app.home.getByRole('switch', {
     name: /^(Use graphics acceleration|Grafikbeschleunigung verwenden)$/,
   });
-  let restarted: number[] = [];
   try {
     await openSettings(app);
     await expect(acceleration).toBeChecked();
@@ -138,17 +135,20 @@ test('graphics acceleration asks before it restarts floawty, and cancelling keep
     await expect(acceleration).toBeChecked();
     await acceleration.uncheck();
     await app.home.locator('#restart-yes').click();
-    await expect.poll(() => childrenOf(app.pid).length, { timeout: 15_000 }).toBeGreaterThan(0);
-    restarted = childrenOf(app.pid);
+    await expect.poll(async () => (await app.children()).length, { timeout: 15_000 }).toBe(1);
     // Written by the new floawty only after its main window exists.
     await expect
       .poll(() => logOf(profile), { timeout: 15_000 })
       .toContain('graphics acceleration is off');
+    expect(readFileSync(settingsFile(profile), 'utf8')).toContain('"graphicsAcceleration": false');
+    // The restarted floawty owns the hotkeys once it registered them, a moment after the log line.
+    await expect(() => app.hotkey('Ctrl+Alt+Shift+T')).toPass();
+    await expect
+      .poll(() => readFileSync(settingsFile(profile), 'utf8'))
+      .toContain('"alwaysOnTop": false');
   } finally {
     await app.stop();
-    for (const pid of restarted) process.kill(pid);
   }
-  expect(readFileSync(settingsFile(profile), 'utf8')).toContain('"graphicsAcceleration": false');
 });
 
 function logOf(profile: Profile): string {
@@ -156,17 +156,10 @@ function logOf(profile: Profile): string {
   return existsSync(file) ? readFileSync(file, 'utf8') : '';
 }
 
-function childrenOf(pid: number): number[] {
-  const query = `(Get-CimInstance Win32_Process -Filter "ParentProcessId=${pid} AND Name='${path.basename(EXE)}'").ProcessId`;
-  const output = execFileSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', query]);
-  return output.toString().split(/\s+/).filter(Boolean).map(Number);
-}
-
 test('reset all data deletes settings and sign-ins and restarts floawty', async () => {
   const profile = freshProfile();
   const app = await launch(profile);
   const signIn = path.join(profile.webviewDir, 'sign-in-stand-in.txt');
-  let restarted: number[] = [];
   try {
     await app.home.locator('#notice-ok').click();
     await expect
@@ -177,12 +170,10 @@ test('reset all data deletes settings and sign-ins and restarts floawty', async 
     await openSettings(app);
     await app.home.locator('#reset').click();
     await app.home.locator('#reset-yes').click();
-    await expect.poll(() => childrenOf(app.pid).length, { timeout: 15_000 }).toBeGreaterThan(0);
-    restarted = childrenOf(app.pid);
+    await expect.poll(async () => (await app.children()).length, { timeout: 15_000 }).toBe(1);
     await expect.poll(() => existsSync(signIn), { timeout: 15_000 }).toBe(false);
   } finally {
     await app.stop();
-    for (const pid of restarted) process.kill(pid);
   }
   const settings = existsSync(settingsFile(profile))
     ? readFileSync(settingsFile(profile), 'utf8')

@@ -6,7 +6,7 @@ import path from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 import { youtube } from '../../src/services/youtube/manifest';
 import { freshProfile, launch, type Profile, type RunningApp } from '../app';
-import { pointAt, pointAway, pressKeys } from '../desktop';
+import { pointAt, pointAway, pressKeys } from '../real-input';
 import { EXE } from '../tested-exe';
 
 const ROOT = path.join(import.meta.dirname, '..', '..');

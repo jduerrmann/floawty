@@ -1,0 +1,63 @@
+// The launcher's line protocol as the tests read it: the first line, replies in order, the counts.
+export interface Counts {
+  sendInput: number;
+  shellExecute: number;
+}
+
+/** The first line of `test-input floawty`: floawty's pid, or the cause it could not start. */
+export function parsePidLine(line: string): number {
+  if (line.startsWith('error ')) throw new Error(line.slice('error '.length));
+  const pid = /^pid (\d+)$/.exec(line)?.[1];
+  if (pid === undefined) throw new Error(`unexpected first line of the launcher: ${line}`);
+  return Number(pid);
+}
+
+/** The detail of an `ok` reply; an `error` reply throws its cause. */
+export function parseReply(line: string): string {
+  if (line === 'ok') return '';
+  if (line.startsWith('ok ')) return line.slice('ok '.length);
+  if (line.startsWith('error ')) throw new Error(line.slice('error '.length));
+  throw new Error(`unexpected reply of the launcher: ${line}`);
+}
+
+export function parseCounts(detail: string): Counts {
+  const match = /^send_input=(\d+) shell_execute=(\d+)$/.exec(detail);
+  if (!match) throw new Error(`unexpected counts of the launcher: ${detail}`);
+  return { sendInput: Number(match[1]), shellExecute: Number(match[2]) };
+}
+
+/** The pids in the detail of a `children` reply. */
+export function parseChildren(detail: string): number[] {
+  if (!/^(\d+( \d+)*)?$/.test(detail)) {
+    throw new Error(`unexpected children of the launcher: ${detail}`);
+  }
+  return detail === '' ? [] : detail.split(' ').map(Number);
+}
+
+/** Lines from the launcher, handed to whoever asks in the order they arrived. */
+export class LineQueue {
+  private lines: string[] = [];
+  private waiting: { resolve: (line: string) => void; reject: (error: Error) => void }[] = [];
+  private closed = false;
+
+  push(line: string): void {
+    const waiter = this.waiting.shift();
+    if (waiter) waiter.resolve(line);
+    else this.lines.push(line);
+  }
+
+  /** No more lines come: those still waiting, and every later ask, fail. */
+  close(): void {
+    this.closed = true;
+    for (const waiter of this.waiting.splice(0)) waiter.reject(ENDED());
+  }
+
+  next(): Promise<string> {
+    const line = this.lines.shift();
+    if (line !== undefined) return Promise.resolve(line);
+    if (this.closed) return Promise.reject(ENDED());
+    return new Promise((resolve, reject) => this.waiting.push({ resolve, reject }));
+  }
+}
+
+const ENDED = () => new Error('the launcher ended before it answered');

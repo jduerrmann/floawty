@@ -1,16 +1,8 @@
 // The bar over a service: hover, back to the tiles, opacity and the click-through dot.
 import { expect, test, type Page } from '@playwright/test';
 import { freshProfile, launch, type RunningApp } from './app';
-import {
-  clickAt,
-  dragBy,
-  ownedPopups,
-  pointAt,
-  pointAway,
-  pressKeys,
-  resizeWindow,
-  windowPosition,
-} from './desktop';
+import { ownedPopups, resizeWindow, windowPosition } from './desktop';
+import { clickAt, dragBy, pointAt, pointAway, pressKeys } from './real-input';
 
 const EXAMPLE = {
   service: { id: 'example', url: 'https://example.com/', allowedDomains: ['example.com'] },
@@ -34,7 +26,7 @@ async function hoverVideo(app: RunningApp): Promise<void> {
   await expect.poll(() => barShown(app.bar)).toBe('true');
 }
 
-test('over a service the bar shows while the cursor is on floawty', async () => {
+test('over a service the bar shows while the cursor is on floawty', { tag: '@real' }, async () => {
   const app = await launch(freshProfile());
   try {
     pointAway(app.pid);
@@ -49,22 +41,26 @@ test('over a service the bar shows while the cursor is on floawty', async () => 
   }
 });
 
-test('◀ in the bar closes the service and shows the tiles with the bar', async () => {
-  const app = await launch(freshProfile());
-  try {
-    await openExample(app);
-    await hoverVideo(app);
-    await app.bar.locator('#back').click();
-    await expect
-      .poll(() => app.pages().some((page) => page.url().startsWith('https://example.com')))
-      .toBe(false);
-    await expect(app.bar.locator('#back')).toBeHidden();
-    await expect.poll(() => barShown(app.bar)).toBe('true');
-  } finally {
-    pointAway(app.pid);
-    await app.stop();
-  }
-});
+test(
+  '◀ in the bar closes the service and shows the tiles with the bar',
+  { tag: '@real' },
+  async () => {
+    const app = await launch(freshProfile());
+    try {
+      await openExample(app);
+      await hoverVideo(app);
+      await app.bar.locator('#back').click();
+      await expect
+        .poll(() => app.pages().some((page) => page.url().startsWith('https://example.com')))
+        .toBe(false);
+      await expect(app.bar.locator('#back')).toBeHidden();
+      await expect.poll(() => barShown(app.bar)).toBe('true');
+    } finally {
+      pointAway(app.pid);
+      await app.stop();
+    }
+  },
+);
 
 test('the opacity slider sets the opacity', async () => {
   const app = await launch(freshProfile());
@@ -78,7 +74,7 @@ test('the opacity slider sets the opacity', async () => {
   }
 });
 
-test('click-through shows the dot over a service with its hotkey', async () => {
+test('click-through shows the dot over a service with its hotkey', { tag: '@real' }, async () => {
   const app = await launch(freshProfile());
   try {
     await openExample(app);
@@ -116,7 +112,6 @@ test('the bar is dark over a service, and follows Windows on the tiles and in th
     await expect.poll(scheme).not.toBe('dark');
     expect(await pillColor()).toBe(lightText);
   } finally {
-    pointAway(app.pid);
     await app.stop();
   }
 });
@@ -142,12 +137,11 @@ test('the bar leaves the page clickable: narrow over a service, above it in wind
     await expect.poll(async () => (await width(app.bar)) === (await width(app.home))).toBe(true);
     await expect.poll(async () => (await height(app.home)) - (await height(service))).toBe(40);
   } finally {
-    pointAway(app.pid);
     await app.stop();
   }
 });
 
-test("a page's suggestion list stays open when the bar hides", async () => {
+test("a page's suggestion list stays open when the bar hides", { tag: '@real' }, async () => {
   const app = await launch(freshProfile());
   try {
     await openExample(app);
@@ -169,7 +163,7 @@ test("a page's suggestion list stays open when the bar hides", async () => {
   }
 });
 
-test('the grip in the bar moves the window over a service', async () => {
+test('the grip in the bar moves the window over a service', { tag: '@real' }, async () => {
   const app = await launch(freshProfile());
   try {
     await openExample(app);

@@ -4,7 +4,8 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test } from '@playwright/test';
 import { freshProfile, launch, type RunningApp } from './app';
-import { clickAt, minimize, openOtherWindow, OTHER_TITLE, pressKeys, windowFlags } from './desktop';
+import { minimize, windowFlags } from './desktop';
+import { clickAt, openOtherWindow, OTHER_TITLE, pressKeys } from './real-input';
 
 const flags = (app: RunningApp) => () => windowFlags(app.pid);
 const invoke = (app: RunningApp, command: string, args: Record<string, unknown> = {}) =>
@@ -40,7 +41,7 @@ test('🖈 and its hotkey switch always on top, and a restart keeps the choice',
   try {
     await expect.poll(flags(app)).toMatchObject({ visible: true, topmost: false });
     await expect(app.bar.locator('#on-top')).toHaveAttribute('aria-pressed', 'false');
-    pressKeys('^%+t');
+    await app.hotkey('Ctrl+Alt+Shift+T');
     await expect.poll(flags(app)).toMatchObject({ topmost: true });
     await expect(app.bar.locator('#on-top')).toHaveAttribute('aria-pressed', 'true');
   } finally {
@@ -68,8 +69,8 @@ test('window mode is never on top and ignores the switch', async () => {
     await expect.poll(flags(app)).toMatchObject({ topmost: false });
     await expect(app.bar.locator('#on-top')).toBeDisabled();
     // Hotkeys run in order, so once the mode is back the first one has been handled.
-    pressKeys('^%+t');
-    pressKeys('^%+f');
+    await app.hotkey('Ctrl+Alt+Shift+T');
+    await app.hotkey('Ctrl+Alt+Shift+F');
     await expect.poll(flags(app)).toMatchObject({ topmost: true });
     expect(
       await app.home.evaluate(() => window.__TAURI_INTERNALS__.invoke('overlay_state')),
@@ -79,40 +80,46 @@ test('window mode is never on top and ignores the switch', async () => {
   }
 });
 
-test('show/hide brings a floaty view that is not on top to the front before hiding it', async () => {
-  // About twenty PowerShell calls and a cold WinForms start.
-  test.slow();
-  const app = await launch(freshProfile());
-  const other = openOtherWindow();
-  const otherPid = other.pid ?? 0;
-  try {
-    await expect
-      .poll(() => windowFlags(otherPid, OTHER_TITLE).visible, { timeout: 15000 })
-      .toBe(true);
-    clickAt(otherPid, 0.5, 0.5);
-    await expect.poll(() => windowFlags(otherPid, OTHER_TITLE).foreground).toBe(true);
-    pressKeys('^%+o');
-    await expect.poll(flags(app)).toMatchObject({ visible: false });
-    pressKeys('^%+o');
-    await expect.poll(flags(app)).toMatchObject({ visible: true });
+test(
+  'show/hide brings a floaty view that is not on top to the front before hiding it',
+  { tag: '@real' },
+  async () => {
+    // About twenty PowerShell calls and a cold WinForms start.
+    test.slow();
+    const app = await launch(freshProfile());
+    const other = openOtherWindow();
+    const otherPid = other.pid ?? 0;
+    try {
+      await expect
+        .poll(() => windowFlags(otherPid, OTHER_TITLE).visible, { timeout: 15000 })
+        .toBe(true);
+      clickAt(otherPid, 0.5, 0.5);
+      await expect.poll(() => windowFlags(otherPid, OTHER_TITLE).foreground).toBe(true);
+      pressKeys('^%+o');
+      await expect.poll(flags(app)).toMatchObject({ visible: false });
+      pressKeys('^%+o');
+      await expect.poll(flags(app)).toMatchObject({ visible: true });
 
-    await switchOff(app);
-    clickAt(otherPid, 0.5, 0.5);
-    await expect.poll(() => windowFlags(otherPid, OTHER_TITLE).foreground).toBe(true);
-    pressKeys('^%+o');
-    await expect.poll(flags(app)).toMatchObject({ visible: true, foreground: true });
-    pressKeys('^%+o');
-    await expect.poll(flags(app)).toMatchObject({ visible: false });
+      await switchOff(app);
+      clickAt(otherPid, 0.5, 0.5);
+      await expect.poll(() => windowFlags(otherPid, OTHER_TITLE).foreground).toBe(true);
+      pressKeys('^%+o');
+      await expect.poll(flags(app)).toMatchObject({ visible: true, foreground: true });
+      pressKeys('^%+o');
+      await expect.poll(flags(app)).toMatchObject({ visible: false });
 
-    pressKeys('^%+o');
-    await expect.poll(flags(app)).toMatchObject({ visible: true });
-    await invoke(app, 'set_opacity', { value: 0.5 });
-    minimize(app.pid);
-    await expect.poll(flags(app)).toMatchObject({ minimized: true });
-    pressKeys('^%+o');
-    await expect.poll(flags(app)).toMatchObject({ minimized: false, foreground: true, alpha: 128 });
-  } finally {
-    other.kill();
-    await app.stop();
-  }
-});
+      pressKeys('^%+o');
+      await expect.poll(flags(app)).toMatchObject({ visible: true });
+      await invoke(app, 'set_opacity', { value: 0.5 });
+      minimize(app.pid);
+      await expect.poll(flags(app)).toMatchObject({ minimized: true });
+      pressKeys('^%+o');
+      await expect
+        .poll(flags(app))
+        .toMatchObject({ minimized: false, foreground: true, alpha: 128 });
+    } finally {
+      other.kill();
+      await app.stop();
+    }
+  },
+);

@@ -20,6 +20,7 @@
     "build:test-input": "cargo build --release --manifest-path tools/test-input/Cargo.toml",
     "test:adapters": "node scripts/build-page-scripts.mjs && playwright test --project=adapter",
     "smoke": "playwright test --project=app",
+    "smoke:hidden": "node scripts/smoke-hidden.mjs",
     "measure": "playwright test -c tests/measure",
     "check": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run test:adapters && npm run lint:rust && npm run test:rust",
     "verify": "npm run check && npm run build && npm run smoke"

@@ -1,52 +1,5 @@
-// Real mouse and keyboard input: the bar reacts to where Windows sees the cursor, global
-// hotkeys to real key presses. Using the mouse yourself while these tests run makes them fail.
-import { execFileSync, spawn, type ChildProcess } from 'node:child_process';
-
-const SCRIPT = `
-param([int]$ProcessId, [double]$Fx, [double]$Fy)
-Add-Type @"
-using System; using System.Runtime.InteropServices;
-public struct Box { public int L, T, R, B; }
-public static class Desk {
-  [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr h, out Box r);
-  [DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y);
-  [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
-}
-"@
-[Desk]::SetProcessDPIAware() | Out-Null
-$box = New-Object Box
-[Desk]::GetWindowRect((Get-Process -Id $ProcessId).MainWindowHandle, [ref]$box) | Out-Null
-if ($Fx -lt 0) { [Desk]::SetCursorPos($box.L - 200, $box.T - 200) | Out-Null }
-else { [Desk]::SetCursorPos([int]($box.L + ($box.R - $box.L) * $Fx), [int]($box.T + ($box.B - $box.T) * $Fy)) | Out-Null }
-`;
-
-function run(pid: number, fx: number, fy: number): void {
-  const command = `& {${SCRIPT}} ${pid} ${fx} ${fy}`;
-  execFileSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', command]);
-}
-
-/** Puts the cursor at a fraction of floawty's window, e.g. (0.5, 0.6) for the video's middle. */
-export function pointAt(pid: number, fx: number, fy: number): void {
-  run(pid, fx, fy);
-}
-
-/** Moves the cursor off floawty's window. */
-export function pointAway(pid: number): void {
-  run(pid, -1, -1);
-}
-
-/** Clicks the left mouse button at a fraction of floawty's window. */
-export function clickAt(pid: number, fx: number, fy: number): void {
-  run(pid, fx, fy);
-  const click = `Add-Type -MemberDefinition '[DllImport("user32.dll")] public static extern void mouse_event(int f, int x, int y, int d, int e);' -Name Mouse -Namespace Desk; [Desk.Mouse]::mouse_event(2, 0, 0, 0, 0); [Desk.Mouse]::mouse_event(4, 0, 0, 0, 0)`;
-  execFileSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', click]);
-}
-
-/** Types through Windows' input queue (SendKeys syntax, e.g. "^%+o"): global hotkeys need real key presses. */
-export function pressKeys(keys: string): void {
-  const command = `Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait('${keys}')`;
-  execFileSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', command]);
-}
+// Window queries and actions that work on any desktop: where a window is, its flags, its size, its popups.
+import { execFileSync } from 'node:child_process';
 
 const OWNED_POPUPS = `
 param([int]$ProcessId)
@@ -85,9 +38,6 @@ public struct Frame { public int L, T, R, B; }
 public static class Win {
   [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr h, out Frame r);
   [DllImport("user32.dll")] public static extern bool MoveWindow(IntPtr h, int x, int y, int w, int ht, bool paint);
-  [DllImport("user32.dll")] public static extern bool GetCursorPos(out Frame p);
-  [DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y);
-  [DllImport("user32.dll")] public static extern void mouse_event(int f, int x, int y, int d, int e);
   [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
 }
 "@
@@ -96,14 +46,6 @@ $h = (Get-Process -Id $ProcessId).MainWindowHandle
 $r = New-Object Frame
 [Win]::GetWindowRect($h, [ref]$r) | Out-Null
 if ($Action -eq 'resize') { [Win]::MoveWindow($h, $r.L, $r.T, $A, $B, $true) | Out-Null }
-if ($Action -eq 'drag') {
-  $p = New-Object Frame; [Win]::GetCursorPos([ref]$p) | Out-Null
-  [Win]::mouse_event(2, 0, 0, 0, 0)
-  for ($i = 1; $i -le 10; $i++) { Start-Sleep -Milliseconds 20; [Win]::SetCursorPos($p.L + $A * $i / 10, $p.T + $B * $i / 10) | Out-Null }
-  [Win]::mouse_event(4, 0, 0, 0, 0)
-  Start-Sleep -Milliseconds 100
-  [Win]::GetWindowRect($h, [ref]$r) | Out-Null
-}
 "$($r.L) $($r.T)"
 `;
 
@@ -119,11 +61,6 @@ function windowCall(pid: number, action: string, a = 0, b = 0): { x: number; y: 
 /** floawty's window position in screen pixels. */
 export function windowPosition(pid: number): { x: number; y: number } {
   return windowCall(pid, 'where');
-}
-
-/** Holds the left button where the cursor is and drags by (dx, dy) screen pixels. */
-export function dragBy(pid: number, dx: number, dy: number): { x: number; y: number } {
-  return windowCall(pid, 'drag', dx, dy);
 }
 
 /** Resizes floawty's window in screen pixels, as Windows does for a drag on its border. */
@@ -198,23 +135,4 @@ export function windowFlags(pid: number, title = 'floawty'): WindowFlags {
 /** Minimizes floawty's window the way its taskbar button does. */
 export function minimize(pid: number): void {
   flagsCall(pid, 'floawty', 'minimize');
-}
-
-/** The title of the window `openOtherWindow` opens. */
-export const OTHER_TITLE = 'floawty test window';
-
-// On top, so it never opens behind a maximized window and the click always lands on it.
-const OTHER_WINDOW = `Add-Type -AssemblyName System.Windows.Forms
-$form = New-Object System.Windows.Forms.Form
-$form.Text = '${OTHER_TITLE}'
-$form.TopMost = $true
-$form.StartPosition = 'Manual'
-$form.Location = New-Object System.Drawing.Point(80, 80)
-$form.Size = New-Object System.Drawing.Size(320, 200)
-[System.Windows.Forms.Application]::Run($form)`;
-
-/** Opens a plain window of another app at the top left, to take the foreground from floawty. */
-export function openOtherWindow(): ChildProcess {
-  // windowsHide would hide the form as well, not only the console.
-  return spawn('powershell', ['-NoProfile', '-NonInteractive', '-Command', OTHER_WINDOW]);
 }
