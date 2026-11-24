@@ -10,6 +10,7 @@
     "dev:ui": "vite",
     "build:ui": "vite build && node scripts/build-page-scripts.mjs",
     "build": "tauri build --no-bundle",
+    "icons": "node scripts/build-icons.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",

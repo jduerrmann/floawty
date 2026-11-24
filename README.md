@@ -1,4 +1,9 @@
-# floawty
+<h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/brand/logo-dark.svg">
+    <img src="assets/brand/logo-light.svg" alt="floawty" width="420">
+  </picture>
+</h1>
 
 **Watch videos in a small, always-on-top overlay – while you do something else.**
 

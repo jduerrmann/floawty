@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 674 160" width="674" height="160" role="img" aria-label="floawty">
+<svg width="160" height="160" viewBox="0 0 256 256">
+<defs>
+<linearGradient id="g" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="256" y2="256">
+<stop offset="0" stop-color="#6467f1"/>
+<stop offset="0.5" stop-color="#7d3ced"/>
+<stop offset="1" stop-color="#dc2978"/>
+</linearGradient>
+</defs>
+<rect x="6" y="6" width="244" height="244" rx="62" fill="url(#g)"/>
+<g fill="none" stroke="#fff8f4" stroke-width="19" stroke-linecap="round">
+<path d="M82 150c-16 22 10 30-6 56"/>
+<path d="M128 150c-16 24 16 36 0 64"/>
+<path d="M174 150c16 22-10 30 6 56"/>
+</g>
+<path d="M44 122C44 70 78 38 128 38s84 32 84 84v18c0 18-14 30-32 30H76c-18 0-32-12-32-30z" fill="#fff8f4"/>
+<rect x="66" y="78" width="124" height="70" rx="28" fill="#1e1545"/>
+<path d="M92 117q11-18 22 0M142 117q11-18 22 0" fill="none" stroke="#67e8f9" stroke-width="10" stroke-linecap="round"/>
+</svg>
+<svg x="184" y="5" width="489.5" height="150" viewBox="-21 -57 558 171">
+<g>
+<path d="M17.4 60V-18.3Q17.4 -38 37.1 -38H40.6M0 0H38.3M61.6 -38V44.9Q61.6 60 76.7 60H78.7M235.9 0H237.9C253.3 0 265.9 12.5 265.9 28V32C265.9 47.5 253.3 60 237.9 60H235.9C220.4 60 207.9 47.5 207.9 32V28C207.9 12.5 220.4 0 235.9 0ZM265.9 0V60M291.9 0V40.9Q291.9 60 311 60H311Q330.2 60 330.2 40.9V13.2M330.2 13.2V40.9Q330.2 60 349.3 60H349.3Q368.4 60 368.4 40.9V0M406 -25.8V42.6Q406 60 423.4 60H430.4M394.4 0H429.2M452.4 0V33.3Q452.4 60 479.1 60H479.1Q505.8 60 505.8 33.3V0M505.8 0V60C505.8 77.5 491.8 95 477.8 88S455.8 79.2 443.8 95" fill="none" stroke="#1c1d2b" stroke-width="19" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="3"/>
+<rect x="91.2" y="-9.5" width="100.2" height="79" rx="27" fill="#1c1d2b"/>
+<path d="M117.3 33q8-15 16 0M149.3 33q8-15 16 0" fill="none" stroke="#22d3ee" stroke-width="9" stroke-linecap="round"/>
+</g>
+</svg>
+</svg>

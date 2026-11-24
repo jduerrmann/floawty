@@ -19,4 +19,4 @@ Single resume entry for multi-session work. Rules: [[planning]].
 Archived: stack spike ([[plan-stack-spike]]), done 2026-11-17; MVP ([[plan-mvp]]), done
 2026-11-20; always on top as a switch ([[plan-on-top]]), done 2026-11-20; short feeds
 ([[plan-short-feeds]]), done 2026-11-21; app tests without the maintainer's screen
-([[plan-quiet-tests]]), done 2026-11-24.
+([[plan-quiet-tests]]), done 2026-11-24; logo ([[plan-logo]]), done 2026-11-24.

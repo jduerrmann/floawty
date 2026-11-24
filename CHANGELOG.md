@@ -97,3 +97,4 @@ User-facing changes, in plain language. Format based on
   windows can cover floawty; floawty remembers the choice. Click-through keeps floawty
   on top while it is on. While floawty is not kept on top, Ctrl+Alt+Shift+O first brings
   it to the front (also when minimized), a second press hides it.
+- A new app icon and logo: a smiling jellyfish whose face is a screen.

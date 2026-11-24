@@ -39,6 +39,7 @@ One line per decision record in `decisions/`. Template: `templates/t-decision.md
 
 ## ui
 
+- [[jellyfish-brand]] – the logo is a jellyfish with a screen face; one shape at every icon size; icon and README only
 - [[mvp-scope-and-controls]] – MVP scope, bar over the video, window mode ↔ floaty view, Ctrl+Alt+Shift hotkeys, click-through dot
 - [[settings-export-without-logins]] – export/import carries settings, own tiles and hotkeys, never logins or profile files
 - [[always-on-top-switch]] – 🖈 and Ctrl+Alt+Shift+T switch the floaty view's always on top; stored; click-through keeps it on top
