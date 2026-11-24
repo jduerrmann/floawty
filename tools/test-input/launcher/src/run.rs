@@ -1,4 +1,5 @@
-//! `run`: a command on a desktop nobody looks at, in a job, one run at a time, with a time limit.
+//! `run`: a command on a desktop nobody looks at (or the real one with `--visible`), in a job, one
+//! run at a time, with a time limit.
 use std::time::Duration;
 
 use test_input_shared::process::{os_error, wide};
@@ -18,20 +19,26 @@ const GENERIC_ALL: u32 = 0x1000_0000;
 const EXIT_TIMEOUT: i32 = 124;
 const LONGEST_WAIT_MS: u128 = (u32::MAX - 1) as u128;
 
-pub fn run(timeout: Duration, command: &[String]) -> i32 {
-    run_command(timeout, command).unwrap_or_else(|cause| {
+pub fn run(visible: bool, timeout: Duration, command: &[String]) -> i32 {
+    run_command(visible, timeout, command).unwrap_or_else(|cause| {
         eprintln!("test-input: {cause}");
         EXIT_LAUNCHER_FAILED
     })
 }
 
-fn run_command(timeout: Duration, command: &[String]) -> Result<i32, String> {
+fn run_command(visible: bool, timeout: Duration, command: &[String]) -> Result<i32, String> {
     let _only_run = SingleRun::acquire()?;
-    let desktop = Desktop::create(&format!("{TEST_DESKTOP_PREFIX}{}", std::process::id()))?;
+    let desktop = match visible {
+        true => None,
+        false => Some(Desktop::create(&format!(
+            "{TEST_DESKTOP_PREFIX}{}",
+            std::process::id()
+        ))?),
+    };
     let job = Job::new()?;
     let child = start_suspended(
         &command_line(command),
-        Some(&desktop.name),
+        desktop.as_ref().map(|desktop| desktop.name.as_str()),
         inherited_stdio()?,
     )?;
     if let Err(cause) = job.assign(child.process) {

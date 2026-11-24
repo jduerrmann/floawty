@@ -4,7 +4,7 @@ area: process
 tags: [rules, testing, code-quality, performance]
 status: active
 created: 2026-11-16
-updated: 2026-11-22
+updated: 2026-11-24
 source: conversation; adapted from configuratorCore, varchy and processRecorder standards
 ---
 
@@ -40,21 +40,27 @@ Use the cheapest level that proves the behavior.
 - Fixtures mimic only the DOM structure the adapter needs. Never commit saved pages,
   screenshots or content of the real services.
 - One behavior per test, with a name that states it. No fixed sleeps; wait for
-  observable conditions. No retries that hide flakiness (repeating a noisy RAM
-  measurement, §7, is not a test retry).
-- App runs by stage (AGENTS.md rule 10, [[app-runs-smallest-first]]), each its own
-  command, so that each result is reported and a stop really stops:
-  - first `npm run build` after the last code change (needs no mouse); the tests run
-    whatever exe is in `src-tauri/target/release/`.
-  - named specs: `npm run smoke -- on-top.spec.ts:82`.
+  observable conditions; a fixed wait is allowed only to show that something does
+  not happen within it, and states why. No retries that hide flakiness (repeating a
+  noisy RAM measurement, §7, is not a test retry).
+- App runs by stage (AGENTS.md rule 10, [[app-runs-smallest-first]],
+  [[app-tests-run-hidden]]), each its own command, so that each result is reported and
+  a stop really stops. All of them run on a hidden desktop unless marked visible:
+  - first `npm run build` after the last code change, and `npm run build:test-input`
+    once; the tests run whatever exe is in `src-tauri/target/release/`.
+  - named specs: `npm run smoke:hidden -- tests/on-top.spec.ts:82`.
   - the same on the last good build (copy its exe before rebuilding, or build its
     commit; never swap the exe in `target/`), from Git Bash so that the variable
     ends with the command:
-    `FLOAWTY_TEST_EXE=<exe> npm run smoke -- on-top.spec.ts:82`.
-  - all app tests: `npm run smoke` (about 2 minutes).
-  - one measurement: `npm run measure -- -g "idle on the tiles"` (about 1.5 minutes,
-    needs no mouse; the hover needs it for the first minute only).
-  - on a quiet PC: no other test run or build at the same time.
+    `FLOAWTY_TEST_EXE=<exe> npm run smoke:hidden -- tests/on-top.spec.ts:82`.
+  - all app tests without real input: `npm run smoke:hidden` (about 1.5 minutes).
+  - one measurement: `npm run measure -- -g "idle on the tiles"` (about 1.5 minutes).
+  - visible, asked: `npm run smoke:real` (tests tagged `@real`, before a release) and
+    `npm run smoke` (every app test on the real screen).
+  - on a quiet PC: no other test run or build at the same time; the run lock refuses a
+    second app run.
+- A test that needs the real cursor, keyboard or foreground carries the tag `@real`
+  and imports `tests/real-input.ts`; the tag scan in Vitest fails a mismatch.
 
 ## 3. Readable code
 
@@ -104,19 +110,20 @@ floawty runs next to other work on an ordinary PC.
 - Event-driven, not polling. Unavoidable polling uses the slowest interval that
   works and stops while the overlay is hidden or the video is paused.
 - Idle (no video playing) means ~0 % CPU.
-- Budgets ([[stack-by-spike]]), measured with `spikes/measure`:
+- Budgets ([[stack-by-spike]]), measured hidden by `npm run measure`
+  ([[app-tests-run-hidden]]):
 
   | Metric | Budget | Spike value |
   |---|---|---|
   | Download | ≤ 10 MiB | 4.2 MiB |
-  | Start → visible window | ≤ 200 ms | 46 ms |
+  | Start → visible main window ([[start-budget-main-window]]) | ≤ 400 ms | – |
   | RAM idle | ≤ 260 MB ([[idle-budget-260]]) | 188 MB |
   | RAM YouTube 1080p | ≤ 850 MB | 682 MB |
   | CPU idle and hidden | ≈ 0 % | 0.00 % |
 
 - Changes to window handling, page scripts or startup are measured once the code is
-  final and compared with the last recorded values (app runs, asked for as AGENTS.md
-  rule 10 says); a regression beyond budget blocks a merge.
+  final and compared with the predecessor build measured hidden the same way (asked
+  for as AGENTS.md rule 10 says); a regression beyond budget blocks a merge.
 - Idle RAM varies by 15–35 MB between starts. One value over budget is no verdict:
   measure idle twice more, the median of the three decides. The request for an idle
   measurement names these possible repeats (up to 4.5 minutes, no mouse).

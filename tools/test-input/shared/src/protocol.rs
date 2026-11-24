@@ -1,5 +1,6 @@
 //! The launcher's line protocol: commands in, one `ok ...` or `error ...` line out.
 use crate::input::{Button, Foreground};
+use crate::state::Counts;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Command {
@@ -105,9 +106,10 @@ pub fn children_reply(pids: &[u32], failure: Option<&str>) -> String {
     ok(&pids.join(" "))
 }
 
-pub fn counts_reply(send_input: u32, shell_execute: u32) -> String {
+pub fn counts_reply(counts: &Counts) -> String {
     ok(&format!(
-        "send_input={send_input} shell_execute={shell_execute}"
+        "send_input={} shell_execute={} drag={}",
+        counts.send_input, counts.shell_execute, counts.drag
     ))
 }
 
@@ -255,6 +257,14 @@ mod tests {
         assert_eq!(ok(""), "ok");
         assert_eq!(ok("x=1"), "ok x=1");
         assert_eq!(error("not registered: T"), "error not registered: T");
-        assert_eq!(counts_reply(2, 1), "ok send_input=2 shell_execute=1");
+        let counts = Counts {
+            send_input: 2,
+            shell_execute: 1,
+            drag: 3,
+        };
+        assert_eq!(
+            counts_reply(&counts),
+            "ok send_input=2 shell_execute=1 drag=3"
+        );
     }
 }

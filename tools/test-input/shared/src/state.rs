@@ -24,6 +24,7 @@ pub const ENV_NAME: &str = "FLOAWTY_TEST_INPUT";
 pub const MAX_CHILDREN: usize = 64;
 pub const HANDSHAKE_SLOTS: usize = 64;
 const ERROR_TEXT: usize = 192;
+const COUNTERS: usize = 3;
 const LOCK_TIMEOUT_MS: u32 = 5000;
 
 #[repr(C)]
@@ -44,10 +45,25 @@ pub struct Locked {
 struct State {
     header: Header,
     locked: Locked,
-    send_input: AtomicU32,
-    shell_execute: AtomicU32,
+    counters: [AtomicU32; COUNTERS],
     child_count: AtomicU32,
     children: [AtomicU32; MAX_CHILDREN],
+}
+
+/// The calls of floawty the shim swallows and counts.
+#[derive(Clone, Copy)]
+pub enum Counter {
+    SendInput,
+    ShellExecute,
+    /// A request for Windows' move loop (a press on the caption).
+    Drag,
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct Counts {
+    pub send_input: u32,
+    pub shell_execute: u32,
+    pub drag: u32,
 }
 
 /// A kernel handle that is closed with its owner.
@@ -165,29 +181,22 @@ impl Shared {
         }
     }
 
-    pub fn add_send_input(&self) {
-        // SAFETY: only the atomic field is referenced, never the whole block other processes change.
-        unsafe { &*addr_of!((*self.state).send_input) }.fetch_add(1, Ordering::SeqCst);
+    pub fn add(&self, counter: Counter) {
+        // SAFETY: only the atomic fields are referenced, never the whole block other processes change.
+        let counters = unsafe { &*addr_of!((*self.state).counters) };
+        counters[counter as usize].fetch_add(1, Ordering::SeqCst);
     }
 
-    pub fn add_shell_execute(&self) {
-        // SAFETY: as in add_send_input.
-        unsafe { &*addr_of!((*self.state).shell_execute) }.fetch_add(1, Ordering::SeqCst);
-    }
-
-    /// The calls swallowed so far: (`SendInput`, `ShellExecuteW`).
-    pub fn counts(&self) -> (u32, u32) {
-        // SAFETY: as in add_send_input.
-        let (send_input, shell_execute) = unsafe {
-            (
-                &*addr_of!((*self.state).send_input),
-                &*addr_of!((*self.state).shell_execute),
-            )
-        };
-        (
-            send_input.load(Ordering::SeqCst),
-            shell_execute.load(Ordering::SeqCst),
-        )
+    /// The calls swallowed so far.
+    pub fn counts(&self) -> Counts {
+        // SAFETY: as in add.
+        let counters = unsafe { &*addr_of!((*self.state).counters) };
+        let read = |counter: Counter| counters[counter as usize].load(Ordering::SeqCst);
+        Counts {
+            send_input: read(Counter::SendInput),
+            shell_execute: read(Counter::ShellExecute),
+            drag: read(Counter::Drag),
+        }
     }
 
     pub fn record_child(&self, pid: u32) {
@@ -347,11 +356,17 @@ mod tests {
     #[test]
     fn swallowed_calls_are_counted_across_handles() {
         let (first, second) = pair();
-        first.add_send_input();
-        first.add_send_input();
-        second.add_shell_execute();
-        assert_eq!(first.counts(), (2, 1));
-        assert_eq!(second.counts(), (2, 1));
+        first.add(Counter::SendInput);
+        first.add(Counter::SendInput);
+        second.add(Counter::ShellExecute);
+        second.add(Counter::Drag);
+        let expected = Counts {
+            send_input: 2,
+            shell_execute: 1,
+            drag: 1,
+        };
+        assert_eq!(first.counts(), expected);
+        assert_eq!(second.counts(), expected);
     }
 
     #[test]

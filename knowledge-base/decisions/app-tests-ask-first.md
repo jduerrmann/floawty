@@ -4,13 +4,14 @@ area: process
 tags: [tests, agents, rules]
 status: active
 created: 2026-11-20
-updated: 2026-11-22
+updated: 2026-11-24
 source: conversation (maintainer, 2026-11-20); advisor review
 ---
 
 # App tests run only after the maintainer's yes, muted, one agent at a time
 
-One run per yes and one run per package: amended by [[app-runs-smallest-first]].
+One run per yes and one run per package: amended by [[app-runs-smallest-first]]. Asking
+before hidden runs: superseded by [[app-tests-run-hidden]].
 
 ## Context
 Several agent sessions ran the Playwright app tests again and again, sometimes at

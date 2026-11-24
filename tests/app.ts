@@ -18,6 +18,7 @@ import {
   parseCounts,
   parsePidLine,
   parseReply,
+  parseStartedLine,
   type Counts,
 } from './launcher-lines';
 import { pressKeys, visibleInput } from './real-input';
@@ -52,6 +53,8 @@ export interface Profile {
 /** A started floawty: in a hidden run behind the launcher, otherwise a plain child process. */
 export interface Floawty {
   pid: number;
+  /** Milliseconds from floawty's process start to its visible window; `null` unless asked for and hidden. */
+  startMs: number | null;
   stop: () => Promise<void>;
   /** Presses floawty's hotkey text, e.g. "Ctrl+Alt+Shift+T". */
   hotkey: (text: string) => Promise<void>;
@@ -71,6 +74,8 @@ export interface RunningApp extends Omit<AppInput, 'stop'> {
   pages: () => Page[];
   hotkey: (text: string) => Promise<void>;
   children: () => Promise<number[]>;
+  /** What the launcher swallowed from floawty; `null` in a visible run. */
+  counts: () => Promise<Counts | null>;
   stop: () => Promise<void>;
 }
 
@@ -106,6 +111,7 @@ function startVisible(env: NodeJS.ProcessEnv, args: string[]): Floawty {
   const seen = new Set<number>();
   return {
     pid,
+    startMs: null,
     stop: async () => {
       app.kill();
       await exited(app);
@@ -122,8 +128,13 @@ function startVisible(env: NodeJS.ProcessEnv, args: string[]): Floawty {
   };
 }
 
-async function startHidden(env: NodeJS.ProcessEnv, args: string[]): Promise<Floawty> {
-  const launcher = spawn(LAUNCHER, ['floawty', EXE, ...args], {
+async function startHidden(
+  env: NodeJS.ProcessEnv,
+  args: string[],
+  reportStart: boolean,
+): Promise<Floawty> {
+  const report = reportStart ? ['--report-start'] : [];
+  const launcher = spawn(LAUNCHER, ['floawty', ...report, EXE, ...args], {
     env,
     stdio: ['pipe', 'pipe', 'inherit'],
   });
@@ -139,8 +150,10 @@ async function startHidden(env: NodeJS.ProcessEnv, args: string[]): Promise<Floa
     return parseReply(await lines.next());
   };
   let pid: number;
+  let startMs: number | null = null;
   try {
     pid = parsePidLine(await lines.next());
+    if (reportStart) startMs = parseStartedLine(await lines.next());
   } catch (error) {
     launcher.kill();
     throw new Error(`floawty did not start: ${(error as Error).message}`, { cause: error });
@@ -164,6 +177,7 @@ async function startHidden(env: NodeJS.ProcessEnv, args: string[]): Promise<Floa
   };
   return {
     pid,
+    startMs,
     stop,
     hotkey: async (text) => void (await ask(`hotkey ${text}`)),
     counts,
@@ -176,9 +190,20 @@ async function startHidden(env: NodeJS.ProcessEnv, args: string[]): Promise<Floa
   };
 }
 
-/** Every start of the tested exe goes through here, so a hidden run never starts one directly. */
-export async function startFloawty(env: NodeJS.ProcessEnv, args: string[] = []): Promise<Floawty> {
-  return env.FLOAWTY_TEST_HIDDEN === '1' ? startHidden(env, args) : startVisible(env, args);
+/**
+ * Every start of the tested exe goes through here, so a hidden run never starts one directly.
+ * `reportStart` (hidden only) waits for the window and fills `startMs`.
+ */
+export async function startFloawty(
+  env: NodeJS.ProcessEnv,
+  args: string[] = [],
+  reportStart = false,
+): Promise<Floawty> {
+  if (env.FLOAWTY_TEST_HIDDEN !== '1') {
+    if (reportStart) throw new Error('the start time is measured by the hidden launcher');
+    return startVisible(env, args);
+  }
+  return startHidden(env, args, reportStart);
 }
 
 async function connect(): Promise<Browser> {
@@ -218,7 +243,7 @@ export async function launch(profile: Profile): Promise<RunningApp> {
       await floawty.stop();
     }
   };
-  const { point, pointAway, click, foreground } = input;
+  const { point, pointAway, click, press, release, foreground } = input;
   return {
     browser,
     home,
@@ -231,6 +256,9 @@ export async function launch(profile: Profile): Promise<RunningApp> {
     point,
     pointAway,
     click,
+    press,
+    release,
     foreground,
+    counts: floawty.counts,
   };
 }

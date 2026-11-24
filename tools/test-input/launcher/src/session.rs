@@ -31,10 +31,7 @@ pub fn handle(shared: &Shared, outside: &Outside, line: &str) -> Handled {
             reply: protocol::ok(""),
             quit: true,
         },
-        Command::Counts => {
-            let (send_input, shell_execute) = shared.counts();
-            replied(protocol::counts_reply(send_input, shell_execute))
-        }
+        Command::Counts => replied(protocol::counts_reply(&shared.counts())),
         Command::Children => {
             let failure = shared.child_error();
             replied(protocol::children_reply(
@@ -114,6 +111,7 @@ fn bring_forward(shared: &Shared, outside: &Outside, foreground: Foreground) -> 
 mod tests {
     use super::*;
     use std::cell::RefCell;
+    use test_input_shared::state::Counter;
     use test_input_shared::table::Owner;
 
     fn shared() -> Shared {
@@ -275,10 +273,14 @@ mod tests {
     #[test]
     fn counts_report_the_swallowed_calls() {
         let shared = shared();
-        shared.add_send_input();
-        shared.add_shell_execute();
-        shared.add_shell_execute();
-        assert_eq!(ask(&shared, "counts"), "ok send_input=1 shell_execute=2");
+        shared.add(Counter::SendInput);
+        shared.add(Counter::ShellExecute);
+        shared.add(Counter::ShellExecute);
+        shared.add(Counter::Drag);
+        assert_eq!(
+            ask(&shared, "counts"),
+            "ok send_input=1 shell_execute=2 drag=1"
+        );
     }
 
     #[test]

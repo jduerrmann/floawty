@@ -40,3 +40,33 @@ test('a click that does not reach the page fails with the point and page, and le
   );
   expect(said.at(-1)).toBe('button left up');
 });
+
+/** A page that records the mouse the way the launcher records its own lines. */
+function mousePage(said: string[]): Page {
+  return {
+    mouse: {
+      move: async (x: number, y: number) => void said.push(`move ${x} ${y}`),
+      down: async () => void said.push('mouse down'),
+      up: async () => void said.push('mouse up'),
+    },
+  } as unknown as Page;
+}
+
+test('a press holds the button down, moves into the page and presses there', async () => {
+  const said: string[] = [];
+  const page = mousePage(said);
+  const input = hiddenInput(1, fakeLauncher(said), () => [page], page);
+  await input.press(page, 12, 7);
+  expect(said).toEqual(['button left down', 'move 12 7', 'mouse down']);
+});
+
+test('a release lets the page and the launcher button go, and does nothing twice', async () => {
+  const said: string[] = [];
+  const page = mousePage(said);
+  const input = hiddenInput(1, fakeLauncher(said), () => [page], page);
+  await input.press(page, 1, 2);
+  said.length = 0;
+  await input.release();
+  await input.release();
+  expect(said).toEqual(['mouse up', 'button left up']);
+});

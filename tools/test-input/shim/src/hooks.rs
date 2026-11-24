@@ -3,20 +3,23 @@ use std::ffi::c_void;
 
 use test_input_shared::hotkey_text::Combo;
 use test_input_shared::inject::load_shim;
+use test_input_shared::post_message::is_drag_request;
 use test_input_shared::process::entry_is_live;
 use test_input_shared::process_image::is_floawty_call;
+use test_input_shared::state::Counter;
 use test_input_shared::table::{HotkeyError, HotkeyTable, Owner};
 use windows_sys::core::{BOOL, PCWSTR, PWSTR};
 use windows_sys::Win32::Foundation::{
     CloseHandle, SetLastError, ERROR_ACCESS_DENIED, ERROR_HOTKEY_ALREADY_REGISTERED,
     ERROR_HOTKEY_NOT_REGISTERED, ERROR_INVALID_FUNCTION, ERROR_NOT_ENOUGH_MEMORY, ERROR_TIMEOUT,
-    HINSTANCE, HWND,
+    HINSTANCE, HWND, LPARAM, WPARAM,
 };
 use windows_sys::Win32::Security::SECURITY_ATTRIBUTES;
 use windows_sys::Win32::System::Threading::{
     CreateProcessW, GetCurrentProcessId, GetCurrentThreadId, ResumeThread, TerminateProcess,
     CREATE_SUSPENDED, PROCESS_INFORMATION, STARTUPINFOW,
 };
+use windows_sys::Win32::UI::WindowsAndMessaging::PostMessageW;
 
 use crate::{context, Context};
 
@@ -43,13 +46,31 @@ pub extern "system" fn unregister_hot_key(hwnd: HWND, id: i32) -> BOOL {
 /// Input from the tested exe must never reach the real desktop; it is counted instead.
 pub extern "system" fn send_input(count: u32, _inputs: *const c_void, _size: i32) -> u32 {
     if let Some(context) = context() {
-        context.shared.add_send_input();
+        context.shared.add(Counter::SendInput);
         // Windows lets the process that sent input take the foreground next.
         if let Ok(mut guard) = context.shared.lock() {
             guard.input.note_send_input();
         }
     }
     count
+}
+
+/// floawty asks Windows for its move loop with a posted caption press; that loop would run on a
+/// desktop nobody sees, so the request is counted and dropped. Every other message is posted.
+pub extern "system" fn post_message(
+    hwnd: HWND,
+    message: u32,
+    wparam: WPARAM,
+    lparam: LPARAM,
+) -> BOOL {
+    match context().filter(|_| is_drag_request(message, wparam)) {
+        Some(context) => {
+            context.shared.add(Counter::Drag);
+            1
+        }
+        // SAFETY: the real function takes the arguments floawty passed.
+        None => unsafe { PostMessageW(hwnd, message, wparam, lparam) },
+    }
 }
 
 /// A page's link to the browser is swallowed, never opened on the maintainer's desktop.
@@ -62,7 +83,7 @@ pub extern "system" fn shell_execute(
     _show: i32,
 ) -> HINSTANCE {
     if let Some(context) = context() {
-        context.shared.add_shell_execute();
+        context.shared.add(Counter::ShellExecute);
     }
     SHELL_EXECUTE_OK as HINSTANCE
 }

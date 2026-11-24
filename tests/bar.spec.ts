@@ -1,7 +1,9 @@
 // The bar over a service: hover, back to the tiles, opacity and the click-through dot.
 import { expect, test, type Page } from '@playwright/test';
-import { freshProfile, launch, type RunningApp } from './app';
-import { ownedPopups, resizeWindow, windowPosition } from './desktop';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { freshProfile, launch, type Profile, type RunningApp } from './app';
+import { moveWindow, ownedPopups, resizeWindow, windowPosition } from './desktop';
 import { dragBy, pointAt } from './real-input';
 
 const EXAMPLE = {
@@ -155,26 +157,89 @@ test("a page's suggestion list stays open when the bar hides", async () => {
   }
 });
 
+/** The grip's centre in the bar page, and where that is as a fraction of floawty's window. */
+async function gripOf(app: RunningApp) {
+  const windowWidth = await app.home.evaluate(() => innerWidth);
+  const windowHeight = await app.home.evaluate(() => innerHeight);
+  const barWidth = await app.bar.evaluate(() => innerWidth);
+  const grip = await app.bar.evaluate(() => {
+    const rect = document.getElementById('grip')?.getBoundingClientRect();
+    return rect ? { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 } : null;
+  });
+  if (!grip) throw new Error('the grip is missing');
+  const offset = Math.floor((windowWidth - barWidth) / 2);
+  return { ...grip, fx: (offset + grip.x) / windowWidth, fy: grip.y / windowHeight };
+}
+
 test('the grip in the bar moves the window over a service', { tag: '@real' }, async () => {
   const app = await launch(freshProfile());
   try {
     await openExample(app);
     await hoverVideo(app);
-    const windowWidth = await app.home.evaluate(() => innerWidth);
-    const windowHeight = await app.home.evaluate(() => innerHeight);
-    const barWidth = await app.bar.evaluate(() => innerWidth);
-    const grip = await app.bar.evaluate(() => {
-      const rect = document.getElementById('grip')?.getBoundingClientRect();
-      return rect ? { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 } : null;
-    });
-    if (!grip) throw new Error('the grip is missing');
-    const offset = Math.floor((windowWidth - barWidth) / 2);
-    pointAt(app.pid, (offset + grip.x) / windowWidth, grip.y / windowHeight);
+    const grip = await gripOf(app);
+    pointAt(app.pid, grip.fx, grip.fy);
     const before = windowPosition(app.pid);
     const after = dragBy(app.pid, -120, -90);
     expect(before.x - after.x).toBeGreaterThan(100);
     expect(before.y - after.y).toBeGreaterThan(70);
   } finally {
+    await app.pointAway();
+    await app.stop();
+  }
+});
+
+/** The floaty rectangle floawty saved, or none before it saved one. */
+function savedFloaty(profile: Profile): { x: number; y: number } | null {
+  try {
+    const saved = JSON.parse(readFileSync(path.join(profile.dataDir, 'settings.json'), 'utf8'));
+    return saved.floaty ?? null;
+  } catch {
+    return null;
+  }
+}
+
+const apart = (a: { x: number; y: number } | null, b: { x: number; y: number }) =>
+  a ? Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y)) : Infinity;
+
+// The launcher's shim swallows the request for Windows' move loop, so a plain window move stands
+// in for the drag; the real drag is the @real test above.
+test('the grip asks for a window move, and floawty settles the window once the button is up', async () => {
+  test.skip(
+    process.env.FLOAWTY_TEST_HIDDEN !== '1',
+    'needs the hidden launcher for the drag count',
+  );
+  const profile = freshProfile();
+  const app = await launch(profile);
+  try {
+    await openExample(app);
+    await hoverVideo(app);
+    const grip = await gripOf(app);
+    await app.point(grip.fx, grip.fy);
+    expect((await app.counts())?.drag).toBe(0);
+    await app.press(app.bar, grip.x, grip.y);
+    await expect.poll(async () => (await app.counts())?.drag).toBe(1);
+
+    // A move close to the work area's top left corner: the snap would pull it into the corner.
+    const corner = await app.home.evaluate(() => {
+      const { availLeft, availTop } = screen as unknown as { availLeft: number; availTop: number };
+      return {
+        x: Math.round(availLeft * devicePixelRatio),
+        y: Math.round(availTop * devicePixelRatio),
+      };
+    });
+    moveWindow(app.pid, corner.x, corner.y + 10);
+    const moved = windowPosition(app.pid);
+    expect(moved).toEqual({ x: corner.x, y: corner.y + 10 });
+    // Several settle ticks (250 ms each) pass; with the button down none may settle the window.
+    await app.home.waitForTimeout(1200);
+    expect(windowPosition(app.pid)).toEqual(moved);
+    expect(apart(savedFloaty(profile), corner)).toBeGreaterThan(1);
+
+    await app.release();
+    await expect.poll(() => apart(savedFloaty(profile), corner)).toBeLessThanOrEqual(1);
+    expect(windowPosition(app.pid)).not.toEqual(moved);
+  } finally {
+    await app.release();
     await app.pointAway();
     await app.stop();
   }

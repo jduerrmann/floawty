@@ -1,4 +1,4 @@
-//! DLL that answers floawty's hotkey, input, cursor, foreground and process-start calls for app tests.
+//! DLL that answers floawty's hotkey, input, cursor, foreground, drag and process-start calls for app tests.
 mod hooks;
 mod input_hooks;
 mod patch;
@@ -82,7 +82,7 @@ fn report(shared: &Shared, patched: u32) -> bool {
     handshake::record(&mut guard.slots, report, &is_process_alive).is_ok()
 }
 
-fn import_patches() -> [ImportPatch; 10] {
+fn import_patches() -> [ImportPatch; 11] {
     let patch = |hook: Hook, dll, replacement: usize| ImportPatch {
         bit: hook.bit(),
         dll,
@@ -129,6 +129,10 @@ fn import_patches() -> [ImportPatch; 10] {
         user32(
             Hook::SetForegroundWindow,
             input_hooks::set_foreground_window as *const () as usize,
+        ),
+        user32(
+            Hook::PostMessageW,
+            hooks::post_message as *const () as usize,
         ),
     ]
 }

@@ -6,6 +6,7 @@ mod job;
 mod run;
 mod session;
 mod spawn;
+mod start_time;
 
 use cli::Mode;
 
@@ -15,8 +16,16 @@ const EXIT_LAUNCHER_FAILED: i32 = 125;
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let code = match cli::parse(&args) {
-        Ok(Mode::Run { timeout, command }) => run::run(timeout, &command),
-        Ok(Mode::Floawty { exe, args }) => floawty::run(&exe, &args),
+        Ok(Mode::Run {
+            visible,
+            timeout,
+            command,
+        }) => run::run(visible, timeout, &command),
+        Ok(Mode::Floawty {
+            report_start,
+            exe,
+            args,
+        }) => floawty::run(&exe, &args, report_start),
         Err(cause) => {
             eprintln!("test-input: {cause}");
             EXIT_LAUNCHER_FAILED

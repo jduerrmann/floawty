@@ -4,13 +4,14 @@ area: process
 tags: [tests, agents, rules, workflow]
 status: active
 created: 2026-11-22
-updated: 2026-11-22
+updated: 2026-11-24
 source: conversation (maintainer, 2026-11-22)
 ---
 
 # App runs go smallest first: red specs, all app tests, measurement last
 
-Amends [[app-tests-ask-first]].
+Amends [[app-tests-ask-first]]. The first-stage yes: superseded by [[app-tests-run-hidden]]
+(hidden runs ask nothing); the stage order stays.
 
 ## Context
 Checking gl-03 took three app runs and about 55 minutes on the maintainer's PC,

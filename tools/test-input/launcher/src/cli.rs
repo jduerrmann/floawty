@@ -1,16 +1,20 @@
 //! The command line of the launcher: its two modes and how a command is passed on.
 use std::time::Duration;
 
-pub const USAGE: &str = "usage:\n  test-input run [--timeout-s N] -- <command> [args...]\n  test-input floawty <floawty.exe> [args...]";
+pub const USAGE: &str = "usage:\n  test-input run [--visible] [--timeout-s N] -- <command> [args...]\n  test-input floawty [--report-start] <floawty.exe> [args...]";
 const DEFAULT_TIMEOUT_S: u64 = 1800;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Mode {
     Run {
+        /// On the real desktop instead of a hidden one; the lock, job and time limit stay.
+        visible: bool,
         timeout: Duration,
         command: Vec<String>,
     },
     Floawty {
+        /// Also report the time from resuming floawty to its visible window.
+        report_start: bool,
         exe: String,
         args: Vec<String>,
     },
@@ -28,10 +32,12 @@ pub fn parse(args: &[String]) -> Result<Mode, String> {
 
 fn parse_run(args: &[String]) -> Result<Mode, String> {
     let mut timeout = Duration::from_secs(DEFAULT_TIMEOUT_S);
+    let mut visible = false;
     let mut args = args.iter();
     while let Some(arg) = args.next() {
         match arg.as_str() {
-            "--" => return run_command(timeout, args.cloned().collect()),
+            "--" => return run_command(visible, timeout, args.cloned().collect()),
+            "--visible" => visible = true,
             "--timeout-s" => timeout = seconds(args.next())?,
             option if option.starts_with("--") => return Err(format!("unknown option {option}")),
             _ => break,
@@ -50,18 +56,24 @@ fn seconds(value: Option<&String>) -> Result<Duration, String> {
     }
 }
 
-fn run_command(timeout: Duration, command: Vec<String>) -> Result<Mode, String> {
+fn run_command(visible: bool, timeout: Duration, command: Vec<String>) -> Result<Mode, String> {
     if command.is_empty() {
         return Err(format!("run needs a command after --\n{USAGE}"));
     }
-    Ok(Mode::Run { timeout, command })
+    Ok(Mode::Run {
+        visible,
+        timeout,
+        command,
+    })
 }
 
 fn parse_floawty(args: &[String]) -> Result<Mode, String> {
-    let (exe, args) = args
+    let report_start = args.first().is_some_and(|arg| arg == "--report-start");
+    let (exe, args) = args[usize::from(report_start)..]
         .split_first()
         .ok_or(format!("floawty needs the path of the exe\n{USAGE}"))?;
     Ok(Mode::Floawty {
+        report_start,
         exe: exe.clone(),
         args: args.to_vec(),
     })
@@ -110,6 +122,7 @@ mod tests {
 
     fn run(timeout_s: u64, command: &str) -> Mode {
         Mode::Run {
+            visible: false,
             timeout: Duration::from_secs(timeout_s),
             command: args(command),
         }
@@ -120,6 +133,40 @@ mod tests {
         assert_eq!(
             parse(&args("run -- cmd /c echo hi")),
             Ok(run(1800, "cmd /c echo hi"))
+        );
+    }
+
+    #[test]
+    fn run_visible_takes_the_same_command_and_timeout_on_the_real_desktop() {
+        let visible = |timeout_s, command| match run(timeout_s, command) {
+            Mode::Run {
+                timeout, command, ..
+            } => Mode::Run {
+                visible: true,
+                timeout,
+                command,
+            },
+            other => other,
+        };
+        assert_eq!(
+            parse(&args("run --visible -- cmd /c echo hi")),
+            Ok(visible(1800, "cmd /c echo hi"))
+        );
+        assert_eq!(
+            parse(&args("run --timeout-s 7 --visible -- x")),
+            Ok(visible(7, "x"))
+        );
+        assert_eq!(
+            parse(&args("run --visible --timeout-s 7 -- x")),
+            Ok(visible(7, "x"))
+        );
+    }
+
+    #[test]
+    fn a_visible_flag_after_the_double_dash_stays_with_the_command() {
+        assert_eq!(
+            parse(&args("run -- tool --visible")),
+            Ok(run(1800, "tool --visible"))
         );
     }
 
@@ -165,6 +212,7 @@ mod tests {
     #[test]
     fn floawty_takes_the_exe_and_the_arguments_for_it() {
         let expected = Mode::Floawty {
+            report_start: false,
             exe: "C:\\x\\floawty.exe".into(),
             args: args("--flag"),
         };
@@ -175,8 +223,36 @@ mod tests {
     }
 
     #[test]
+    fn floawty_reports_its_start_time_when_asked_to() {
+        let expected = Mode::Floawty {
+            report_start: true,
+            exe: "C:\\x\\floawty.exe".into(),
+            args: args("--flag"),
+        };
+        assert_eq!(
+            parse(&args("floawty --report-start C:\\x\\floawty.exe --flag")),
+            Ok(expected)
+        );
+    }
+
+    #[test]
+    fn the_report_flag_after_the_exe_stays_with_floawty() {
+        let Ok(Mode::Floawty {
+            report_start, args, ..
+        }) = parse(&args("floawty x.exe --report-start"))
+        else {
+            panic!("not parsed");
+        };
+        assert!(!report_start);
+        assert_eq!(args, vec!["--report-start".to_string()]);
+    }
+
+    #[test]
     fn floawty_needs_an_exe() {
         assert!(parse(&args("floawty")).unwrap_err().contains("exe"));
+        assert!(parse(&args("floawty --report-start"))
+            .unwrap_err()
+            .contains("exe"));
     }
 
     #[test]

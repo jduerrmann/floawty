@@ -47,6 +47,7 @@ $h = (Get-Process -Id $ProcessId).MainWindowHandle
 $r = New-Object Frame
 [Win]::GetWindowRect($h, [ref]$r) | Out-Null
 if ($Action -eq 'resize') { [Win]::MoveWindow($h, $r.L, $r.T, $A, $B, $true) | Out-Null }
+if ($Action -eq 'move') { [Win]::MoveWindow($h, $A, $B, $r.R - $r.L, $r.B - $r.T, $true) | Out-Null }
 "$($r.L) $($r.T) $($r.R) $($r.B)"
 `;
 
@@ -78,6 +79,11 @@ export function windowRect(pid: number): Rect {
 /** Resizes floawty's window in screen pixels, as Windows does for a drag on its border. */
 export function resizeWindow(pid: number, width: number, height: number): void {
   windowCall(pid, 'resize', width, height);
+}
+
+/** Moves floawty's window so its outer top left is at (x, y), as a plain move without a mouse drag. */
+export function moveWindow(pid: number, x: number, y: number): void {
+  windowCall(pid, 'move', x, y);
 }
 
 // Found by title: once floawty's window is hidden, the process's MainWindowHandle names another one.

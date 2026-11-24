@@ -1,5 +1,6 @@
 //! `floawty`: starts the exe with the shim, then serves the line protocol on stdin and stdout.
 use std::io::BufRead;
+use std::time::Instant;
 
 use test_input_shared::hotkey_text::{wm_hotkey_lparam, Combo};
 use test_input_shared::inject::load_shim;
@@ -15,6 +16,7 @@ use crate::cli::command_line;
 use crate::job::Job;
 use crate::session::{handle, Outside};
 use crate::spawn::{floawty_stdio, start_suspended, Child};
+use crate::start_time::{counted_from, started_line, wait_until_visible, LIMIT};
 use crate::EXIT_LAUNCHER_FAILED;
 
 const SHIM_FILE: &str = "floawty_test_shim.dll";
@@ -24,12 +26,17 @@ struct Started {
     shared: Shared,
     job: Job,
     child: Child,
+    /// The start clock: process start plus the time floawty was held for the shim.
+    counted_from: Instant,
 }
 
-pub fn run(exe: &str, args: &[String]) -> i32 {
+pub fn run(exe: &str, args: &[String], report_start: bool) -> i32 {
     match start(exe, args) {
         Ok(started) => {
             println!("pid {}", started.child.pid);
+            if report_start {
+                println!("{}", started_line(time_to_window(&started)));
+            }
             serve(started)
         }
         Err(cause) => {
@@ -55,7 +62,9 @@ fn start(exe: &str, args: &[String]) -> Result<Started, String> {
     let arguments: Vec<String> = std::iter::once(exe.to_string())
         .chain(args.iter().cloned())
         .collect();
+    let created = Instant::now();
     let child = start_suspended(&command_line(&arguments), None, floawty_stdio()?)?;
+    let suspended = Instant::now();
     let loaded = job
         .assign(child.process)
         .and_then(|()| load_shim(&shared, child.process, child.pid, &shim));
@@ -64,7 +73,13 @@ fn start(exe: &str, args: &[String]) -> Result<Started, String> {
         return Err(cause);
     }
     child.resume();
-    Ok(Started { shared, job, child })
+    let counted_from = counted_from(created, suspended, Instant::now());
+    Ok(Started {
+        shared,
+        job,
+        child,
+        counted_from,
+    })
 }
 
 fn shim_path() -> Result<std::path::PathBuf, String> {
@@ -75,6 +90,17 @@ fn shim_path() -> Result<std::path::PathBuf, String> {
         true => Ok(shim),
         false => Err(format!("the shim DLL is missing: {}", shim.display())),
     }
+}
+
+/// How long floawty took from its process start to showing its main window, held time excluded.
+fn time_to_window(started: &Started) -> Result<u64, String> {
+    let visible = || match started.child.wait(0) {
+        true => Err("floawty exited before it showed a window".to_string()),
+        false => Ok(find_on_desktop(&|pid| pid == started.child.pid)
+            .main
+            .is_some()),
+    };
+    wait_until_visible(started.counted_from, LIMIT, &visible)
 }
 
 /// Answers commands until `quit` or the end of stdin, then ends floawty and everything it started.

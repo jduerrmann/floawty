@@ -8,6 +8,7 @@ import {
   parseCounts,
   parsePidLine,
   parseReply,
+  parseStartedLine,
 } from './launcher-lines';
 
 test('the first line names floawty by its pid', () => {
@@ -35,8 +36,12 @@ test('an ok reply gives its detail, an error reply throws its cause', () => {
 });
 
 test('counts are read from their reply', () => {
-  expect(parseCounts('send_input=1 shell_execute=2')).toEqual({ sendInput: 1, shellExecute: 2 });
-  expect(() => parseCounts('send_input=1')).toThrow('send_input=1');
+  expect(parseCounts('send_input=1 shell_execute=2 drag=3')).toEqual({
+    sendInput: 1,
+    shellExecute: 2,
+    drag: 3,
+  });
+  expect(() => parseCounts('send_input=1 shell_execute=2')).toThrow('send_input=1');
 });
 
 test('lines are handed out in the order they came, before or after they are asked for', async () => {
@@ -74,4 +79,15 @@ test('the cursor, button and foreground commands are the lines the launcher pars
   expect(buttonCommand('left', true)).toBe('button left down');
   expect(buttonCommand('right', false)).toBe('button right up');
   expect(foregroundCommand('sign-in')).toBe('foreground sign-in');
+});
+
+test('the started line gives the milliseconds from resume to window', () => {
+  expect(parseStartedLine('started 183')).toBe(183);
+});
+
+test('a started line with an error fails with the cause, any other line is shown', () => {
+  expect(() => parseStartedLine('error floawty exited before it showed a window')).toThrow(
+    'floawty exited before it showed a window',
+  );
+  expect(() => parseStartedLine('started soon')).toThrow('started soon');
 });

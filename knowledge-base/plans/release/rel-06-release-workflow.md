@@ -3,7 +3,7 @@ type: plan
 tags: [package, release, dist]
 status: planned
 created: 2026-11-20
-updated: 2026-11-20
+updated: 2026-11-24
 source: visual plan "Phase 3 – Release-Pipeline", approved 2026-11-20; advisor review
 ---
 
@@ -39,6 +39,8 @@ with the CHANGELOG section once every asset is attached.
       action runs in the signing job; the workflow can write releases only.
 - [ ] The release holds portable, setup, `SHA256SUMS.txt`, `latest.json` and the
       signature; checksums verify; publishing happens after all uploads.
+- [ ] The job lists the files inside portable and setup; none is the test launcher
+      or shim from `tools/test-input` ([[app-tests-run-hidden]]).
 - [ ] `vX.Y.Z-rc.N` tags publish as GitHub pre-releases (versions bumped to the rc,
       CHANGELOG section `[X.Y.Z-rc.N]`); the stable updater endpoint ignores them.
 

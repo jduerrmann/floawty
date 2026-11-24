@@ -14,6 +14,12 @@ export interface AppInput {
   click: (fx: number, fy: number) => Promise<void>;
   /** Puts another window or none in front; floawty's own states only exist in a hidden run. */
   foreground: (name: ForegroundName) => Promise<void>;
+  /**
+   * Holds the left button down on a page at a point of that page, with the cursor already set by
+   * `point`; hidden runs only. `release` lets it go again.
+   */
+  press: (page: Page, x: number, y: number) => Promise<void>;
+  release: () => Promise<void>;
   /** Ends what the input started. */
   stop: () => void;
 }
@@ -60,6 +66,17 @@ async function clickPage(page: Page, fx: number, fy: number): Promise<void> {
   if (!arrived) throw new Error('no pointerdown arrived');
 }
 
+/** The cursor floawty itself sees in a hidden run; pages see the mouse only over CDP. */
+function launcherPointer(
+  pid: number,
+  launcher: LauncherInput,
+): Pick<AppInput, 'point' | 'pointAway'> {
+  return {
+    point: async (fx, fy) => launcher.cursor(screenPoint(windowRect(pid), fx, fy)),
+    pointAway: async () => launcher.cursor(awayPoint(windowRect(pid))),
+  };
+}
+
 export function hiddenInput(
   pid: number,
   launcher: LauncherInput,
@@ -67,9 +84,9 @@ export function hiddenInput(
   home: Page,
 ): AppInput {
   const where = (fx: number, fy: number) => screenPoint(windowRect(pid), fx, fy);
+  let pressed: Page | undefined;
   return {
-    point: async (fx, fy) => launcher.cursor(where(fx, fy)),
-    pointAway: async () => launcher.cursor(awayPoint(windowRect(pid))),
+    ...launcherPointer(pid, launcher),
     click: async (fx, fy) => {
       const point = where(fx, fy);
       const page = filling(pages, home);
@@ -83,6 +100,22 @@ export function hiddenInput(
         throw new Error(`the click at ${at} did not reach the page ${page.url()}: ${cause}`, {
           cause: error,
         });
+      } finally {
+        await launcher.button('left', false);
+      }
+    },
+    press: async (page, x, y) => {
+      await launcher.button('left', true);
+      pressed = page;
+      await page.mouse.move(x, y);
+      await page.mouse.down();
+    },
+    release: async () => {
+      const page = pressed;
+      if (!page) return;
+      pressed = undefined;
+      try {
+        await page.mouse.up();
       } finally {
         await launcher.button('left', false);
       }

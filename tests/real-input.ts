@@ -110,6 +110,13 @@ async function until(check: () => boolean, what: string): Promise<void> {
   }
 }
 
+// The grip substitute swallows the OS drag in the launcher's shim; a visible run has none.
+function unsupported(name: string): () => Promise<never> {
+  return async () => {
+    throw new Error(`${name} needs the hidden launcher`);
+  };
+}
+
 /** A visible run's cursor, click and foreground: the real ones, on the maintainer's screen. */
 export function visibleInput(pid: number): AppInput {
   let other: ChildProcess | undefined;
@@ -136,6 +143,8 @@ export function visibleInput(pid: number): AppInput {
       clickAt(otherPid, 0.5, 0.5);
       await until(() => windowFlags(otherPid, OTHER_TITLE).foreground, 'the other window in front');
     },
+    press: unsupported('press'),
+    release: unsupported('release'),
     // A cursor left over floawty would show the next test's bar before it asks for it.
     stop: () => {
       other?.kill();

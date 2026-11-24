@@ -37,9 +37,10 @@ only for the independent review
   test cases with expected results, checks, and open points not to guess. The lead
   keeps understanding the code; it never delegates that away.
 - Only one agent at a time builds the release app or runs app tests: they share
-  `src-tauri/target`, the debug port 9334 and the real mouse cursor. Cargo checks of
-  two agents only wait for each other. `coder` runs `npm run check`; the lead runs
-  the app tests, after asking the maintainer (AGENTS.md rule 10).
+  `src-tauri/target` and the debug port 9334; the run lock refuses a second app run.
+  Cargo checks of two agents only wait for each other. `coder` runs `npm run check`;
+  the lead runs the app tests – hidden ones without asking, the rest after the
+  maintainer's yes (AGENTS.md rule 10).
 - Call `advisor` only: before a hard-to-reverse decision (stored formats, IPC and
   capabilities, navigation guard, adapter contract, dependencies, rules), to check a
   plan map before multi-package work when the plan contains such a hard-to-reverse

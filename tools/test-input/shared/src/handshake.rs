@@ -1,6 +1,6 @@
 //! What the shim reports about itself, and whether the launcher accepts it.
 
-pub const STATE_VERSION: u32 = 2;
+pub const STATE_VERSION: u32 = 3;
 
 /// The functions the shim replaces in floawty's import table, one bit each.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -15,10 +15,11 @@ pub enum Hook {
     GetForegroundWindow,
     GetGUIThreadInfo,
     SetForegroundWindow,
+    PostMessageW,
 }
 
 impl Hook {
-    pub const ALL: [Hook; 10] = [
+    pub const ALL: [Hook; 11] = [
         Hook::RegisterHotKey,
         Hook::UnregisterHotKey,
         Hook::SendInput,
@@ -29,6 +30,7 @@ impl Hook {
         Hook::GetForegroundWindow,
         Hook::GetGUIThreadInfo,
         Hook::SetForegroundWindow,
+        Hook::PostMessageW,
     ];
 
     pub fn bit(self) -> u32 {
@@ -47,6 +49,7 @@ impl Hook {
             Hook::GetForegroundWindow => "GetForegroundWindow",
             Hook::GetGUIThreadInfo => "GetGUIThreadInfo",
             Hook::SetForegroundWindow => "SetForegroundWindow",
+            Hook::PostMessageW => "PostMessageW",
         }
     }
 }
@@ -140,15 +143,16 @@ mod tests {
 
     #[test]
     fn every_hook_has_its_own_bit_and_a_name() {
-        assert_eq!(all().count_ones(), 10);
+        assert_eq!(all().count_ones(), 11);
         assert_eq!(Hook::SendInput.name(), "SendInput");
         assert_eq!(Hook::CreateProcessW.name(), "CreateProcessW");
         assert_eq!(Hook::GetCursorPos.name(), "GetCursorPos");
         assert_eq!(Hook::SetForegroundWindow.name(), "SetForegroundWindow");
+        assert_eq!(Hook::PostMessageW.name(), "PostMessageW");
     }
 
     #[test]
-    fn all_ten_patched_with_the_right_version_is_accepted() {
+    fn all_eleven_patched_with_the_right_version_is_accepted() {
         assert_eq!(check(STATE_VERSION, report(STATE_VERSION, all())), Ok(()));
     }
 

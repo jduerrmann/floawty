@@ -2,6 +2,8 @@
 export interface Counts {
   sendInput: number;
   shellExecute: number;
+  /** Requests for Windows' move loop (a press on a drag region) that were swallowed. */
+  drag: number;
 }
 
 /** The first line of `test-input floawty`: floawty's pid, or the cause it could not start. */
@@ -10,6 +12,14 @@ export function parsePidLine(line: string): number {
   const pid = /^pid (\d+)$/.exec(line)?.[1];
   if (pid === undefined) throw new Error(`unexpected first line of the launcher: ${line}`);
   return Number(pid);
+}
+
+/** The second line of `test-input floawty --report-start`: the start time in ms, or the cause. */
+export function parseStartedLine(line: string): number {
+  if (line.startsWith('error ')) throw new Error(line.slice('error '.length));
+  const ms = /^started (\d+)$/.exec(line)?.[1];
+  if (ms === undefined) throw new Error(`unexpected start report of the launcher: ${line}`);
+  return Number(ms);
 }
 
 /** The detail of an `ok` reply; an `error` reply throws its cause. */
@@ -21,9 +31,13 @@ export function parseReply(line: string): string {
 }
 
 export function parseCounts(detail: string): Counts {
-  const match = /^send_input=(\d+) shell_execute=(\d+)$/.exec(detail);
+  const match = /^send_input=(\d+) shell_execute=(\d+) drag=(\d+)$/.exec(detail);
   if (!match) throw new Error(`unexpected counts of the launcher: ${detail}`);
-  return { sendInput: Number(match[1]), shellExecute: Number(match[2]) };
+  return {
+    sendInput: Number(match[1]),
+    shellExecute: Number(match[2]),
+    drag: Number(match[3]),
+  };
 }
 
 /** The pids in the detail of a `children` reply. */
