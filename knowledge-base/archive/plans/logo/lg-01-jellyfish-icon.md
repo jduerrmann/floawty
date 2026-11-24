@@ -25,8 +25,8 @@ EXE, taskbar and README show floawty's jellyfish.
 - [x] It works on a light and a dark taskbar (half the area at 3 : 1).
 - [x] Own SVG only: no font, raster source or package.
 - [x] EXE and taskbar show the new icon.
-- [ ] The README shows the logo for GitHub's light and dark theme (verified locally;
-      to be seen on GitHub after a push).
+- [x] The README shows the logo for GitHub's light and dark theme (verified locally;
+      seen on GitHub in light and dark after the push, 2026-11-24).
 
 ## Tests first
 - `src/app-icon.test.ts`: frame sizes, config PNG sizes, one silhouette in all
@@ -90,5 +90,5 @@ config, outside this package).
 - npm run check, build, build:test-input: passed. `smoke:hidden`: 47/47 green.
 
 ## Resume here
-Done; committed to `main` and archived. Left: see the README logo on GitHub in light
-and dark after the push.
+Done; committed to `main` and archived; the README logo shows on GitHub in light and
+dark.
