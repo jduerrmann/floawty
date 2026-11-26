@@ -33,6 +33,8 @@ export interface OverlayState extends Preferences {
   zoom: boolean;
   alwaysOnTop: boolean;
   pageProblems: PageProblem[];
+  /** The service whose page has not started yet; its tile shows that it opens. */
+  opening: string | null;
 }
 
 export type PageProblem = 'controls-missing' | 'player-missing';

@@ -1,10 +1,11 @@
 //! floawty's own light or dark: the pages' startup script and window mode's title bar.
 //! Never Tauri's theme API: it would recolour the profile all services share.
-use tauri::AppHandle;
+use tauri::window::Color;
+use tauri::{AppHandle, Manager};
 use windows_sys::Win32::Foundation::{HWND, LPARAM, LRESULT, WPARAM};
 
 use crate::logbook;
-use crate::overlay;
+use crate::overlay::{self, Overlay};
 use crate::settings::Theme;
 
 // The root element does not exist yet when the script runs; a reload keeps the latest choice.
@@ -40,6 +41,23 @@ fn forced_dark(theme: Theme) -> Option<bool> {
 
 fn title_bar_dark(theme: Theme, windows_dark: bool) -> bool {
     forced_dark(theme).unwrap_or(windows_dark)
+}
+
+/// Under a service until its page draws: `--ground-1` of floawty's own pages, never white.
+pub fn ground(app: &AppHandle) -> Color {
+    let theme = app.state::<Overlay>().settings().theme;
+    let windows_dark = overlay::main_window(app)
+        .theme()
+        .is_ok_and(|theme| theme == tauri::Theme::Dark);
+    ground_colour(title_bar_dark(theme, windows_dark))
+}
+
+fn ground_colour(dark: bool) -> Color {
+    if dark {
+        Color(0x0f, 0x12, 0x26, 0xff)
+    } else {
+        Color(0xec, 0xef, 0xfa, 0xff)
+    }
 }
 
 /// Colours the main window's title bar and keeps it so; main thread only.
@@ -128,6 +146,17 @@ unsafe fn redraw(hwnd: HWND) {
 mod tests {
     use super::*;
     use crate::settings::Theme;
+
+    fn hex(Color(r, g, b, _): Color) -> String {
+        format!("#{r:02x}{g:02x}{b:02x}")
+    }
+
+    #[test]
+    fn the_ground_under_a_service_matches_the_pages_ground() {
+        let tokens = include_str!("../../src/tokens.css");
+        let (light, dark) = (hex(ground_colour(false)), hex(ground_colour(true)));
+        assert!(tokens.contains(&format!("--ground-1: light-dark({light}, {dark});")));
+    }
 
     #[test]
     fn only_a_chosen_theme_overrides_windows() {

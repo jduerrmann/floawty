@@ -14,7 +14,7 @@ use crate::opacity;
 use crate::page::{self, Problem};
 use crate::persistence;
 use crate::service;
-use crate::settings::{Hotkeys, Language, Settings, Shorts, Theme};
+use crate::settings::{Hotkeys, Language, OpenService, Settings, Shorts, Theme};
 use crate::sign_in_window;
 
 mod settle;
@@ -34,6 +34,8 @@ pub struct Overlay {
     /// Size after the last settle, to tell which edge the user dragged.
     settled: Mutex<Option<(u32, u32)>>,
     page_problems: Mutex<Vec<Problem>>,
+    /// The service whose webview waits, out of sight, for its first document.
+    opening: Mutex<Option<OpenService>>,
 }
 
 #[derive(Clone, serde::Serialize)]
@@ -55,6 +57,7 @@ pub struct OverlayState {
     pub zoom: bool,
     pub always_on_top: bool,
     pub page_problems: Vec<Problem>,
+    pub opening: Option<String>,
 }
 
 impl Overlay {
@@ -70,6 +73,7 @@ impl Overlay {
             turned_to: Mutex::new(None),
             settled: Mutex::new(None),
             page_problems: Mutex::new(Vec::new()),
+            opening: Mutex::new(None),
         }
     }
 
@@ -87,6 +91,24 @@ impl Overlay {
 
     pub fn set_settings_open(&self, open: bool) {
         *self.settings_open.lock().unwrap() = open;
+    }
+
+    pub fn opening(&self) -> Option<String> {
+        self.opening.lock().unwrap().as_ref().map(|s| s.id.clone())
+    }
+
+    /// Starts opening `service`; false while another one is still opening.
+    pub fn start_opening(&self, service: OpenService) -> bool {
+        let mut opening = self.opening.lock().unwrap();
+        if opening.is_some() {
+            return false;
+        }
+        *opening = Some(service);
+        true
+    }
+
+    pub fn end_opening(&self) -> Option<OpenService> {
+        self.opening.lock().unwrap().take()
     }
 
     /// Takes the page's current problems (sorted); returns whether they changed.
@@ -117,6 +139,7 @@ impl Overlay {
             zoom: settings.zoom,
             always_on_top: settings.always_on_top,
             page_problems: self.page_problems.lock().unwrap().clone(),
+            opening: self.opening(),
         }
     }
 }

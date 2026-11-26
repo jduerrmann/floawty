@@ -19,6 +19,7 @@
   color: #ffffff;
   font: 600 12px var(--font);
   cursor: pointer;
+  transition: opacity var(--ease);
 }
 
 .tile-face {
@@ -165,6 +166,39 @@
 
   :root:not([data-still]) .tiles li:hover .tile-symbol {
     transform: translate(var(--float-x, 0%), var(--float-y, 0%)) scale(1.06);
+  }
+}
+
+/* An opening service's tile shows a ring; the others fade on their buttons, keeping the li's z-index transition. */
+.tiles[data-opening] li:not(:has(.tile[aria-busy])) :is(.tile, .tile-more) {
+  opacity: 0.4;
+}
+
+.tiles[data-opening] .tile {
+  cursor: progress;
+}
+
+.tile-busy {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 14px;
+  height: 14px;
+  box-sizing: border-box;
+  border: 2px solid rgb(255 255 255 / 35%);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+}
+
+@keyframes tile-busy {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-still]) .tile-busy {
+    animation: tile-busy 0.8s linear infinite;
   }
 }
 

@@ -3,7 +3,7 @@ type: research
 tags: [mvp, performance, network, services]
 status: active
 created: 2026-11-18
-updated: 2026-11-24
+updated: 2026-11-26
 source: npm run measure and maintainer checks, 2026-11-18
 ---
 
@@ -41,6 +41,27 @@ Budgets: [[stack-by-spike]]; spike values: [[stack-spike-results]].
   YouTube 1080p 738 MB at 61.5 fps, hidden 730 MB / 0.05 % CPU; within budget.
 - Zoom (mvp-10): live-checked by the maintainer on all services, works everywhere,
   no black picture with protected video.
+
+## Opening YouTube: floawty vs Chrome (2026-11-26)
+
+Hidden, fresh profiles, Chrome 158.0.8127.38 vs WebView2 158.0.4370.33, build `d0bfdd7`,
+medians of 3, ms from the click (page clock); probe `tests/measure/open-compare.spec.ts`.
+
+| Case | Page starts | First paint | Largest paint | Loaded |
+|---|---:|---:|---:|---:|
+| floawty tile, first visit | 55 | 519 | 1079 | 1207 |
+| floawty tile, second visit | 46 | 918 | 920 | 822 |
+| floawty without GPU, first visit | 53 | 508 | 1072 | 1389 |
+| Chrome new tab, first visit | 3 | 456 | 1244 | 1227 |
+| Chrome new tab, second visit | 3 | 487 | 1107 | 981 |
+| Chrome same tab, first visit | 4 | 440 | 1160 | 1178 |
+
+- floawty is as fast as Chrome when both start cold; its own share before the page
+  starts is about 50 ms. Second-visit first paint is bimodal in both (≈ 0.27 s or
+  ≈ 0.93 s); Chrome same-tab second visits are skewed by the probe's about:blank reset.
+- The maintainer's ~3 s on a logged-in profile come from the page itself (not measured).
+- After of-01 (A/B, three runs): paints unchanged against `d0bfdd7` (first paint 555 vs
+  556 ms, largest 1188 vs 1154 ms); cold load events spread 1.2–1.7 s in every build.
 
 ## Network while idle
 

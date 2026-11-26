@@ -77,27 +77,33 @@ function wire(language: Language, current: () => OverlayState): void {
   for (const [id, key] of labels) label(button(id), language, key);
 }
 
+// The service in sight; while one opens the tiles are still in sight, though back cancels it.
+function visibleService(state: OverlayState): string | null {
+  return state.opening === null ? state.serviceId : null;
+}
+
 function showControls(language: Language, state: OverlayState): void {
   const floaty = state.mode === 'floaty';
+  const service = visibleService(state);
   controls.hidden = state.clickThrough;
-  button('back').hidden = state.serviceId === null;
+  button('back').hidden = state.serviceId === null && state.opening === null;
   const opacity = document.getElementById('opacity') as HTMLInputElement;
   opacity.value = String(Math.round(state.opacity * 100));
   opacity.disabled = !floaty;
   button('click-through').disabled = !floaty;
   button('on-top').disabled = !floaty;
   button('on-top').setAttribute('aria-pressed', String(floaty && state.alwaysOnTop));
-  button('shorts').hidden = !offersShorts(state.serviceId);
+  button('shorts').hidden = !offersShorts(service);
   button('shorts').setAttribute('aria-pressed', String(state.shorts.auto));
   const controlsMissing = state.pageProblems.includes('controls-missing');
   button('shorts').classList.toggle('problem', controlsMissing);
   label(button('shorts'), language, controlsMissing ? 'shortsProblem' : 'shortsAuto');
   const playerMissing = state.pageProblems.includes('player-missing');
-  button('video-only').hidden = !offersVideoOnly(state.serviceId);
+  button('video-only').hidden = !offersVideoOnly(service);
   button('video-only').setAttribute('aria-pressed', String(state.videoOnly));
   button('video-only').classList.toggle('problem', playerMissing);
   label(button('video-only'), language, playerMissing ? 'videoOnlyProblem' : 'videoOnly');
-  button('zoom').hidden = state.serviceId === null;
+  button('zoom').hidden = service === null;
   button('zoom').setAttribute('aria-pressed', String(state.zoom));
   label(button('mode'), language, floaty ? 'toWindowMode' : 'toFloatyView');
   button('settings').setAttribute('aria-pressed', String(state.settingsOpen));
@@ -133,7 +139,10 @@ function startBar(state: OverlayState, language: Language): StateView {
     showClickThrough(next);
     document.body.classList.toggle('docked', next.mode === 'window');
     // Over a visible service the bar is dark glass, whatever Windows uses (the page is no backdrop).
-    document.body.classList.toggle('over-service', next.serviceId !== null && !next.settingsOpen);
+    document.body.classList.toggle(
+      'over-service',
+      visibleService(next) !== null && !next.settingsOpen,
+    );
     reportWidth();
   };
 }

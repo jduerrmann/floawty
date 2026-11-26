@@ -3,7 +3,7 @@ type: moc
 tags: [plans]
 status: active
 created: 2026-11-16
-updated: 2026-11-24
+updated: 2026-11-26
 source: conversation
 ---
 
@@ -14,6 +14,7 @@ Single resume entry for multi-session work. Rules: [[planning]].
 | Plan | Outcome | Map |
 |---|---|---|
 | release | floawty 0.1.0 public: CI, installer and portable, checksums, updates, settings export | [[plan-release]] |
+| open-faster | A tile shows at once that it opens; services can stay awake for a fast return | [[plan-open-faster]] |
 
 Archived: stack spike ([[plan-stack-spike]]), done 2026-11-17; MVP ([[plan-mvp]]), done
 2026-11-20; always on top as a switch ([[plan-on-top]]), done 2026-11-20; short feeds

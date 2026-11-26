@@ -6,6 +6,9 @@ User-facing changes, in plain language. Format based on
 
 ## [Unreleased]
 
+- A tile shows at once that its service is opening, the other tiles step back, and a
+  second click no longer starts the opening again. Until the page draws, the area
+  stays in floawty's own colour instead of flashing white.
 - floawty comes as an installer and as a portable exe, both without admin rights and
   sharing the same settings and logins. Uninstalling keeps them unless you tick
   "delete app data". If WebView2 is missing, the installer fetches it from Microsoft
