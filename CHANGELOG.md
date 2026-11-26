@@ -6,6 +6,10 @@ User-facing changes, in plain language. Format based on
 
 ## [Unreleased]
 
+- floawty comes as an installer and as a portable exe, both without admin rights and
+  sharing the same settings and logins. Uninstalling keeps them unless you tick
+  "delete app data". If WebView2 is missing, the installer fetches it from Microsoft
+  and the portable build says so with a link instead of failing silently.
 - A change right after floawty starts, such as switching to window mode, now always
   shows in the bar and on the start screen instead of being missed now and then.
 - A new switch turns floawty's animations off: tiles then only glow, and from the next

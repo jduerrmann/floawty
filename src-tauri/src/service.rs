@@ -146,7 +146,7 @@ fn navigation_guard(app: AppHandle, allowed: Vec<String>) -> impl Fn(&Url) -> bo
     }
 }
 
-fn open_in_browser(url: &Url) {
+pub fn open_in_browser(url: &Url) {
     use windows_sys::Win32::UI::Shell::ShellExecuteW;
     use windows_sys::Win32::UI::WindowsAndMessaging::SW_SHOWNORMAL;
     if !matches!(url.scheme(), "http" | "https" | "mailto") {

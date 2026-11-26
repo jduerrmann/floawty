@@ -47,7 +47,9 @@ else, and can even let your mouse click right through it.
 
 Once released: download the latest version from the
 [Releases](../../releases) page – portable build or installer, no admin rights needed.
-Windows 10 and 11 only for now.
+Windows 10 and 11 only for now. Both use the same settings and logins. If WebView2 is
+missing (rare on Windows 10 and 11), the installer downloads it from Microsoft; the
+portable build shows a link to Microsoft's download page instead.
 
 ## Contributing
 

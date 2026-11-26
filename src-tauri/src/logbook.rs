@@ -10,9 +10,8 @@ use crate::paths;
 
 const SECONDS_PER_DAY: u64 = 86_400;
 
-pub fn startup_message(app_version: &str, webview_version: Option<&str>) -> String {
-    let webview = webview_version.unwrap_or("unknown");
-    format!("floawty {app_version} started, WebView2 {webview}")
+pub fn startup_message(app_version: &str, build: &str, webview_version: &str) -> String {
+    format!("floawty {app_version} ({build}) started, WebView2 {webview_version}")
 }
 
 /// Prefixes a message with its UTC time; `unix_seconds` is UTC.
@@ -73,23 +72,14 @@ mod tests {
     use super::{stamped, startup_message};
 
     #[test]
-    fn names_time_app_and_webview_versions() {
+    fn names_time_app_version_build_and_webview_version() {
         let line = stamped(
             1_794_934_800,
-            &startup_message("0.1.0", Some("157.0.4341.46")),
+            &startup_message("0.1.0", "portable", "157.0.4341.46"),
         );
         assert_eq!(
             line,
-            "2026-11-17T17:00:00Z floawty 0.1.0 started, WebView2 157.0.4341.46"
-        );
-    }
-
-    #[test]
-    fn says_so_when_webview_version_is_unknown() {
-        let line = stamped(0, &startup_message("0.1.0", None));
-        assert_eq!(
-            line,
-            "1970-01-01T00:00:00Z floawty 0.1.0 started, WebView2 unknown"
+            "2026-11-17T17:00:00Z floawty 0.1.0 (portable) started, WebView2 157.0.4341.46"
         );
     }
 

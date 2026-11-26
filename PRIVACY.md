@@ -27,6 +27,9 @@ updates of its own parts from Microsoft (see below).
   [WebView2 data and privacy](https://learn.microsoft.com/microsoft-edge/webview2/concepts/data-privacy).
 - Protected video (Netflix, Prime Video, Disney+, …) uses the DRM modules of
   WebView2, which WebView2 keeps up to date itself; floawty downloads nothing for it.
+- If WebView2 is missing, floawty's installer downloads Microsoft's WebView2
+  installer from Microsoft and runs it. The portable build downloads nothing; it
+  offers to open Microsoft's download page in your browser.
 - "Reset all data" in the settings deletes your settings, your own tiles, the local
   log and all stored logins, then restarts floawty.
 

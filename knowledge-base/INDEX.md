@@ -2,7 +2,7 @@
 type: moc
 tags: [index]
 created: 2026-11-16
-updated: 2026-11-24
+updated: 2026-11-26
 source: conversation
 ---
 
@@ -30,7 +30,7 @@ Vault conventions and budgets: `CLAUDE.md` in this folder.
 | "Video only" | [[tech-video-only]], [[video-only-lays-player-over-page]], [[shorts-video-only-fills-with-the-list]] |
 | Overlay UI, hotkeys, tiles, Shorts behavior | [[mvp-scope-and-controls]], [[redrawn-service-logos]], [[glass-design-follows-windows-theme]], [[floawty-theme-choice]], [[tiles-tilt-with-light]], [[home-stays-awake-under-a-service]], [[overlay-controls]] |
 | Logins, DRM download, network | [[google-login-honest-user-agent-first]], [[widevine-on-demand-with-notice]] |
-| Releases, signing, updates | [[release-pipeline]], [[updates-by-tauri-updater]], [[unsigned-first-then-signpath]] |
+| Releases, signing, updates | [[tech-distribution]], [[release-pipeline]], [[updates-by-tauri-updater]], [[unsigned-first-then-signpath]] |
 | Delegating work, independent review | root `CLAUDE.md`, [[advisor-and-coder-subagents]] |
 | Writing a note | `CLAUDE.md` in this folder, `templates/` |
 
@@ -58,4 +58,5 @@ Vault conventions and budgets: `CLAUDE.md` in this folder.
 - [[tech-bar-and-settings]] – hover bar over the service, settings panel, hotkey changes, EN/DE, reset all data
 - [[tech-shorts]] – Shorts auto mode, page scripts asked by floawty, turning the overlay
 - [[tech-video-only]] – "video only": player over the page by styles, rules for YouTube and Twitch, warning dot
+- [[tech-distribution]] – setup and portable build, shared data folders, uninstall, WebView2 check at start
 - [[tech-app-tests]] – app tests and measurements on a hidden desktop: launcher, shim, scripts, `@real`

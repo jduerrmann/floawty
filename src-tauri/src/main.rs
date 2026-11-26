@@ -3,6 +3,7 @@
 
 mod bar;
 mod commands;
+mod distribution;
 mod geometry;
 mod hotkeys;
 mod hover;
@@ -67,7 +68,7 @@ fn add_bar_and_last_service(app: &AppHandle, last: Option<settings::OpenService>
     });
 }
 
-fn setup(app: &AppHandle) -> tauri::Result<()> {
+fn setup(app: &AppHandle, webview: &str) -> tauri::Result<()> {
     if let Err(error) = reset_if_requested(app) {
         logbook::write(
             app,
@@ -83,8 +84,8 @@ fn setup(app: &AppHandle) -> tauri::Result<()> {
         return Err(error);
     }
     let version = app.package_info().version.to_string();
-    let webview = tauri::webview_version().ok();
-    logbook::write(app, &logbook::startup_message(&version, webview.as_deref()));
+    let build = distribution::Build::current().name();
+    logbook::write(app, &logbook::startup_message(&version, build, webview));
     if !app.state::<Overlay>().settings().graphics_acceleration {
         logbook::write(app, "graphics acceleration is off");
     }
@@ -109,6 +110,10 @@ fn setup(app: &AppHandle) -> tauri::Result<()> {
 }
 
 fn main() {
+    let Some(webview) = distribution::installed_webview(tauri::webview_version().ok()) else {
+        distribution::explain_missing_webview();
+        return;
+    };
     tauri::Builder::default()
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .invoke_handler(tauri::generate_handler![
@@ -135,7 +140,7 @@ fn main() {
             commands::reset_all_data,
             commands::quit
         ])
-        .setup(|app| Ok(setup(app.handle())?))
+        .setup(move |app| Ok(setup(app.handle(), &webview)?))
         .run(tauri::generate_context!())
         .expect("error while running floawty");
 }
