@@ -1,10 +1,14 @@
-# `npm run check` and the release build, for every pull request and every push to main.
+# `npm run check` for every pull request and every push to main that touches more than notes.
+# No release build and no app tests: `npm run verify` runs both locally before a merge or
+# release (WebView2 cannot create its window on the runner's hidden desktop, 0x80070578).
 name: CI
 
 on:
   pull_request:
+    paths-ignore: ['**.md', 'knowledge-base/**', '.claude/plans/**']
   push:
     branches: [main]
+    paths-ignore: ['**.md', 'knowledge-base/**', '.claude/plans/**']
 
 permissions:
   contents: read
@@ -17,7 +21,7 @@ concurrency:
 jobs:
   verify:
     runs-on: windows-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -37,7 +41,7 @@ jobs:
           workspaces: |
             src-tauri
             tools/test-input
-          # Red runs are expected while CI settles; without this each one builds cold.
+          # A red run still saves the cache, so the fix after it builds warm.
           cache-on-failure: true
 
       - run: npm ci
@@ -46,7 +50,3 @@ jobs:
       # Cargo has no --locked through the npm scripts; check resolved both workspaces, so a stale lockfile shows here.
       - name: Cargo lockfiles unchanged
         run: git diff --exit-code -- src-tauri/Cargo.lock tools/test-input/Cargo.lock
-
-      # No app tests here: WebView2 cannot create its window on the runner's hidden desktop
-      # (0x80070578), so `npm run verify` runs them locally before a merge or release.
-      - run: npm run build

@@ -3,7 +3,7 @@ type: plan
 tags: [package, release, dist]
 status: in-progress
 created: 2026-11-20
-updated: 2026-11-24
+updated: 2026-11-26
 source: visual plan "Phase 3 – Release-Pipeline", approved 2026-11-20
 ---
 
@@ -12,8 +12,8 @@ source: visual plan "Phase 3 – Release-Pipeline", approved 2026-11-20
 Plan: [[plan-release]]
 
 ## Outcome
-A GitHub Actions workflow runs the checks of `npm run verify` on `windows-latest` for
-every pull request and every push to `main`.
+A GitHub Actions workflow runs `npm run check` on `windows-latest` for every pull
+request and every push to `main` that changes more than notes.
 
 ## Scope
 - Owns: `.github/workflows/ci.yml`, `rust-toolchain.toml`, CONTRIBUTING.md (what CI
@@ -24,7 +24,11 @@ every pull request and every push to `main`.
   [[engineering-standards]] §1–2, [[release-pipeline]].
 
 ## Decided
-- CI runs `npm run check` and the release build. The app tests do not run in CI:
+- CI runs `npm run check` only (maintainer, 2026-11-26: keep CI lean). Commits that
+  change only `*.md`, `knowledge-base/` or `.claude/plans/` start no run. The
+  release build left CI: `check` compiles both Rust workspaces, `verify` builds
+  locally before a merge, and rel-06 builds on the tag (warm run with it 5.5 min,
+  of which the build 1.2 min). The app tests do not run in CI:
   on the runner every one failed at floawty's start on the hidden desktop, WebView2
   "failed to create webview … 0x80070578 Invalid window handle" (first run
   45496192486, 2026-11-24; check, lockfiles, build and test launcher green). They
@@ -38,10 +42,10 @@ every pull request and every push to `main`.
 
 ## Acceptance criteria
 - [ ] A pull request shows one check that runs `npm run check` (types, lint, format,
-      Vitest, adapter tests, `cargo fmt`/`clippy`, `cargo test`) and the release
-      build.
+      Vitest, adapter tests, `cargo fmt`/`clippy`, `cargo test`).
 - [ ] A deliberately broken commit (failing unit test) turns the check red.
-- [ ] Rust and npm caches keep a warm run under about 15 minutes.
+- [x] Rust and npm caches keep a warm run under about 15 minutes (5.5 min with the
+      build, run 45499300716).
 - [x] `smoke:hidden` passes three runs in a row on the runner, or is skipped with the
       reason recorded here and in CONTRIBUTING.md (skipped, see "Decided").
 - [ ] The workflow runs on `pull_request` (never `pull_request_target`), has
@@ -62,7 +66,8 @@ every pull request and every push to `main`.
 - Pushing a test branch and opening a pull request needs the maintainer's OK.
 
 ## Resume here
-On `main` without a pull request (maintainer, 2026-11-24): a0707c0, then the app
-tests left CI after the first run. Advisor review: no must-fix, findings resolved
-(see "Decided"). Next: one green run on `main` (check the warm time against 15
-minutes), then a deliberately failing unit test on a branch to see red, then `done`.
+On `main` without a pull request (maintainer, 2026-11-24): a0707c0; the app tests
+left CI after the first run, the release build and note-only runs on 2026-11-26.
+Advisor review: no must-fix, findings resolved (see "Decided"). Green on `main`:
+45499300716. Next: a deliberately failing unit test on a branch with a pull request
+to see red (needs the maintainer's OK to push), then `done`.
