@@ -1,7 +1,7 @@
 ---
 type: plan
 tags: [package, release, dist]
-status: in-progress
+status: done
 created: 2026-11-20
 updated: 2026-11-26
 source: visual plan "Phase 3 – Release-Pipeline", approved 2026-11-20
@@ -41,14 +41,15 @@ request and every push to `main` that changes more than notes.
   publishing floawty's logs from the runner needs a decision first.
 
 ## Acceptance criteria
-- [ ] A pull request shows one check that runs `npm run check` (types, lint, format,
-      Vitest, adapter tests, `cargo fmt`/`clippy`, `cargo test`).
-- [ ] A deliberately broken commit (failing unit test) turns the check red.
+- [x] A pull request shows one check that runs `npm run check` (types, lint, format,
+      Vitest, adapter tests, `cargo fmt`/`clippy`, `cargo test`) (#3: "verify").
+- [x] A deliberately broken commit (failing unit test) turns the check red (#3, run
+      45862925182: `npm run check` failed on the test, 1 failed, 174 passed).
 - [x] Rust and npm caches keep a warm run under about 15 minutes (5.5 min with the
-      build, run 45499300716).
+      build, run 45499300716; 3.9 min with check only, run 45860129071).
 - [x] `smoke:hidden` passes three runs in a row on the runner, or is skipped with the
       reason recorded here and in CONTRIBUTING.md (skipped, see "Decided").
-- [ ] The workflow runs on `pull_request` (never `pull_request_target`), has
+- [x] The workflow runs on `pull_request` (never `pull_request_target`), has
       read-only `contents` permission, actions pinned by full SHA, `npm ci`,
       unchanged `Cargo.lock` files after `check` and a pinned Rust toolchain (clippy
       runs with `-D warnings`).
@@ -69,5 +70,5 @@ request and every push to `main` that changes more than notes.
 On `main` without a pull request (maintainer, 2026-11-24): a0707c0; the app tests
 left CI after the first run, the release build and note-only runs on 2026-11-26.
 Advisor review: no must-fix, findings resolved (see "Decided"). Green on `main`:
-45499300716. Next: a deliberately failing unit test on a branch with a pull request
-to see red (needs the maintainer's OK to push), then `done`.
+45860129071; red proof by the throwaway pull request #3 (closed, branch deleted).
+Done.
