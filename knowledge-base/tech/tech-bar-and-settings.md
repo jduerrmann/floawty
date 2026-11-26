@@ -4,7 +4,7 @@ area: ui
 tags: [bar, settings, i18n, hotkeys, reset]
 status: active
 created: 2026-11-17
-updated: 2026-11-24
+updated: 2026-11-26
 source: mvp-05 implementation
 ---
 
@@ -49,7 +49,8 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
 - **Bar icons** are SVG files in `src/assets/icons/` drawn as CSS masks over
   `currentcolor` (the CSP has no `data:`); pressed = accent tint, the problem dot is
   `::after`. Accessible names come from `aria-label`, the buttons have no text.
-- **Settings page:** cards General (language, theme, animations, update check, graphics acceleration),
+- **Settings page:** cards General (language, theme, animations, page fullscreen in the
+  window ([[page-fullscreen-stays-in-window]]), update check, graphics acceleration),
   Hotkeys, Shorts and TikTok, Data (reset), then the trademark line for the logos
   ([[redrawn-service-logos]]). rel-03's update button joins General, rel-05's export
   and import join Data. On/off settings are checkboxes with `role="switch"` (Space

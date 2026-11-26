@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>A player with a fullscreen button</title>
+    <style>
+      body {
+        margin: 0;
+      }
+      #player {
+        width: 320px;
+        height: 180px;
+        background: #123;
+      }
+      #player:fullscreen {
+        background: #321;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="player"><button id="fullscreen" type="button">Fullscreen</button></div>
+    <script>
+      document.getElementById('fullscreen').addEventListener('click', () => {
+        void document.getElementById('player').requestFullscreen();
+      });
+    </script>
+  </body>
+</html>

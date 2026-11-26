@@ -3,6 +3,7 @@ use serde::Serialize;
 use tauri::{AppHandle, Manager};
 
 use crate::bar;
+use crate::fullscreen;
 use crate::hotkeys::{self, Action};
 use crate::logbook;
 use crate::overlay::{self, Overlay, OverlayState};
@@ -115,12 +116,15 @@ pub fn set_settings_open(app: AppHandle, open: bool) -> CommandResult {
 
 #[tauri::command]
 pub fn set_preferences(app: AppHandle, preferences: Preferences) {
-    let before = app.state::<Overlay>().settings().theme;
-    let chosen = preferences.theme;
+    let before = app.state::<Overlay>().settings();
+    let (chosen_theme, in_window) = (preferences.theme, preferences.fullscreen_in_window);
     app.state::<Overlay>()
         .update(&app, |s| settings::apply_preferences(s, preferences));
-    if chosen != before {
-        theme::apply(&app, chosen);
+    if chosen_theme != before.theme {
+        theme::apply(&app, chosen_theme);
+    }
+    if in_window != before.fullscreen_in_window {
+        fullscreen::sync(&app);
     }
     overlay::emit_state(&app);
     page::sync(&app);

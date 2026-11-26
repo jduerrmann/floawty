@@ -313,6 +313,7 @@ mod tests {
             video_only: false,
             zoom: false,
             always_on_top: settings.always_on_top,
+            fullscreen_in_window: settings.fullscreen_in_window,
             page_problems: Vec::new(),
             opening: None,
         }

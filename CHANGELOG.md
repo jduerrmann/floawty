@@ -6,6 +6,9 @@ User-facing changes, in plain language. Format based on
 
 ## [Unreleased]
 
+- A page's fullscreen button now fills only the floawty window, in the small overlay
+  and in window mode, so you can keep working next to the video. A new switch in the
+  settings (General) brings back the whole screen.
 - A tile shows at once that its service is opening, the other tiles step back, and a
   second click no longer starts the opening again. Until the page draws, the area
   stays in floawty's own colour instead of flashing white.
