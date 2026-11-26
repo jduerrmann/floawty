@@ -2,7 +2,7 @@
 type: moc
 tags: [decisions]
 created: 2026-11-16
-updated: 2026-11-24
+updated: 2026-11-26
 source: conversation
 ---
 
@@ -28,6 +28,7 @@ One line per decision record in `decisions/`. Template: `templates/t-decision.md
 ## services
 
 - [[drm-services-in-first-release]] – Netflix, Prime Video, Disney+ and RTL+ ship in the first release
+- [[service-shows-when-page-starts]] – the tile shows the opening; the service fills its place when its page starts loading
 - [[shared-webview2-profile-in-mvp]] – one shared WebView2 profile until Tauri exposes per-service profiles
 - [[google-login-honest-user-agent-first]] – Google login is a must; honest user agent first, Chrome only if blocked
 - [[widevine-on-demand-with-notice]] – superseded: Widevine comes with WebView2

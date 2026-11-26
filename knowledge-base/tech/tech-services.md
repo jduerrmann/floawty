@@ -4,7 +4,7 @@ area: services
 tags: [tiles, services, webview, navigation, privacy]
 status: active
 created: 2026-11-17
-updated: 2026-11-22
+updated: 2026-11-26
 source: mvp-04 implementation, mvp-05
 ---
 
@@ -17,6 +17,20 @@ page inside the main window.
 ## Invariants
 
 - One service webview at a time (label `service`); opening another closes it first.
+- **Opening** ([[service-shows-when-page-starts]]): `service::open` claims
+  `Overlay::start_opening` (a second open while one is opening does nothing), emits
+  `OverlayState.opening` (the service id), and adds the webview at full size just left
+  of the window (`service::place`; at size 0 WebView2 shows no page popups) with
+  `background_color` = `theme::ground` (`--ground-1` of the effective theme, checked
+  against `tokens.css`; white again after the first `Finished`), so the tiles stay in
+  sight. `open` and `close` hold `SWITCHING` (worker threads only). The first `on_page_load` event (`Started` = ContentLoading, or
+  `Finished`, also after a failure) ends the opening: `lastService` is saved only
+  then and `service::fit` fills the place. `close` ends an opening too. The home page
+  marks the tile (`src/opening.ts` decides, `showOpening` in `tiles.ts` draws: a ring,
+  `aria-busy`, a hidden description) from the click until the shell reports the end;
+  other tiles step back and clicks count for nothing meanwhile. The bar stays as on the
+  tiles while opening (`watch_applies`, `visibleService` in `bar.ts`), and its back
+  button cancels the opening.
 - Service webviews share floawty's WebView2 profile ([[shared-webview2-profile-in-mvp]])
   and need the **same browser arguments** as the main window, or WebView2 refuses the
   shared environment: main window, bar and service all take `service::browser_args`
@@ -96,13 +110,14 @@ page inside the main window.
 | `src/services/<id>/manifest.ts` | id, name, start URL, allowed domains (incl. sign-in), `signInHosts` (TikTok), brand colour, symbol, `shortsAutoMode` (YouTube, YouTube Shorts, TikTok), `videoOnly` (YouTube, YouTube Shorts, TikTok, Twitch, Crunchyroll; [[tech-video-only]]), `startsShortsAuto` (the Shorts and TikTok tiles turn the auto mode on before opening) | Vitest, Playwright |
 | `src/services/manifest.ts` | manifest validation (`signInHosts` bare hosts), `hostAllowed` | Vitest |
 | `src/custom-tiles.ts` | own pages: name and URL rules, https added, duplicates, allowed domain = host without `www.` | Vitest |
-| `src/tiles.ts`, `src/home.ts` | tiles, options menu (rename, remove; a popover in the top layer, placed by the ⋯ button and kept inside the window), add/rename form, first-start notice | Playwright |
+| `src/opening.ts` | which tile shows the opening: the click at once, then the shell's `opening` | Vitest |
+| `src/tiles.ts`, `src/home.ts` | tiles, opening mark, options menu (rename, remove; a popover in the top layer, placed by the ⋯ button and kept inside the window), add/rename form, first-start notice | Playwright |
 | `src/tilt.ts` | `tiltOf` (tilt that stays in the box), `tiltStyle` (its custom properties) | Vitest, `tests/adapters/tile-hover.spec.ts` |
 | `src/tile-colors.ts` | `labelShade`, `contrastWithWhite`, the own-page colour | Vitest |
 | `src/tokens.css`, `src/style.css`, `src/tiles.css` | design values as `light-dark()` pairs, page and glass cards, tiles | Playwright (fit), screenshots |
 | `src/assets/logos/*.svg`, `NOTICE.md` | the services' redrawn logos (trademarks, outside the GPL) | Vitest (every service has one, shapes only) |
 | `src/assets/symbols/*.svg` | floawty's own symbols (globe, plus); Vite emits all SVGs as files (`assetsInlineLimit: 0`) so the CSP needs no `data:` | Vitest |
-| `src-tauri/src/service.rs` | open/close the service webview, navigation guard, pause on hide, play/pause, cover for the settings, focus | Playwright, check scripts |
+| `src-tauri/src/service.rs` | open (beside the window until the page starts)/close the service webview, navigation guard, pause on hide, play/pause, cover for the settings, focus | Playwright (`tests/opening.spec.ts` for the opening), check scripts |
 | `src-tauri/src/navigation.rs` | stay or open in the browser | unit |
 | `src-tauri/src/sign_in.rs`, `sign_in_window.rs` | sign-in pop-ups: open, navigation, title and place (pure); the owned window and its close watcher | unit, `tests/sign-in.spec.ts` |
 | `src/services/_zoom/page.ts` | in every service: frozen `__floawtyZoom(on)` (a frozen no-op outside http(s)); scales the largest video to the view's width when on, the view is wider than 16:9 (× 1.01), the picture (letterboxed by `object-fit: contain`) fills ≥ 95 % of the height, the box is centred, the page applies no transform of its own and the scale is ≤ 1.5; window `resize`, captured `loadedmetadata`/`resize` and a ResizeObserver on the main video, no polling | `tests/adapters/zoom.spec.ts` |

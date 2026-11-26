@@ -2,7 +2,9 @@
 import { invoke } from '@tauri-apps/api/core';
 import { createCustomTile, type CustomTile } from './custom-tiles';
 import { t, type Language } from './i18n';
-import { renderTiles } from './tiles';
+import { afterClick, afterFailure, afterState, NOT_OPENING, shownTile } from './opening';
+import type { StateView } from './state';
+import { renderTiles, showOpening } from './tiles';
 
 interface TilesState {
   noticeAccepted: boolean;
@@ -38,7 +40,33 @@ function labelForm(language: Language): void {
   element('tile-cancel').textContent = t(language, 'cancel');
 }
 
-export async function startHome(language: Language): Promise<void> {
+/** Shows the home page; the returned view marks the tile whose service opens. */
+export function startHome(language: Language): StateView {
+  let opening = NOT_OPENING;
+  const list = element('tiles');
+  const mark = () => showOpening(list, language, shownTile(opening));
+  const onOpen = (id: string, open: () => Promise<unknown>) => {
+    const next = afterClick(opening, id);
+    if (!next) return;
+    opening = next;
+    mark();
+    open().catch(() => {
+      opening = afterFailure(opening);
+      mark();
+    });
+  };
+  void showTiles(language, onOpen, mark);
+  return (state) => {
+    opening = afterState(opening, state.opening);
+    mark();
+  };
+}
+
+async function showTiles(
+  language: Language,
+  onOpen: (id: string, open: () => Promise<unknown>) => void,
+  afterRender: () => void,
+): Promise<void> {
   const state = await invoke<TilesState>('tiles_state');
   let tiles = state.customTiles;
   const list = element('tiles');
@@ -63,12 +91,15 @@ export async function startHome(language: Language): Promise<void> {
     name.focus();
     form.scrollIntoView({ block: 'end' });
   };
-  const render = () =>
+  const render = () => {
     renderTiles(list, language, tiles, {
+      onOpen,
       onAdd: () => openForm(null),
       onRename: (tile) => openForm(tile),
       onRemove: (tile) => save(tiles.filter((other) => other.id !== tile.id)),
     });
+    afterRender();
+  };
 
   form.onsubmit = (event) => {
     event.preventDefault();

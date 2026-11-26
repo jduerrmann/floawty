@@ -1,5 +1,8 @@
 //! The service webview: one at a time, in floawty's shared WebView2 profile, on its domains.
+use std::sync::{Mutex, PoisonError};
+
 use tauri::webview::PageLoadEvent;
+use tauri::window::Color;
 use tauri::{
     AppHandle, LogicalPosition, LogicalSize, Manager, Url, Webview, WebviewBuilder, WebviewUrl, Wry,
 };
@@ -11,8 +14,11 @@ use crate::overlay::{self, Overlay};
 use crate::page;
 use crate::settings::OpenService;
 use crate::sign_in_window;
+use crate::theme;
 
 pub const LABEL: &str = "service";
+// Only worker threads take it (add_child waits for the main thread), so a close never slips into an open.
+static SWITCHING: Mutex<()> = Mutex::new(());
 const BROWSER_ARGS: &str =
     "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --disable-background-networking";
 const PAUSE: &str = "document.querySelectorAll('video, audio').forEach((m) => m.pause())";
@@ -38,19 +44,35 @@ fn current(app: &AppHandle) -> Option<Webview> {
 }
 
 /// Opens a service over floawty's own page; an open service is closed first.
+/// Its webview waits left of the window until its first document starts loading.
 pub fn open(app: &AppHandle, service: OpenService) -> tauri::Result<()> {
-    close_webview(app)?;
+    let _switching = SWITCHING.lock().unwrap_or_else(PoisonError::into_inner);
+    // A tile clicked again while its page has not come yet starts nothing.
+    if !app.state::<Overlay>().start_opening(service.clone()) {
+        return Ok(());
+    }
+    overlay::emit_state(app);
+    let added = close_webview(app).and_then(|()| add_webview(app, &service));
+    if added.is_err() {
+        app.state::<Overlay>().end_opening();
+        overlay::emit_state(app);
+    }
+    added
+}
+
+fn add_webview(app: &AppHandle, service: &OpenService) -> tauri::Result<()> {
     let url: Url = service
         .url
         .parse()
         .map_err(|_| tauri::Error::InvalidWebviewUrl("service url"))?;
     let mut builder = WebviewBuilder::new(LABEL, WebviewUrl::External(url))
         .additional_browser_args(&current_browser_args(app))
+        .background_color(theme::ground(app))
         .on_navigation(navigation_guard(
             app.clone(),
             service.allowed_domains.clone(),
         ))
-        .on_new_window(sign_in_window::handler(app.clone(), &service));
+        .on_new_window(sign_in_window::handler(app.clone(), service));
     let script = page::script(app, &service.id);
     let scripted = script.is_some();
     page::reset(app, scripted);
@@ -65,12 +87,20 @@ pub fn open(app: &AppHandle, service: OpenService) -> tauri::Result<()> {
     let size = window
         .inner_size()?
         .to_logical::<f64>(window.scale_factor()?);
-    window.add_child(builder, LogicalPosition::new(0.0, 0.0), size)?;
+    let (position, size) = place(0.0, size, true);
+    window.add_child(builder, position, size)?;
     bar::raise(app);
+    Ok(())
+}
+
+/// The page took over: the service fills its place and becomes the last service.
+fn reveal(app: &AppHandle) {
+    let Some(service) = app.state::<Overlay>().end_opening() else {
+        return;
+    };
     app.state::<Overlay>()
         .update(app, |s| s.last_service = Some(service));
     overlay::emit_state(app);
-    Ok(())
 }
 
 /// Puts the service below `top` (the bar in window mode) and fills the rest of the window.
@@ -78,11 +108,21 @@ pub fn fit(app: &AppHandle, top: f64, window: LogicalSize<f64>) -> tauri::Result
     let Some(service) = current(app) else {
         return Ok(());
     };
-    service.set_position(LogicalPosition::new(0.0, top))?;
-    service.set_size(LogicalSize::new(
-        window.width,
-        (window.height - top).max(0.0),
-    ))
+    let opening = app.state::<Overlay>().opening().is_some();
+    let (position, size) = place(top, window, opening);
+    service.set_position(position)?;
+    service.set_size(size)
+}
+
+// An opening service waits at full size left of the window; made at size 0 it never shows popups.
+fn place(
+    top: f64,
+    window: LogicalSize<f64>,
+    opening: bool,
+) -> (LogicalPosition<f64>, LogicalSize<f64>) {
+    let left = if opening { -window.width } else { 0.0 };
+    let size = LogicalSize::new(window.width, (window.height - top).max(0.0));
+    (LogicalPosition::new(left, top), size)
 }
 
 // The title is only a wake-up call and is never read: it names what the user watches.
@@ -97,15 +137,18 @@ fn with_page_script(
         .on_document_title_changed(move |_, _| page::wake(&on_title))
 }
 
-/// Every loaded page learns the zoom; a scripted one is also asked for its status.
+/// The first document to start or end shows the service; every loaded page learns the zoom.
 fn with_load_hook(
     app: &AppHandle,
     builder: WebviewBuilder<Wry>,
     scripted: bool,
 ) -> WebviewBuilder<Wry> {
     let on_load = app.clone();
-    builder.on_page_load(move |_, payload| {
+    builder.on_page_load(move |webview, payload| {
+        reveal(&on_load);
         if payload.event() == PageLoadEvent::Finished {
+            // The ground only bridges the wait: a page without a background of its own gets white.
+            let _ = webview.set_background_color(Some(Color(0xff, 0xff, 0xff, 0xff)));
             if scripted {
                 page::wake(&on_load);
             }
@@ -116,7 +159,9 @@ fn with_load_hook(
 
 /// Back to the tiles; the next start opens the tiles too.
 pub fn close(app: &AppHandle) -> tauri::Result<()> {
+    let _switching = SWITCHING.lock().unwrap_or_else(PoisonError::into_inner);
     close_webview(app)?;
+    app.state::<Overlay>().end_opening();
     page::reset(app, false);
     app.state::<Overlay>()
         .update(app, |s| s.last_service = None);
@@ -201,7 +246,29 @@ pub fn focus(app: &AppHandle) {
 
 #[cfg(test)]
 mod tests {
-    use super::browser_args;
+    use super::{browser_args, place};
+    use tauri::{LogicalPosition, LogicalSize};
+
+    #[test]
+    fn an_opening_service_waits_left_of_the_window_so_the_tiles_stay_in_sight() {
+        let window = LogicalSize::new(480.0, 270.0);
+        assert_eq!(
+            place(0.0, window, true),
+            (LogicalPosition::new(-480.0, 0.0), window)
+        );
+    }
+
+    #[test]
+    fn an_open_service_fills_the_window_below_the_bar() {
+        let window = LogicalSize::new(480.0, 270.0);
+        assert_eq!(
+            place(32.0, window, false),
+            (
+                LogicalPosition::new(0.0, 32.0),
+                LogicalSize::new(480.0, 238.0)
+            )
+        );
+    }
 
     #[test]
     fn with_graphics_acceleration_webview2_keeps_its_gpu() {

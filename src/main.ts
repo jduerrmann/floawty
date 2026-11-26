@@ -25,6 +25,10 @@ document.addEventListener('keydown', (event) => {
 
 void showAbout();
 void startWithState((state, language) => {
-  void startHome(language);
-  return startSettingsPanel(state, language);
+  const showHome = startHome(language);
+  const showPanel = startSettingsPanel(state, language);
+  return (next) => {
+    showHome(next);
+    showPanel(next);
+  };
 });

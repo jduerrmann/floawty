@@ -16,6 +16,8 @@ const symbolUrls = import.meta.glob<string>(['./assets/logos/*.svg', './assets/s
 });
 
 export interface TileHandlers {
+  /** Decides whether a click opens: `open` runs only while no tile is opening. */
+  onOpen: (id: string, open: () => Promise<unknown>) => void;
   onAdd: () => void;
   onRename: (tile: CustomTile) => void;
   onRemove: (tile: CustomTile) => void;
@@ -30,8 +32,8 @@ function openService(
   url: string,
   allowedDomains: string[],
   signInHosts: readonly string[] = [],
-): void {
-  void invoke('open_service', { service: { id, url, allowedDomains, signInHosts } });
+): Promise<unknown> {
+  return invoke('open_service', { service: { id, url, allowedDomains, signInHosts } });
 }
 
 async function turnShortsAutoOn(): Promise<void> {
@@ -87,13 +89,16 @@ function followPointer(item: HTMLLIElement): void {
   });
 }
 
-function serviceTile(service: ServiceManifest): HTMLLIElement {
+function serviceTile(service: ServiceManifest, handlers: TileHandlers): HTMLLIElement {
   const item = document.createElement('li');
+  item.dataset.tile = service.id;
   const button = tileButton(service.name, service.brandColor, service.symbol);
-  button.addEventListener('click', async () => {
-    if (service.startsShortsAuto) await turnShortsAutoOn();
-    openService(service.id, service.startUrl, service.allowedDomains, service.signInHosts);
-  });
+  button.addEventListener('click', () =>
+    handlers.onOpen(service.id, async () => {
+      if (service.startsShortsAuto) await turnShortsAutoOn();
+      await openService(service.id, service.startUrl, service.allowedDomains, service.signInHosts);
+    }),
+  );
   item.append(button);
   return item;
 }
@@ -136,8 +141,11 @@ function placeMenu(menu: HTMLElement, anchor: HTMLElement): void {
 function customTile(language: Language, tile: CustomTile, handlers: TileHandlers): HTMLLIElement {
   const item = document.createElement('li');
   item.className = 'custom';
+  item.dataset.tile = tile.id;
   const button = tileButton(tile.name, CUSTOM_COLOR, 'symbols/custom.svg');
-  button.addEventListener('click', () => openService(tile.id, tile.url, customTileDomains(tile)));
+  button.addEventListener('click', () =>
+    handlers.onOpen(tile.id, () => openService(tile.id, tile.url, customTileDomains(tile))),
+  );
   const more = document.createElement('button');
   more.type = 'button';
   more.className = 'tile-more';
@@ -174,10 +182,48 @@ export function renderTiles(
   addButton.addEventListener('click', handlers.onAdd);
   add.append(addButton);
   const items = [
-    ...services.map(serviceTile),
+    ...services.map((service) => serviceTile(service, handlers)),
     ...customTiles.map((tile) => customTile(language, tile, handlers)),
     add,
   ];
   items.forEach(followPointer);
   list.replaceChildren(...items);
+}
+
+/** Marks the tile whose service opens, or none; the others step back meanwhile. */
+export function showOpening(list: HTMLElement, language: Language, id: string | null): void {
+  list.toggleAttribute('data-opening', id !== null);
+  // Renaming or removing the opening tile would leave a mark on nothing, by keyboard too.
+  for (const more of list.querySelectorAll<HTMLButtonElement>('.tile-more'))
+    more.disabled = id !== null;
+  for (const item of list.querySelectorAll<HTMLLIElement>('li')) {
+    const button = item.querySelector<HTMLButtonElement>('.tile');
+    if (!button) continue;
+    const busy = item.querySelector('.tile-busy');
+    if (id !== null && item.dataset.tile === id) {
+      if (!busy) markBusy(language, item, button);
+    } else if (busy) {
+      button.removeAttribute('aria-busy');
+      button.removeAttribute('aria-describedby');
+      item.querySelector('.tile-busy-text')?.remove();
+      busy.remove();
+    }
+  }
+}
+
+// The ring is decoration; screen readers get the busy state and a hidden description.
+function markBusy(language: Language, item: HTMLLIElement, button: HTMLButtonElement): void {
+  const ring = document.createElement('span');
+  ring.className = 'tile-busy';
+  ring.setAttribute('aria-hidden', 'true');
+  const text = document.createElement('span');
+  text.className = 'tile-busy-text';
+  text.id = `opening-${item.dataset.tile ?? ''}`;
+  text.hidden = true;
+  const name = button.querySelector('.tile-name')?.textContent ?? '';
+  text.textContent = t(language, 'tileOpening', { name });
+  button.querySelector('.tile-face')?.append(ring);
+  item.append(text);
+  button.setAttribute('aria-busy', 'true');
+  button.setAttribute('aria-describedby', text.id);
 }

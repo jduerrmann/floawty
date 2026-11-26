@@ -163,7 +163,8 @@ pub fn raise(app: &AppHandle) {
 
 /// The page hears about the cursor (Shorts hold) while a service is visible and can be clicked.
 fn watch_applies(state: &OverlayState) -> bool {
-    state.service_id.is_some() && !state.settings_open && !state.click_through
+    let visible = state.service_id.is_some() && state.opening.is_none();
+    visible && !state.settings_open && !state.click_through
 }
 
 /// The bar follows the hover over a service in the floaty view; in window mode it stays.
@@ -313,6 +314,7 @@ mod tests {
             zoom: false,
             always_on_top: settings.always_on_top,
             page_problems: Vec::new(),
+            opening: None,
         }
     }
 
@@ -320,6 +322,13 @@ mod tests {
     fn over_a_service_the_bar_follows_the_hover() {
         assert!(!wanted(&state(true, false, false), false));
         assert!(wanted(&state(true, false, false), true));
+    }
+
+    #[test]
+    fn while_a_service_opens_the_bar_stays_as_on_the_tiles() {
+        let mut opening = state(true, false, false);
+        opening.opening = Some("youtube".into());
+        assert!(wanted(&opening, false));
     }
 
     #[test]

@@ -6,6 +6,9 @@ User-facing changes, in plain language. Format based on
 
 ## [Unreleased]
 
+- A tile shows at once that its service is opening, the other tiles step back, and a
+  second click no longer starts the opening again. Until the page draws, the area
+  stays in floawty's own colour instead of flashing white.
 - A change right after floawty starts, such as switching to window mode, now always
   shows in the bar and on the start screen instead of being missed now and then.
 - A new switch turns floawty's animations off: tiles then only glow, and from the next
