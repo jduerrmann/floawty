@@ -6,6 +6,7 @@ use std::sync::Mutex;
 
 use tauri::{AppHandle, Emitter, Manager, PhysicalPosition, PhysicalSize, Window};
 
+use crate::awake::KeepAwake;
 use crate::bar;
 use crate::geometry::{self, Aspect, Rect};
 use crate::logbook;
@@ -59,6 +60,7 @@ pub struct OverlayState {
     pub fullscreen_in_window: bool,
     pub page_problems: Vec<Problem>,
     pub opening: Option<String>,
+    pub keep_awake: KeepAwake,
 }
 
 impl Overlay {
@@ -142,6 +144,7 @@ impl Overlay {
             fullscreen_in_window: settings.fullscreen_in_window,
             page_problems: self.page_problems.lock().unwrap().clone(),
             opening: self.opening(),
+            keep_awake: settings.keep_awake,
         }
     }
 }

@@ -106,7 +106,8 @@ Never treat user settings or service sessions as disposable.
 
 floawty runs next to other work on an ordinary PC.
 
-- One active service at a time; switching unloads the previous one.
+- One active service at a time; switching unloads the previous one, unless the user turns
+  on keeping services awake ([[services-stay-awake-on-request]]).
 - Event-driven, not polling. Unavoidable polling uses the slowest interval that
   works and stops while the overlay is hidden or the video is paused.
 - Idle (no video playing) means ~0 % CPU.

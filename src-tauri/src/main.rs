@@ -1,6 +1,7 @@
 //! floawty: streaming services in a small always-on-top overlay.
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod awake;
 mod bar;
 mod commands;
 mod distribution;
@@ -94,6 +95,7 @@ fn setup(app: &AppHandle, webview: &str) -> tauri::Result<()> {
     app.manage(Bar::default());
     app.manage(Page::default());
     app.manage(PageFullscreen::default());
+    app.manage(std::sync::Mutex::new(service::Views::default()));
     theme::apply(app, app.state::<Overlay>().settings().theme);
     overlay::place_and_show(app)?;
     let settings = app.state::<Overlay>().settings();
@@ -124,6 +126,7 @@ fn main() {
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .invoke_handler(tauri::generate_handler![
             commands::webview_version,
+            commands::set_keep_awake,
             commands::overlay_state,
             commands::set_opacity,
             commands::toggle_mode,

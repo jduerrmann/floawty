@@ -53,7 +53,9 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
   `currentcolor` (the CSP has no `data:`); pressed = accent tint, the problem dot is
   `::after`. Accessible names come from `aria-label`, the buttons have no text.
 - **Settings page:** cards General (language, theme, animations, page fullscreen in the
-  window ([[page-fullscreen-stays-in-window]]), update check, graphics acceleration),
+  window ([[page-fullscreen-stays-in-window]]), keep services awake (three segments Off /
+  Last / Up to 3, `set_keep_awake`, [[services-stay-awake-on-request]]), update check,
+  graphics acceleration),
   Hotkeys, Shorts and TikTok, Data (reset), then the trademark line for the logos
   ([[redrawn-service-logos]]). rel-03's update button joins General, rel-05's export
   and import join Data. On/off settings are checkboxes with `role="switch"` (Space

@@ -36,6 +36,7 @@ export interface OverlayState extends Preferences {
   pageProblems: PageProblem[];
   /** The service whose page has not started yet; its tile shows that it opens. */
   opening: string | null;
+  keepAwake: 'off' | 'last' | 'three';
 }
 
 export type PageProblem = 'controls-missing' | 'player-missing';

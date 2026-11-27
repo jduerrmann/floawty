@@ -21,6 +21,11 @@ const TEXTS: [string, MessageKey][] = [
   ['animations-note', 'animationsNote'],
   ['fullscreen-in-window-label', 'fullscreenInWindow'],
   ['fullscreen-in-window-note', 'fullscreenInWindowNote'],
+  ['keep-awake-label', 'keepAwake'],
+  ['keep-awake-note', 'keepAwakeNote'],
+  ['keep-awake-off', 'keepAwakeOff'],
+  ['keep-awake-last', 'keepAwakeLast'],
+  ['keep-awake-three', 'keepAwakeThree'],
   ['hotkeys-title', 'hotkeysTitle'],
   ['shorts-title', 'shortsTitle'],
   ['shorts-pause-label', 'shortsPause'],
@@ -102,6 +107,7 @@ function wirePreferences(current: () => OverlayState): void {
   });
   wireTheme(change);
   wireAnimations(change);
+  wireKeepAwake();
   wireShorts(change);
   const updateCheck = element<HTMLInputElement>('update-check');
   updateCheck.addEventListener('change', () =>
@@ -123,6 +129,16 @@ function wireTheme(change: Change): void {
     radio.addEventListener('change', () =>
       change((p) => ({ ...p, theme: radio.value as Preferences['theme'] })),
     );
+  }
+}
+
+const keepAwakeRadios = () =>
+  element('keep-awake').querySelectorAll<HTMLInputElement>('input[name="keep-awake"]');
+
+// Its own command: closing awake services must not wait on the main thread.
+function wireKeepAwake(): void {
+  for (const radio of keepAwakeRadios()) {
+    radio.addEventListener('change', () => void invoke('set_keep_awake', { keep: radio.value }));
   }
 }
 
@@ -151,6 +167,7 @@ function showValues(state: OverlayState): void {
   element<HTMLSelectElement>('portrait-size').value = state.shorts.portraitSize;
   element<HTMLInputElement>('update-check').checked = state.updateCheck;
   element<HTMLInputElement>('fullscreen-in-window').checked = state.fullscreenInWindow;
+  for (const radio of keepAwakeRadios()) radio.checked = radio.value === state.keepAwake;
   // An open restart question keeps the box as the user just set it.
   if (element('restart-confirm').hidden) {
     element<HTMLInputElement>('graphics-acceleration').checked = state.graphicsAcceleration;

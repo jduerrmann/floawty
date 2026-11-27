@@ -1,9 +1,9 @@
 ---
 type: plan
 tags: [plan-map, services, tiles, resources]
-status: active
+status: done
 created: 2026-11-26
-updated: 2026-11-26
+updated: 2026-11-27
 source: visual plan "Kacheln öffnen schneller", rounds 1–3, answered 2026-11-26
 ---
 
@@ -41,8 +41,8 @@ Decisions: [[service-shows-when-page-starts]]; of-02 adds the keep-awake decisio
 - Measured before and after with the comparison probe; each live run asks first.
 
 ## Constraints
-- Rules 5 (no new dependency: muting through `webview2-com` stays out unless the
-  maintainer approves it), 7 (no service-specific code), 10, 13 (EN/DE in
+- Rules 5 (`webview2-com` approved for of-02 to mute hidden services, maintainer
+  2026-11-26; no other new dependency), 7 (no service-specific code), 10, 13 (EN/DE in
   `src/i18n.ts`), 14 (independent review per package: both touch Rust and IPC).
 - Base commit `d0bfdd7`. Branch of this worktree; one commit per package after OK.
 

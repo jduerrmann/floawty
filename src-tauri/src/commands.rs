@@ -2,6 +2,7 @@
 use serde::Serialize;
 use tauri::{AppHandle, Manager};
 
+use crate::awake::KeepAwake;
 use crate::bar;
 use crate::fullscreen;
 use crate::hotkeys::{self, Action};
@@ -84,8 +85,19 @@ pub fn accept_notice(app: AppHandle) {
 
 #[tauri::command]
 pub fn set_custom_tiles(app: AppHandle, tiles: Vec<CustomTile>) {
+    let ids = |tiles: &[CustomTile]| tiles.iter().map(|tile| tile.id.clone()).collect::<Vec<_>>();
+    let before = ids(&app.state::<Overlay>().settings().custom_tiles);
+    let after = ids(&tiles);
     app.state::<Overlay>()
         .update(&app, |s| s.custom_tiles = tiles);
+    // Closing webviews waits for open and close, which only worker threads may do.
+    tauri::async_runtime::spawn(async move { service::forget_tiles(&app, &before, &after) });
+}
+
+/// Async: closing awake webviews waits for an open, which needs the main thread.
+#[tauri::command]
+pub async fn set_keep_awake(app: AppHandle, keep: KeepAwake) {
+    service::set_keep_awake(&app, keep);
 }
 
 // Async: creating a WebView2 inside a sync (main-thread) command deadlocks.
@@ -165,7 +177,9 @@ fn focus(app: &AppHandle, to_bar: bool) -> tauri::Result<()> {
     let state = app.state::<Overlay>().state();
     let label = match (to_bar, state.service_id.is_some() && !state.settings_open) {
         (true, _) => "bar",
-        (false, true) => "service",
+        (false, true) => {
+            return service::current(app).map_or(Ok(()), |webview| webview.set_focus())
+        }
         (false, false) => "main",
     };
     match app.get_webview(label) {

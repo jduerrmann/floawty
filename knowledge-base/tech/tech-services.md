@@ -4,7 +4,7 @@ area: services
 tags: [tiles, services, webview, navigation, privacy]
 status: active
 created: 2026-11-17
-updated: 2026-11-26
+updated: 2026-11-27
 source: mvp-04 implementation, mvp-05
 ---
 
@@ -16,7 +16,23 @@ page inside the main window.
 
 ## Invariants
 
-- One service webview at a time (label `service`); opening another closes it first.
+- At most one service webview is **shown** (`service::current`: `SHOWN` holds its number,
+  label `service-<n>`); opening another closes the shown one first.
+- **Keeping awake** ([[services-stay-awake-on-request]]): with `keepAwake` `last` or
+  `three`, `close` hides the shown service instead (`service/keep.rs`: page script told
+  to rest, media paused, fullscreen left, sign-in window closed, then WebView2's own
+  `SetIsVisible(false)` and `SetIsMuted(true)` through `webview2-com` and `windows-core`,
+  and `hide()`). `open` first asks `keep::wake`: an awake webview of exactly the same
+  `OpenService` shows again through the opening state (`reveal` ends it at once);
+  `awake.rs` decides which ones close (pure: `room`, `on_open`, `beyond_room`,
+  `removed`). Callbacks of a webview that is not shown do nothing: no reveal, page
+  wake, zoom, pop-ups, and no browser (host logged: "kept a hidden service from
+  leaving"). `set_keep_awake` (async command) and removed own tiles (`set_custom_tiles`
+  spawns `forget_tiles`) close what has no room; both hold `SWITCHING`. Over CDP a
+  hidden page still reports `visibilityState` "visible". A resting page pauses anything
+  that starts playing (capture `play` listener, re-applied after loads out of sight).
+  Only `fullscreen.rs`'s handler is not gated: leaving ends a page fullscreen and a
+  hidden page cannot start one without a user gesture.
 - **Opening** ([[service-shows-when-page-starts]]): `service::open` claims
   `Overlay::start_opening` (a second open while one is opening does nothing), emits
   `OverlayState.opening` (the service id), and adds the webview at full size just left
