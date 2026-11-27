@@ -284,17 +284,21 @@ test('the bar fits all nine controls at the minimum width and grows back when wi
           slider: width('opacity'),
         };
       });
-    // Without the cursor on it the bar is hidden and lays itself out late, so the whole layout is
-    // polled; the bar's own width tells a late page from a stale width in the shell.
+    // A hidden bar's page can keep an old size until it shows (WebView2), so the layout is checked
+    // as the user sees it; the bar's own width tells a late page from a stale width in the shell.
+    // A shown bar lays itself out within a few ms, well before the 3 s idle hide.
+    const shown = { timeout: 1000 };
     // The smallest overlay a user can drag: 240 px inside, plus the 2 × 8 px invisible border.
     resizeWindow(app.pid, 256, 151);
     await expect.poll(() => app.home.evaluate(() => innerWidth)).toBe(240);
     await app.bar.evaluate(() => window.__TAURI_INTERNALS__.invoke('set_opacity', { value: 0.8 }));
-    await expect.poll(layout).toEqual({ bar: 240, fits: true, button: 20, slider: 24 });
+    await hoverVideo(app);
+    await expect.poll(layout, shown).toEqual({ bar: 240, fits: true, button: 20, slider: 24 });
     resizeWindow(app.pid, 800, 450);
     await expect.poll(() => app.home.evaluate(() => innerWidth)).toBeGreaterThan(600);
+    await hoverVideo(app);
     // 88 px alone would also pass in the compact layout, so the buttons must be full size too.
-    await expect.poll(layout).toEqual({ bar: 400, fits: true, button: 28, slider: 88 });
+    await expect.poll(layout, shown).toEqual({ bar: 400, fits: true, button: 28, slider: 88 });
   } finally {
     await app.stop();
   }

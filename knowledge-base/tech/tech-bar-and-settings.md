@@ -4,7 +4,7 @@ area: ui
 tags: [bar, settings, i18n, hotkeys, reset]
 status: active
 created: 2026-11-17
-updated: 2026-11-26
+updated: 2026-11-27
 source: mvp-05 implementation
 ---
 
@@ -39,8 +39,11 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
   their natural width is measured under `.measuring`, free of the current width.
 - A hidden webview keeps `document.visibilityState` "visible"; the bar learns its
   visibility from the event `bar-visible` (also `body[data-visible]` for tests).
-  While hidden, its page sees a new size late (about 1 s measured) and the `resize`
-  event later still, so a hidden bar's compact layout can be stale; app tests poll it.
+  While hidden, its page sees a new size late (about 1 s measured) or sometimes (about
+  a quarter of the runs of one app test) not within 5 s: it keeps the size set right
+  after the hide while the shell sets others, and gets the current one within a few ms
+  once shown. So a hidden bar's layout can be stale; app tests that assert the
+  compact layout show the bar first.
 - **Look** ([[glass-design-follows-windows-theme]]): bar, settings and tiles use the
   `light-dark()` tokens of `src/tokens.css` and follow Windows. Over a visible service
   (`serviceId` set, settings closed) `bar.ts` sets `body.over-service`, which pins
