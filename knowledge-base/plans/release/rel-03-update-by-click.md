@@ -1,7 +1,7 @@
 ---
 type: plan
 tags: [package, release, dist, ui]
-status: in-progress
+status: done
 created: 2026-11-20
 updated: 2026-11-27
 source: visual plan "Phase 3 – Release-Pipeline", approved 2026-11-20
@@ -37,8 +37,9 @@ installs on click and floawty restarts in the new version. The portable build sh
 
 ## Acceptance criteria
 - [x] Before any request: no traffic to GitHub at start. Proven on the update-test
-      build: the local endpoint gets no request of any kind before the click. A network
-      log of the real build was not taken.
+      build: the local endpoint gets no request of any kind before the click. Real
+      build idle on the tiles (network log of `npm run measure`): one Microsoft host
+      (WebView2), no GitHub, the same as on `main`.
 - [x] Click with a newer version available: download, signature check, install,
       restart in the new version. Proven up to the start of the setup: byte-identical
       saved setup, one `ShellExecuteW`, floawty exits. Passive mode, the started file
@@ -89,6 +90,9 @@ installs on click and floawty restarts in the new version. The portable build sh
 - Size: portable 3.33 → 3.93 MiB, setup 1.20 → 1.42 MiB (budget 10 MiB). New crates
   (Windows): tauri-plugin-updater, minisign-verify, native-tls, schannel, hyper-tls,
   tokio-native-tls, tempfile, zeroize, rustls-pki-types – MIT and/or Apache-2.0.
+- `npm run measure` (hidden, maintainer's yes 2026-11-27), against `main` c1f2648
+  built into `target/baseline`: start to visible window 233 → 237 ms (medians of 5),
+  idle on the tiles RAM 216.7 → 216.7 MB, CPU 0 → 0 %, portable 3.4 → 3.9 MiB.
 - Independent review by `advisor`: no must-fix. Resolved: download timeout confirmed
   in the plugin source (`configure_client` applies to `download`); fixtures and a test
   for a signature bound to another version; rel-06 criteria for `--app-version` and
@@ -101,6 +105,5 @@ installs on click and floawty restarts in the new version. The portable build sh
   refusal); classified failures log only their code (no URLs or hosts in the log).
 
 ## Resume here
-Code final and reviewed on `feat/rel-03-update-by-click` (not committed). Waiting for:
-the maintainer's yes to `npm run measure` (startup gained a plugin), the answer on
-the system proxy, and the OK on the commit. Next package: rel-05.
+Done on `feat/rel-03-update-by-click` (3c5e7cd); measured. Open: the maintainer's
+answer on the system proxy (a feature flag, can follow). Next package: rel-05.
