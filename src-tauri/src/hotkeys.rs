@@ -3,7 +3,7 @@ use std::str::FromStr;
 
 use serde::Deserialize;
 use tauri::{AppHandle, Manager};
-use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
+use tauri_plugin_global_shortcut::{GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
 
 use crate::logbook;
 use crate::overlay::{self, Overlay};
@@ -102,6 +102,25 @@ fn bind(
         })
 }
 
+/// Every hotkey parses, has Ctrl, Alt or Win (Shift alone would catch typing) and none repeats.
+pub fn usable(hotkeys: &Hotkeys) -> bool {
+    let mut hotkeys = hotkeys.clone();
+    let mut seen = Vec::new();
+    for action in ACTIONS {
+        let Ok(shortcut) = Shortcut::from_str(slot(&mut hotkeys, action)) else {
+            return false;
+        };
+        let guarded = shortcut
+            .mods
+            .intersects(Modifiers::CONTROL | Modifiers::ALT | Modifiers::SUPER);
+        if !guarded || seen.contains(&shortcut) {
+            return false;
+        }
+        seen.push(shortcut);
+    }
+    true
+}
+
 pub fn register(app: &AppHandle, hotkeys: &Hotkeys) {
     let mut hotkeys = hotkeys.clone();
     for action in ACTIONS {
@@ -167,6 +186,25 @@ mod tests {
         for (name, default) in names {
             let action: Action = serde_json::from_str(&format!("\"{name}\"")).unwrap();
             assert_eq!(slot(&mut hotkeys, action), default, "{name}");
+        }
+    }
+
+    #[test]
+    fn hotkeys_are_usable_with_a_guarding_modifier_and_no_repeat() {
+        assert!(usable(&Hotkeys::default()));
+        let with_zoom = |zoom: &str| Hotkeys {
+            zoom: zoom.into(),
+            ..Hotkeys::default()
+        };
+        assert!(usable(&with_zoom("Super+Z")));
+        for zoom in [
+            "Z",
+            "Shift+Z",
+            "Ctrl+Alt+Nope",
+            "Ctrl+Alt+Shift+O",
+            "Shift+Ctrl+Alt+O",
+        ] {
+            assert!(!usable(&with_zoom(zoom)), "{zoom}");
         }
     }
 

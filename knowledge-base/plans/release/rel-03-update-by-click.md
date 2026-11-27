@@ -74,8 +74,8 @@ installs on click and floawty restarts in the new version. The portable build sh
   version the manifest announces (`tauri signer sign --app-version`).
 - Timeouts: connect 10 s, read 30 s (also for the download, plugin `configure_client`),
   check 30 s.
-- System proxy: off (`default-features = false` drops `system-proxy`); open question
-  for the maintainer.
+- System proxy: on (maintainer, 2026-11-27; feature `system-proxy`, adds
+  `windows-registry` 0.6.1, MIT/Apache-2.0, on Windows), shipped with the rel-05 commit.
 
 ## Evidence (2026-11-27)
 - Plan check by `advisor` before building: shim swallows `ShellExecuteW` (tests
@@ -105,5 +105,5 @@ installs on click and floawty restarts in the new version. The portable build sh
   refusal); classified failures log only their code (no URLs or hosts in the log).
 
 ## Resume here
-Done on `feat/rel-03-update-by-click` (3c5e7cd); measured. Open: the maintainer's
-answer on the system proxy (a feature flag, can follow). Next package: rel-05.
+Done; merged to `main` (34eb326); measured. The system proxy follows with rel-05.
+Next package: rel-05.

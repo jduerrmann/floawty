@@ -6,6 +6,10 @@ User-facing changes, in plain language. Format based on
 
 ## [Unreleased]
 
+- Settings → Data can export your settings, own tiles and hotkeys to a file and import
+  them on another PC. Sign-ins never go into the file. A file from a newer floawty or
+  a damaged one changes nothing and says why.
+- The update check now uses the proxy set up in Windows.
 - The settings show floawty's version and a "Check for updates" button. A found update
   downloads, checks its signature, installs and restarts floawty in the new version;
   the portable build shows the new version and opens its release page. floawty asks

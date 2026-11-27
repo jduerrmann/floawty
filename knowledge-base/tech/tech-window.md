@@ -4,7 +4,7 @@ area: window
 tags: [overlay, settings, hotkeys, logging]
 status: active
 created: 2026-11-17
-updated: 2026-11-26
+updated: 2026-11-27
 source: mvp-02 implementation, mvp-05
 ---
 
@@ -22,6 +22,11 @@ wiring talks to Tauri and Win32.
   every window-flag change (click-through, always on top), which rewrites the extended style.
 - A broken settings file is copied to `settings.json.broken` before defaults are used
   (AGENTS.md rule 5: settings are never disposable).
+- Forward compatibility: an unknown top-level key survives a save (`Settings.extra`).
+  A new key inside `hotkeys` or `shorts`, or a new value of an enum (language, theme,
+  portraitSize, keepAwake), would be lost or read as the default by an older floawty,
+  so such a change bumps `version`; an older floawty then copies the file to
+  `settings.json.newer` and saves only the keys it knows.
 - A hotkey another app holds is logged, never fatal; changing one keeps the old one
   if the new one is taken ([[tech-bar-and-settings]]).
 - The main window is created in `setup` (`create: false` in `tauri.conf.json`), after
@@ -69,7 +74,7 @@ wiring talks to Tauri and Win32.
 | `geometry.rs` | first placement (floaty: flush bottom right, 480 × 270; window: centred 1280 × 720 or smaller to fit with 16 px room; scaled), per-axis snapping flush within 32 px ([[overlay-snaps-flush]]), landscape shape free with magnets at 16:9 and 12:5 within 4 % (`fit_landscape`, never below the minimum height), 9:16 while a Short plays (`fit_resized`); a height-only drag keeps its height, anything else the width ([[overlay-shape-free-with-zoom]]), restore on the monitor with the largest overlap | unit |
 | `settings.rs` | `Settings` v1 (opacity, geometry, hotkeys, tiles, language, animations, Shorts, update check, graphics acceleration, video only, zoom, always on top, page fullscreen in the window), tolerant `parse` (unknown language → system), Shorts pause 0–10 s | unit |
 | `opacity.rs` | opacity clamp 10–100 %, 10 % steps | unit |
-| `persistence.rs` | `%APPDATA%\floawty\settings.json`, atomic write (temp + rename), keeps broken files | unit (temp dir) |
+| `persistence.rs` | `%APPDATA%\floawty\settings.json`, atomic write (temp + rename), keeps broken (`.broken`, also one wrong type) and newer (`.newer`) files; unknown keys survive a save (`Settings.extra`) | unit (temp dir) |
 | `mode.rs` | `Mode` (floaty / window), switch and remember geometry per mode | unit |
 | `overlay.rs` | place and show in the saved mode, mode style (decorations, on top), layered-window opacity, click-through, hide/show, settle 250 ms after the last move/resize, not before the mouse button is up (floaty: aspect, back onto the work area, snap; both: save) | Win32 check scripts |
 | `hotkeys.rs` | registers the hotkeys from the settings (default Ctrl+Alt+Shift + O / D / ↑ / ↓ / F / Space / V / Z / T), changes one at once, pauses all while recording | unit, check scripts |

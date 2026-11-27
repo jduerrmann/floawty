@@ -18,13 +18,13 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 url = "2"
 tauri-plugin-global-shortcut = "~2.4"
-# Updates by click; native-tls uses Windows' own TLS instead of bundling rustls.
-tauri-plugin-updater = { version = "~2.14", default-features = false, features = ["native-tls"] }
+# Updates by click; native-tls uses Windows' own TLS, system-proxy its proxy settings.
+tauri-plugin-updater = { version = "~2.14", default-features = false, features = ["native-tls", "system-proxy"] }
 # Tauri's own WebView2 bindings, same version; floawty handles a page's fullscreen itself.
 webview2-com = "~0.39.1"
 # Its `cast` reaches newer WebView2 interfaces: muting a service kept awake out of sight.
 windows-core = "~0.62.2"
-windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Globalization", "Win32_Graphics_Dwm", "Win32_UI_Input_KeyboardAndMouse", "Win32_UI_Shell", "Win32_UI_WindowsAndMessaging"] }
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Globalization", "Win32_Graphics_Dwm", "Win32_UI_Controls_Dialogs", "Win32_UI_Input_KeyboardAndMouse", "Win32_UI_Shell", "Win32_UI_WindowsAndMessaging"] }
 
 [profile.release]
 codegen-units = 1

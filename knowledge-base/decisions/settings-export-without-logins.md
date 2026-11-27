@@ -4,7 +4,7 @@ area: ui
 tags: [settings, privacy, export]
 status: active
 created: 2026-11-20
-updated: 2026-11-20
+updated: 2026-11-27
 source: visual plan "Phase 3 – Release-Pipeline", round 2, chat and advisor review
 ---
 
@@ -41,3 +41,6 @@ and whether logins could come along by copying the profile folder.
 ## Consequences
 - The hotkey and tile rules exist in Rust as well as TypeScript.
 - A new in-scope item for AGENTS.md rule 9, added with the package (rel-05).
+- Pinned in rel-05 (2026-11-27): the marker is `"kind": "floawty-settings"`; an
+  import applies at once, without a restart, except a changed graphics acceleration,
+  which asks for the restart like its switch (maintainer chose live over one restart).
