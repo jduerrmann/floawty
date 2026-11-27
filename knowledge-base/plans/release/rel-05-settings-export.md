@@ -3,7 +3,7 @@ type: plan
 tags: [package, release, ui]
 status: ready
 created: 2026-11-20
-updated: 2026-11-22
+updated: 2026-11-27
 source: visual plan "Phase 3 – Release-Pipeline", approved 2026-11-20; advisor review
 ---
 
@@ -55,12 +55,10 @@ allow-list. Never exported: window geometry, `lastService`, `mode`,
 - Playwright: export → reset → import round trip through commands that return and
   accept text (the native dialog is not driven).
 
-## Open points (do not guess)
-- File dialogs: `GetSaveFileNameW`/`GetOpenFileNameW` through `windows-sys`, the web
-  file input and save picker in floawty's own page (check availability in WebView2),
-  or `tauri-plugin-dialog` (pulls in `tauri-plugin-fs` and `rfd`; new dependency,
-  needs OK). Prefer the first two.
+## Decided (visual plan "Release 0.1.0 – der Rest", 2026-11-27)
+- File dialogs: `GetSaveFileNameW`/`GetOpenFileNameW` through `windows-sys` (one more
+  feature, no new crate). Not `tauri-plugin-dialog`, not the web pickers.
+- Import replaces own tiles and hotkeys as a whole; no merging.
 
 ## Resume here
-Not started. Next: settle the file dialog (prefer no new dependency), then tests for
-the strict import.
+Not started; comes after rel-03. Next: tests for the strict import.

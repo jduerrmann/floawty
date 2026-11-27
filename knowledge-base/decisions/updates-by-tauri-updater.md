@@ -4,7 +4,7 @@ area: dist
 tags: [updates, dependency, privacy]
 status: active
 created: 2026-11-20
-updated: 2026-11-20
+updated: 2026-11-27
 source: visual plan "Phase 3 – Release-Pipeline", rounds 1–2
 ---
 
@@ -27,8 +27,8 @@ automatic if wished, and by hand.
 - "Update automatically" is off by default (the stored `updateCheck` field). When on:
   a check at start and every 24 h, download in the background, install in passive
   mode when the user quits floawty (not on its own restarts, not at shutdown); never
-  during playback. Whether the passive installer relaunches floawty is checked in
-  rel-04 and decided with the maintainer.
+  during playback. After an install on quit floawty stays closed; the next start runs
+  the new version (maintainer, 2026-11-27: `restart_after_install(false)`).
 - The portable build cannot update itself: the same check shows the new version and
   opens the release page.
 - Updates are signed with an updater key; the private key and its password live in
@@ -53,5 +53,5 @@ automatic if wished, and by hand.
 - Principle 3 covered an update check only. The maintainer approved (2026-11-20)
   amending it to "check, download and install from GitHub Releases, only on click or
   with automatic updates on"; rel-03 changes AGENTS.md §2.3 and core-principles #3.
-- The installer closes every running `floawty.exe` of the user; open question 6
-  (single instance) is answered in rel-04.
+- The installer closes every running `floawty.exe` of the user; only one floawty
+  runs ([[one-running-floawty]]).

@@ -3,7 +3,7 @@ type: plan
 tags: [package, release, dist]
 status: planned
 created: 2026-11-20
-updated: 2026-11-24
+updated: 2026-11-27
 source: visual plan "Phase 3 – Release-Pipeline", approved 2026-11-20; advisor review
 ---
 
@@ -27,9 +27,10 @@ and README, CHANGELOG and the notes describe the released state.
   [[webview2-diagnostics-disclosed]].
 
 ## Acceptance criteria
-- [ ] Fresh Windows (Sandbox or VM) with a standard local account (the Sandbox user
-      is an administrator): setup and portable start without UAC, the first-start
-      notice shows, YouTube plays; SmartScreen behaviour noted.
+- [ ] Fresh Windows in Windows Sandbox (the maintainer turns it on once; a `.wsb`
+      logon script creates a standard local account, as the Sandbox user is an
+      administrator): setup and portable start without UAC, the first-start notice
+      shows, YouTube plays; SmartScreen behaviour noted.
 - [ ] Update path proven before 0.1.0: rc.1 → rc.2 by click and automatically, with
       a test build whose endpoint points at the rc release (`/releases/latest` skips
       pre-releases).
