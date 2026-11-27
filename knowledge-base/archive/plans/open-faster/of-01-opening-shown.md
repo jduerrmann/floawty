@@ -1,9 +1,9 @@
 ---
 type: plan
 tags: [package]
-status: in-progress
+status: done
 created: 2026-11-26
-updated: 2026-11-26
+updated: 2026-11-27
 source: visual plan "Kacheln öffnen schneller", rounds 1–3
 ---
 
@@ -25,18 +25,18 @@ the page takes over when its first document starts loading.
 - Read first: [[tech-services]], [[service-shows-when-page-starts]], `service.rs`.
 
 ## Acceptance criteria
-- [ ] A click marks the tile as opening in the click's own task (so the next frame
+- [x] A click marks the tile as opening in the click's own task (so the next frame
       shows it, well under 100 ms); the other tiles step back.
-- [ ] Further tile clicks while opening start nothing (one request to the page).
-- [ ] The service webview waits out of sight (full size, left of the window; at size 0
+- [x] Further tile clicks while opening start nothing (one request to the page).
+- [x] The service webview waits out of sight (full size, left of the window; at size 0
       WebView2 shows no page popups) until its first document starts loading
       (`PageLoadEvent::Started`), at the latest until loading ends, failure included.
-- [ ] The webview's background is floawty's ground colour for the effective theme until
+- [x] The webview's background is floawty's ground colour for the effective theme until
       the first load ends, then white as before.
-- [ ] Opening the last service at start shows the same sign.
-- [ ] With animations off or reduced motion the sign does not move.
-- [ ] Page start and paints are not later than before (probe, hidden, after the yes).
-- [ ] Idle RAM on the tiles stays within budget.
+- [x] Opening the last service at start shows the same sign.
+- [x] With animations off or reduced motion the sign does not move.
+- [x] Page start and paints are not later than before (probe, hidden, after the yes).
+- [x] Idle RAM on the tiles stays within budget.
 
 ## Tests first
 - Vitest `src/opening.test.ts`: a click marks the tile until the shell reports; the
@@ -77,6 +77,6 @@ the page takes over when its first document starts loading.
   (park left, keyboard-proof ⋯, criterion wording).
 
 ## Resume here
-Code final and measured. Branch `claude/cranky-mendeleev-b55d49`
-(worktree), uncommitted. Merge order agreed with the maintainer: rel-02, of-01, the page
-fullscreen branch, then of-02. Next: the maintainer's OK for the commit, rebase onto `main` once rel-02 is there.
+Done. On `main` as the merge `2b9d006` of `d458780` (after rel-02), not pushed.
+Follow-up outside this package: `bar.spec.ts` "nine controls" is flaky on `main`
+(reported by the page fullscreen session, 3 of 8 runs); `d0bfdd7` was 2/2 green here.

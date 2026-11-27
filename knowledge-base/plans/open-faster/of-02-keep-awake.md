@@ -19,8 +19,7 @@ With "Keep services awake" on, returning to a service left for the tiles takes u
 - Owns: `src-tauri/src/service.rs`, `settings.rs` (new field), `overlay.rs`, `page.rs`
   (active webview only), `commands.rs`, `src/settings-panel.ts`, `index.html`,
   `src/i18n.ts`, `src/state.ts`, tests for all of it.
-- Non-goals: preloading at start, per-service profiles, muting through WebView2's
-  COM API (new dependency), a time limit.
+- Non-goals: preloading at start, per-service profiles, a time limit.
 - Read first: [[plan-open-faster]] (decided), [[tech-services]], [[tech-shorts]],
   [[home-stays-awake-under-a-service]] (memory levels do not lower private bytes),
   engineering standards §7.
@@ -43,8 +42,9 @@ With "Keep services awake" on, returning to a service left for the tiles takes u
 - Setting changes go through an async `set_keep_awake` command (trims under
   `SWITCHING`); never from a sync command (main thread, deadlock).
 - Help text names a measured range, not one figure; CPU with awake services measured too.
-- Open: quiet script is best effort (shadow DOM, iframes, WebAudio escape it) unless the
-  maintainer approves `webview2-com` for `IsMuted`/`TrySuspend`.
+- Quiet: `webview2-com` approved by the maintainer for of-02 (2026-11-26): hidden services
+  are muted with `IsMuted` (shadow DOM, iframes and WebAudio included); `TrySuspend` is
+  measured before it is used. The page fullscreen branch adds the dependency first.
 
 ## Acceptance criteria
 - [ ] The setting offers Off, Last service, Up to 3 services; default Off; older
