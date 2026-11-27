@@ -189,6 +189,27 @@
       <section class="card" aria-labelledby="data-title">
         <h2 id="data-title"></h2>
         <div class="setting">
+          <p id="transfer-explain" class="setting-note"></p>
+          <div class="setting-actions">
+            <button id="export-settings" type="button" class="button"></button>
+            <button id="import-settings" type="button" class="button"></button>
+          </div>
+        </div>
+        <p id="transfer-status" class="setting-note" role="status"></p>
+        <div
+          id="import-confirm"
+          class="setting-confirm"
+          role="group"
+          aria-labelledby="import-question"
+          hidden
+        >
+          <p id="import-question"></p>
+          <div class="setting-actions">
+            <button id="import-no" type="button" class="button"></button>
+            <button id="import-yes" type="button" class="button primary"></button>
+          </div>
+        </div>
+        <div class="setting">
           <p id="reset-explain" class="setting-note"></p>
           <button id="reset" type="button" class="button"></button>
         </div>

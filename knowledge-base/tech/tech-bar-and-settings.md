@@ -56,8 +56,8 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
   window ([[page-fullscreen-stays-in-window]]), keep services awake (three segments Off /
   Last / Up to 3, `set_keep_awake`, [[services-stay-awake-on-request]]), the update row,
   update check, graphics acceleration),
-  Hotkeys, Shorts and TikTok, Data (reset), then the trademark line for the logos
-  ([[redrawn-service-logos]]). rel-05's export and import join Data. On/off settings are checkboxes with `role="switch"` (Space
+  Hotkeys, Shorts and TikTok, Data (export, import, reset), then the trademark line for
+  the logos ([[redrawn-service-logos]]). On/off settings are checkboxes with `role="switch"` (Space
   toggles, `change` events as before). Hotkeys show one `<kbd>` chip per key
   (`hotkeyParts`); the button's accessible name is "action: Strg+Alt+…". "Delete
   everything" is the only red control (`--danger`).
@@ -86,6 +86,19 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
   unavailable (no valid manifest), signature, failed (text only in the log).
   Timeouts: connect 10 s, read 30 s, check 30 s. The `updateCheck` switch is stored
   only (off by default) until rel-04.
+- **Export and import** ([[settings-export-without-logins]]): Windows' own save and open
+  dialogs (`GetSaveFileNameW` / `GetOpenFileNameW`, on a worker, owner the main
+  window) write or read `floawty-settings.json`: `"kind": "floawty-settings"`,
+  `version`, and only opacity, hotkeys, customTiles, language, theme, animations,
+  shorts, videoOnly, zoom, graphicsAcceleration, alwaysOnTop, fullscreenInWindow,
+  keepAwake. The import is strict (`export_format.rs`: marker, version not newer, no
+  wrong type, hotkeys with Ctrl/Alt/Win and none shared, the panel's tile rules),
+  asks once, then applies live (`pending_import`, `apply_import`) and reloads the page
+  once; a changed graphics acceleration is not applied but asked after the reload
+  (sessionStorage `floawty-imported`), like its switch. Cancel → `discard_import`. Missing keys keep the current value; missing
+  fields inside `hotkeys` or `shorts` take their defaults; an unknown language,
+  theme or keep-awake word reads as its default. `settings_export_text` and
+  `check_import_text` do the same without a dialog for the app tests.
 - "Use graphics acceleration" (default on): turning it off or on asks "Restart floawty
   now?" in place; Cancel puts the box back, Restart saves and restarts
   (`set_graphics_acceleration`), because WebView2 takes its arguments only at start.

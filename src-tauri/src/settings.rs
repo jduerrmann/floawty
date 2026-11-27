@@ -158,6 +158,9 @@ pub struct Settings {
     /// On keeps a page's fullscreen inside the window, in both modes; off fills the screen.
     pub fullscreen_in_window: bool,
     pub keep_awake: KeepAwake,
+    /// Keys this version does not know, kept so saving never loses a newer floawty's settings.
+    #[serde(flatten)]
+    pub extra: serde_json::Map<String, serde_json::Value>,
 }
 
 impl Default for Settings {
@@ -184,6 +187,7 @@ impl Default for Settings {
             always_on_top: true,
             fullscreen_in_window: true,
             keep_awake: KeepAwake::Off,
+            extra: serde_json::Map::new(),
         }
     }
 }
@@ -191,11 +195,20 @@ impl Default for Settings {
 /// Reads settings text; anything unreadable falls back to defaults.
 pub fn parse(text: &str) -> Settings {
     let mut settings: Settings = serde_json::from_str(text).unwrap_or_default();
+    if settings.version > CURRENT_VERSION {
+        // Saved as version 1, the file must not claim keys of a format this version does not know.
+        settings.extra.clear();
+    }
+    migrate(&mut settings);
+    settings
+}
+
+/// Brings read settings to the current format and ranges; the one place a file is migrated.
+pub fn migrate(settings: &mut Settings) {
     // Version 1 is the first format; files without a version are read as version 1.
     settings.version = CURRENT_VERSION;
     settings.opacity = opacity::clamp(settings.opacity);
     settings.shorts.pause_seconds = clamp_shorts_pause(settings.shorts.pause_seconds);
-    settings
 }
 
 /// Takes the panel's choices, kept within their ranges.

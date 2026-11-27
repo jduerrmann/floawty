@@ -5,6 +5,8 @@ mod awake;
 mod bar;
 mod commands;
 mod distribution;
+mod export_format;
+mod file_dialog;
 mod fullscreen;
 mod geometry;
 mod hotkeys;
@@ -23,6 +25,7 @@ mod settings;
 mod sign_in;
 mod sign_in_window;
 mod theme;
+mod transfer;
 mod updates;
 
 use tauri::{AppHandle, Manager, WebviewWindowBuilder, WindowEvent};
@@ -97,6 +100,7 @@ fn setup(app: &AppHandle, webview: &str) -> tauri::Result<()> {
     app.manage(Page::default());
     app.manage(PageFullscreen::default());
     app.manage(updates::Updates::default());
+    app.manage(transfer::PendingImport::default());
     app.manage(std::sync::Mutex::new(service::Views::default()));
     theme::apply(app, app.state::<Overlay>().settings().theme);
     overlay::place_and_show(app)?;
@@ -150,6 +154,13 @@ fn main() {
             commands::set_hotkeys_paused,
             commands::move_focus,
             commands::reset_all_data,
+            transfer::export_settings_file,
+            transfer::import_settings_file,
+            transfer::settings_export_text,
+            transfer::check_import_text,
+            transfer::apply_import,
+            transfer::discard_import,
+            transfer::pending_import,
             commands::quit,
             updates::check_for_update,
             updates::install_update,

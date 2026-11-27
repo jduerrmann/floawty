@@ -128,7 +128,8 @@ hotkey to leave it; configurable global hotkeys (default Ctrl+Alt+Shift); app ti
 with the services' redrawn logos ([redrawn-service-logos](knowledge-base/decisions/redrawn-service-logos.md))
 and custom URL tiles; first-start notice about WebView2; best-effort "video only"
 view; auto mode for YouTube Shorts and TikTok; a small sign-in window for a service's
-sign-in pop-ups (Google, Apple, Facebook); UI in English and German. Service tiles: YouTube,
+sign-in pop-ups (Google, Apple, Facebook); export and import of settings, own tiles
+and hotkeys (never logins); UI in English and German. Service tiles: YouTube,
 Twitch, Netflix, Prime Video, Disney+, RTL+; further services once they pass a
 maintainer test. Windows 10/11 only.
 

@@ -54,6 +54,12 @@ Windows 10 and 11 only for now. Both use the same settings and logins. If WebVie
 missing (rare on Windows 10 and 11), the installer downloads it from Microsoft; the
 portable build shows a link to Microsoft's download page instead.
 
+To take floawty to another PC, use Settings → Data → "Export settings" and "Import
+settings": settings, own tiles and hotkeys come along, sign-ins never do. To back up
+the sign-ins on the same PC and Windows account, copy the folder
+`%LOCALAPPDATA%\io.github.floawty` while floawty is closed; they do not work on
+another PC or account.
+
 ## Contributing
 
 Contributions are welcome – especially fixes when a streaming site changes its

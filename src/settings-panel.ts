@@ -2,6 +2,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { createHotkeyList } from './hotkey-list';
 import { t, type Language, type MessageKey } from './i18n';
+import { startSettingsTransfer } from './settings-transfer';
 import { preferencesOf, type OverlayState, type Preferences, type StateView } from './state';
 import { startUpdates } from './updates';
 
@@ -77,7 +78,8 @@ function wireReset(): void {
 }
 
 // WebView2 takes its arguments only at start, so a change needs a restart; cancelling undoes it.
-function wireGraphicsAcceleration(current: () => OverlayState): void {
+// The returned function asks the same question for a value the settings import brought.
+function wireGraphicsAcceleration(current: () => OverlayState): (enabled: boolean) => void {
   const box = element<HTMLInputElement>('graphics-acceleration');
   const confirm = element('restart-confirm');
   box.addEventListener('change', () => {
@@ -92,6 +94,13 @@ function wireGraphicsAcceleration(current: () => OverlayState): void {
   element('restart-yes').addEventListener('click', () => {
     void invoke('set_graphics_acceleration', { enabled: box.checked });
   });
+  return (enabled) => {
+    box.checked = enabled;
+    confirm.hidden = false;
+    element('restart-no').focus();
+    // After an import the user is at the Data card, far below this question.
+    confirm.scrollIntoView({ block: 'nearest' });
+  };
 }
 
 function wirePreferences(current: () => OverlayState): void {
@@ -182,7 +191,10 @@ export function startSettingsPanel(state: OverlayState, language: Language): Sta
   writeTexts(language);
   wireReset();
   wirePreferences(() => latest);
-  wireGraphicsAcceleration(() => latest);
+  const showImported = startSettingsTransfer(
+    language,
+    wireGraphicsAcceleration(() => latest),
+  );
   startUpdates(language);
   element('settings-done').addEventListener('click', close);
   panel.addEventListener('keydown', (event) => {
@@ -198,6 +210,8 @@ export function startSettingsPanel(state: OverlayState, language: Language): Sta
     element('home').hidden = next.settingsOpen;
     if (opening) {
       element('reset-confirm').hidden = true;
+      element('import-confirm').hidden = true;
+      element('transfer-status').textContent = '';
       element('restart-confirm').hidden = true;
       element('hotkey-error').textContent = '';
       element('language').focus();
@@ -206,5 +220,6 @@ export function startSettingsPanel(state: OverlayState, language: Language): Sta
     if (closing) element('notice-ok').focus();
     showValues(next);
     showHotkeys(next.hotkeys);
+    showImported();
   };
 }
