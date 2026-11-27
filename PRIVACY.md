@@ -12,9 +12,12 @@ updates of its own parts from Microsoft (see below).
   (e.g. "Continue with Google" on TikTok) opens in a small floawty window and stays
   signed in there, for every service in floawty, until you use "Reset all data".
 - Settings are stored locally in a plain JSON file in your user-data folder.
-- floawty makes no network requests on its own. It checks GitHub Releases for
-  updates only when you click "Check for updates" or turn on automatic checks
-  (off by default).
+- floawty makes no network requests on its own. It contacts GitHub Releases only
+  when you click "Check for updates" or turn on automatic updates (off by default):
+  it asks `github.com` for the latest version and, for an update, downloads the
+  setup from GitHub's download servers, checks its signature and installs it. GitHub
+  sees your IP address, as with any download. The portable build only shows the new
+  version and opens the release page in your browser.
 - floawty shows the services through **Microsoft Edge WebView2**, a component of
   Windows that many apps use. WebView2 sends diagnostic data to Microsoft – Microsoft
   says it always sends required diagnostic data, whatever the settings. floawty

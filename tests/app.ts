@@ -79,6 +79,12 @@ export interface RunningApp extends Omit<AppInput, 'stop'> {
   stop: () => Promise<void>;
 }
 
+/** Another exe than the tested build, and the pages it may open outside floawty in a hidden run. */
+export interface StartOptions {
+  exe?: string;
+  allowedOpens?: number;
+}
+
 export function freshProfile(): Profile {
   const root = mkdtempSync(path.join(tmpdir(), 'floawty-test-'));
   return { dataDir: path.join(root, 'data'), webviewDir: path.join(root, 'webview') };
@@ -90,8 +96,8 @@ function exited(app: ChildProcess): Promise<void> {
   );
 }
 
-function childrenOf(pid: number): number[] {
-  const query = `(Get-CimInstance Win32_Process -Filter "ParentProcessId=${pid} AND Name='${path.basename(EXE)}'").ProcessId`;
+function childrenOf(pid: number, exe: string): number[] {
+  const query = `(Get-CimInstance Win32_Process -Filter "ParentProcessId=${pid} AND Name='${path.basename(exe)}'").ProcessId`;
   const output = execFileSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', query]);
   return output.toString().split(/\s+/).filter(Boolean).map(Number);
 }
@@ -104,8 +110,8 @@ function killIfAlive(pid: number): void {
   }
 }
 
-function startVisible(env: NodeJS.ProcessEnv, args: string[]): Floawty {
-  const app = spawn(EXE, args, { env });
+function startVisible(env: NodeJS.ProcessEnv, args: string[], exe: string): Floawty {
+  const app = spawn(exe, args, { env });
   const pid = app.pid ?? 0;
   // Only children a test asked for are ended, so a stop needs no process query.
   const seen = new Set<number>();
@@ -120,7 +126,7 @@ function startVisible(env: NodeJS.ProcessEnv, args: string[]): Floawty {
     hotkey: async (text) => pressKeys(sendKeysFor(text)),
     counts: async () => null,
     children: async () => {
-      const pids = childrenOf(pid);
+      const pids = childrenOf(pid, exe);
       pids.forEach((child) => seen.add(child));
       return pids;
     },
@@ -132,9 +138,10 @@ async function startHidden(
   env: NodeJS.ProcessEnv,
   args: string[],
   reportStart: boolean,
+  { exe = EXE, allowedOpens = 0 }: StartOptions,
 ): Promise<Floawty> {
   const report = reportStart ? ['--report-start'] : [];
-  const launcher = spawn(LAUNCHER, ['floawty', ...report, EXE, ...args], {
+  const launcher = spawn(LAUNCHER, ['floawty', ...report, exe, ...args], {
     env,
     stdio: ['pipe', 'pipe', 'inherit'],
   });
@@ -173,7 +180,9 @@ async function startHidden(
     // A stuck launcher is killed; its kill-on-close job then ends floawty too.
     await Promise.race([quit(), delay(LAUNCHER_QUIT_MS)]);
     if (launcher.exitCode === null) launcher.kill();
-    if (opened > 0) throw new Error(`floawty tried to open ${opened} page(s) outside floawty`);
+    if (opened > allowedOpens) {
+      throw new Error(`floawty tried to open ${opened} page(s) outside floawty`);
+    }
   };
   return {
     pid,
@@ -198,6 +207,7 @@ export async function startFloawty(
   env: NodeJS.ProcessEnv,
   args: string[] = [],
   reportStart = false,
+  options: StartOptions = {},
 ): Promise<Floawty> {
   // Set by `test-input run`: a direct `playwright test` would hold no run lock.
   if (env.FLOAWTY_TEST_RUN !== '1') {
@@ -207,9 +217,9 @@ export async function startFloawty(
   }
   if (env.FLOAWTY_TEST_HIDDEN !== '1') {
     if (reportStart) throw new Error('the start time is measured by the hidden launcher');
-    return startVisible(env, args);
+    return startVisible(env, args, options.exe ?? EXE);
   }
-  return startHidden(env, args, reportStart);
+  return startHidden(env, args, reportStart, options);
 }
 
 async function connect(): Promise<Browser> {
@@ -223,14 +233,18 @@ async function connect(): Promise<Browser> {
   throw new Error('WebView2 debug port did not open');
 }
 
-export async function launch(profile: Profile): Promise<RunningApp> {
+export async function launch(
+  profile: Profile,
+  options: StartOptions & { env?: NodeJS.ProcessEnv } = {},
+): Promise<RunningApp> {
   const env = {
     ...process.env,
+    ...options.env,
     FLOAWTY_DATA_DIR: profile.dataDir,
     WEBVIEW2_USER_DATA_FOLDER: profile.webviewDir,
     WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: BROWSER_ARGS,
   };
-  const floawty = await startOnFreePort(CDP_PORT, () => startFloawty(env));
+  const floawty = await startOnFreePort(CDP_PORT, () => startFloawty(env, [], false, options));
   const browser = await connect();
   const pages = () => browser.contexts().flatMap((context) => context.pages());
   const find = (file: string) =>

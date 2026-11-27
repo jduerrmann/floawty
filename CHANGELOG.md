@@ -6,6 +6,10 @@ User-facing changes, in plain language. Format based on
 
 ## [Unreleased]
 
+- The settings show floawty's version and a "Check for updates" button. A found update
+  downloads, checks its signature, installs and restarts floawty in the new version;
+  the portable build shows the new version and opens its release page. floawty asks
+  GitHub only when you click.
 - A new setting keeps services awake: off by default, or the last service, or up to
   three. A service you leave then stays loaded, quiet and paused, and comes back at once
   where you left it; each one kept uses extra memory.

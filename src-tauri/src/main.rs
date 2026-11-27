@@ -23,6 +23,7 @@ mod settings;
 mod sign_in;
 mod sign_in_window;
 mod theme;
+mod updates;
 
 use tauri::{AppHandle, Manager, WebviewWindowBuilder, WindowEvent};
 
@@ -95,6 +96,7 @@ fn setup(app: &AppHandle, webview: &str) -> tauri::Result<()> {
     app.manage(Bar::default());
     app.manage(Page::default());
     app.manage(PageFullscreen::default());
+    app.manage(updates::Updates::default());
     app.manage(std::sync::Mutex::new(service::Views::default()));
     theme::apply(app, app.state::<Overlay>().settings().theme);
     overlay::place_and_show(app)?;
@@ -124,6 +126,7 @@ fn main() {
     };
     tauri::Builder::default()
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .invoke_handler(tauri::generate_handler![
             commands::webview_version,
             commands::set_keep_awake,
@@ -147,7 +150,10 @@ fn main() {
             commands::set_hotkeys_paused,
             commands::move_focus,
             commands::reset_all_data,
-            commands::quit
+            commands::quit,
+            updates::check_for_update,
+            updates::install_update,
+            updates::open_release_page
         ])
         .setup(move |app| Ok(setup(app.handle(), &webview)?))
         .run(tauri::generate_context!())

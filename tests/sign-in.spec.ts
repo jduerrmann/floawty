@@ -96,7 +96,7 @@ const titled = (app: RunningApp, host: string) => () => {
 };
 
 // Only whether a call is allowed; what a command would return is never read.
-const TRY_COMMANDS = `Promise.all(['tiles_state', 'plugin:app|version'].map((command) =>
+const TRY_COMMANDS = `Promise.all(['tiles_state', 'open_release_page', 'plugin:app|version', 'plugin:updater|check'].map((command) =>
   window.__TAURI_INTERNALS__.invoke(command).then(() => 'allowed', () => 'refused')))`;
 
 test('a listed sign-in pop-up opens one owned window, without floawty commands', async () => {
@@ -112,7 +112,12 @@ test('a listed sign-in pop-up opens one owned window, without floawty commands',
     await expect.poll(titled(app, 'www.example.org')).toBe(true);
     await expect.poll(signInTarget).toBeTruthy();
     const target = (await signInTarget()) as Target;
-    expect(await evaluateIn(target, TRY_COMMANDS)).toEqual(['refused', 'refused']);
+    expect(await evaluateIn(target, TRY_COMMANDS)).toEqual([
+      'refused',
+      'refused',
+      'refused',
+      'refused',
+    ]);
     // The provider closes its page after the sign-in; the window must go with it.
     await evaluateIn(target, 'window.close()');
     await expect.poll(() => ownedPopups(app.pid), { timeout: 5000 }).toBe(0);

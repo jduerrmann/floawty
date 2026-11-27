@@ -4,7 +4,7 @@ area: process
 tags: [tests, playwright, test-input, measurement]
 status: active
 created: 2026-11-24
-updated: 2026-11-24
+updated: 2026-11-27
 source: plan [[plan-quiet-tests]]
 ---
 
@@ -34,7 +34,7 @@ take neither the maintainer's mouse, keyboard nor screen. Rules: AGENTS.md rule 
   `smoke:hidden` (app project without `@real`, spec filters allowed),
   `smoke:real` (only `@real`, visible), `smoke` (all, visible, optional),
   `measure` (hidden, `tests/measure/`); `verify` = check, build, `build:test-input`,
-  `smoke:hidden`. Flags that open windows, change the reporter, project or config, or
+  `build:update-test`, `smoke:hidden`. Flags that open windows, change the reporter, project or config, or
   bring `@real` back are refused.
 - **Launcher** `test-input run [--visible] [--timeout-s N] -- cmd` and
   `test-input floawty [--report-start] <exe>`: line protocol on stdin/stdout – first
@@ -56,6 +56,16 @@ take neither the maintainer's mouse, keyboard nor screen. Rules: AGENTS.md rule 
   `tests/real-input.ts`). A spec that imports `tests/real-input.ts` itself carries
   `@real`; the tag scan (`tests/tag-scan.ts`, in Vitest) fails a mismatch. The `@real`
   set: the real grip drag and show/hide with a real foreground (about 13 s).
+- **Update-test build** (`npm run build:update-test`, `scripts/build-update-test.mjs`):
+  floawty with `--config` asking `http://127.0.0.1:9335/latest.json`, insecure
+  transport allowed and a throwaway key (no password), built into
+  `src-tauri/target/update-test/` so `target/release` is never replaced. It leaves a
+  portable copy, an installed copy (bundle-type marker patched to NSIS, as the bundler
+  does) and a signed payload plus a signature over other bytes. `tests/update.spec.ts`
+  serves them (hidden only: the shim swallows the setup start and the release page)
+  and checks the saved setup in its own `TEMP`; `launch()` takes `exe`, `env` and
+  `allowedOpens` for it. `FLOAWTY_TEST_EXE` does not reach these tests; a hidden run
+  refuses an update-test build older than `target/release/floawty.exe`.
 - **Measurements** (`tests/measure/budgets.spec.ts`): hidden, medians over 60 s with
   `spikes/measure`; start time from the launcher to floawty's main window without
   the time it is held for the shim ([[start-budget-main-window]]); hover scenarios

@@ -3,6 +3,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { createHotkeyList } from './hotkey-list';
 import { t, type Language, type MessageKey } from './i18n';
 import { preferencesOf, type OverlayState, type Preferences, type StateView } from './state';
+import { startUpdates } from './updates';
 
 function element<T extends HTMLElement>(id: string): T {
   return document.getElementById(id) as T;
@@ -182,6 +183,7 @@ export function startSettingsPanel(state: OverlayState, language: Language): Sta
   wireReset();
   wirePreferences(() => latest);
   wireGraphicsAcceleration(() => latest);
+  startUpdates(language);
   element('settings-done').addEventListener('click', close);
   panel.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && !event.defaultPrevented) close();
