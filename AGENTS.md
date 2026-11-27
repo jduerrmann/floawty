@@ -33,8 +33,9 @@ Breaking one needs a new decision and the maintainer's explicit OK first.
    ([redrawn-service-logos](knowledge-base/decisions/redrawn-service-logos.md)).
 2. **No ads, no monetization in the app.** A donation link may live in the README only.
 3. **No server.** No backend, API, database or proxy. floawty's own code talks only
-   to the services the user opens and to GitHub Releases for an update check the
-   user triggers or turns on (off by default). The Windows component WebView2 also
+   to the services the user opens and to GitHub Releases to check, download and
+   install updates, only on the user's click or with automatic updates on (off by
+   default). The Windows component WebView2 also
    sends diagnostic data to Microsoft and loads updates of its own components (e.g.
    the DRM module) from Microsoft; both are disclosed at first start, in
    PRIVACY.md and in the README, never hidden or denied
@@ -143,7 +144,9 @@ through the service's own next control the way a user would, and is configurable
 ## 10. Verify before reporting completion
 
 - `npm run verify` must pass: `npm run check` (types, lint, format, Vitest, adapter
-  tests, `cargo clippy`, `cargo test`), build, `build:test-input`, `smoke:hidden`.
+  tests, `cargo clippy`, `cargo test`), build, `build:test-input`,
+  `build:update-test`, `smoke:hidden`. A hidden run refuses an update-test build
+  older than the build.
 - **Hidden runs** start floawty on a desktop nobody sees, through `tools/test-input`
   ([app-tests-run-hidden](knowledge-base/decisions/app-tests-run-hidden.md)):
   `npm run smoke:hidden` with optional spec filters, and `verify`. Start them without

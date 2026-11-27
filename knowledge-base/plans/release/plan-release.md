@@ -3,8 +3,8 @@ type: plan
 tags: [plan-map, release, dist]
 status: active
 created: 2026-11-20
-updated: 2026-11-21
-source: visual plan "Phase 3 – Release-Pipeline", rounds 1–2, approved 2026-11-20
+updated: 2026-11-27
+source: visual plan "Phase 3 – Release-Pipeline", rounds 1–2, approved 2026-11-20; "Release 0.1.0 – der Rest", approved 2026-11-27
 ---
 
 # Plan – Release pipeline (phase 3)
@@ -65,7 +65,8 @@ Decisions: [[release-pipeline]], [[updates-by-tauri-updater]],
 | 07 | [[rel-07-first-release]] | 0.1.0 is public after rc → rc updates proved | 04, 05, 06, sf-01–04, gl-02 |
 | 08 | [[rel-08-signpath]] | Releases are signed through SignPath Foundation | 07 |
 
-Order: 01, 02 and 05 can start; 03 after 02, 04 after 03.
+Order (maintainer, 2026-11-27): 03, 05, 04, 06, 07; 08 after 0.1.0. One commit per
+package after the maintainer's OK. 01 and 02 are done.
 02, 03 and 05 share `main.rs` and the settings files, so they run one after another,
 not as parallel writers. 08 waits for SignPath's acceptance.
 

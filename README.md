@@ -31,7 +31,10 @@ else, and can even let your mouse click right through it.
 - **Free forever**, licensed under GPL-3.0
 - **No ads**, no affiliate links, no sponsored anything
 - **No server, no account, no tracking.** floawty only talks to the streaming sites
-  you open, and to GitHub only when you ask it to check for updates. Honest
+  you open, and to GitHub only to check for, download and install updates when you
+  click "Check for updates" or turn on automatic updates (off by default): it asks
+  github.com and downloads from GitHub's download servers, which see your IP address
+  like any download. Honest
   footnote: floawty uses Windows' WebView2 component, which sends diagnostic data to
   Microsoft, which cannot be stopped, and loads updates of its own parts (such as the
   video DRM module) from Microsoft, which floawty keeps on because some services need

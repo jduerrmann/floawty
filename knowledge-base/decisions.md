@@ -66,3 +66,4 @@ One line per decision record in `decisions/`. Template: `templates/t-decision.md
 - [[unsigned-first-then-signpath]] – unsigned releases with checksums first, SignPath Foundation signing later
 - [[release-pipeline]] – CI checks every PR; a tag after local checks publishes setup, portable and SHA256SUMS at once
 - [[updates-by-tauri-updater]] – updates by click or, if turned on, automatically on quit; portable only links to the release
+- [[one-running-floawty]] – a second start brings the open window to the front; tauri-plugin-single-instance

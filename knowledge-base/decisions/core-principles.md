@@ -4,7 +4,7 @@ area: process
 tags: [principles, license, privacy]
 status: active
 created: 2026-11-16
-updated: 2026-11-21
+updated: 2026-11-27
 source: conversation
 ---
 
@@ -26,7 +26,9 @@ services, which brings legal and ethical constraints.
 3. **No server** operated by the project. Outgoing connections only to the services
    the user opens and to GitHub Releases for an update check the user triggers or
    turns on (off by default). Amended by [[webview2-diagnostics-disclosed]]
-   and [[webview2-component-updates-disclosed]].
+   and [[webview2-component-updates-disclosed]], and by [[updates-by-tauri-updater]]:
+   GitHub Releases to check, download and install updates, only on the user's click
+   or with automatic updates on (maintainer, 2026-11-20).
 4. **No telemetry or tracking**, not even opt-in.
 5. **No accounts and no API keys.**
 6. Distribution only via **GitHub Releases**, built by GitHub Actions; portable build

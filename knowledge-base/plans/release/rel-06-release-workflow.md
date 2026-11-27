@@ -3,7 +3,7 @@ type: plan
 tags: [package, release, dist]
 status: planned
 created: 2026-11-20
-updated: 2026-11-24
+updated: 2026-11-27
 source: visual plan "Phase 3 – Release-Pipeline", approved 2026-11-20; advisor review
 ---
 
@@ -31,7 +31,16 @@ with the CHANGELOG section once every asset is attached.
       `package.json`, `Cargo.toml`, `tauri.conf.json`, when the tag commit is not on
       `main`, or when the CHANGELOG has no section for the version.
 - [ ] The built setup is installed silently in the job and the smoke test runs
-      against the installed exe before anything is uploaded.
+      against the installed exe before anything is uploaded, tried first as a
+      visible run on the runner's desktop. If it cannot run there, the job skips it
+      and the rc's CI-built setup is checked locally (`smoke:hidden` against the
+      installed exe) before any stable tag; CONTRIBUTING names that step.
+- [ ] The updater signature is bound to the version (`tauri signer sign --app-version
+      X.Y.Z`; floawty sets `requireSignedVersion`, rel-03), and the job fails before
+      building when `plugins.updater.pubkey` in `tauri.conf.json` is empty.
+- [ ] The maintainer generates the updater key pair (password manager plus backup);
+      the public key goes into `tauri.conf.json`, key and password into the
+      environment secret.
 - [ ] Updater signing is an explicit last step (`tauri signer sign` on the final
       file), not `createUpdaterArtifacts` in the base config, so `build:release` runs
       without the key and rel-08's Authenticode step needs no rework.

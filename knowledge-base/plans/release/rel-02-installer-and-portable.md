@@ -3,7 +3,7 @@ type: plan
 tags: [package, release, dist, window]
 status: done
 created: 2026-11-20
-updated: 2026-11-26
+updated: 2026-11-27
 source: visual plan "Phase 3 – Release-Pipeline", approved 2026-11-20
 ---
 
@@ -104,6 +104,4 @@ instead of failing silently.
   61.2 fps, hidden 718.8 MB.
 
 ## Resume here
-Done on `feat/rel-02-installer-and-portable` (on `main` d0bfdd7); waiting for the
-maintainer's OK on the commit. Next in [[plan-release]]: rel-03 (update by click) or
-rel-05 (settings export), one after the other.
+Done; on `main` as a7d90d1. Next in [[plan-release]]: rel-03.

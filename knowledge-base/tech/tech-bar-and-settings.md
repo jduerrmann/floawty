@@ -54,11 +54,10 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
   `::after`. Accessible names come from `aria-label`, the buttons have no text.
 - **Settings page:** cards General (language, theme, animations, page fullscreen in the
   window ([[page-fullscreen-stays-in-window]]), keep services awake (three segments Off /
-  Last / Up to 3, `set_keep_awake`, [[services-stay-awake-on-request]]), update check,
-  graphics acceleration),
+  Last / Up to 3, `set_keep_awake`, [[services-stay-awake-on-request]]), the update row,
+  update check, graphics acceleration),
   Hotkeys, Shorts and TikTok, Data (reset), then the trademark line for the logos
-  ([[redrawn-service-logos]]). rel-03's update button joins General, rel-05's export
-  and import join Data. On/off settings are checkboxes with `role="switch"` (Space
+  ([[redrawn-service-logos]]). rel-05's export and import join Data. On/off settings are checkboxes with `role="switch"` (Space
   toggles, `change` events as before). Hotkeys show one `<kbd>` chip per key
   (`hotkeyParts`); the button's accessible name is "action: Strg+Alt+…". "Delete
   everything" is the only red control (`--danger`).
@@ -79,7 +78,14 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
   Leertaste, arrows) everywhere, also in the click-through hint.
 - Auto-mode settings (section "Shorts and TikTok"): pause 0–10 s, "hold while the mouse
   is over floawty" (default on), size while a short video plays (`rotated` default or `separate`, [[tech-window]]).
-- The update check is stored only (off by default); nothing talks to GitHub yet.
+- **Update row** ([[updates-by-tauri-updater]]): "Version X.Y.Z" and "Check for updates"
+  (`check_for_update`); nothing asks GitHub before the click. A found update shows
+  "Install and restart" (installed, `install_update`: download, signature bound to
+  the version, passive setup, floawty exits and the setup restarts it) or "Open
+  release page" (portable, `open_release_page`, fixed URL). Hints: offline,
+  unavailable (no valid manifest), signature, failed (text only in the log).
+  Timeouts: connect 10 s, read 30 s, check 30 s. The `updateCheck` switch is stored
+  only (off by default) until rel-04.
 - "Use graphics acceleration" (default on): turning it off or on asks "Restart floawty
   now?" in place; Cancel puts the box back, Restart saves and restarts
   (`set_graphics_acceleration`), because WebView2 takes its arguments only at start.
@@ -113,6 +119,8 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
 | `src/state.ts` | `OverlayState`, start a page in its language, reload on change, `withShortsAuto` | Vitest |
 | `src/bar.ts`, `src/bar.css`, `src/click-through.ts` | controls, dot and hint | Playwright |
 | `src/settings-panel.ts`, `src/hotkey-list.ts`, `src/settings.css` | glass cards, preferences, restart and reset confirms, hotkey recording and chips | Playwright |
+| `src-tauri/src/updates.rs` | check, install, release page; error → hint code; plugin `tauri-plugin-updater` (no `updater:` permission) | unit, `tests/update.spec.ts` |
+| `src/update-view.ts`, `src/updates.ts` | update row states and wiring | Vitest, Playwright |
 | `src/hotkeys.ts` | key press → hotkey, conflicts, localized display (`hotkeyParts`, `formatHotkey`) | Vitest |
 | `src/i18n.ts` | all texts, `resolveLanguage` | Vitest |
 
