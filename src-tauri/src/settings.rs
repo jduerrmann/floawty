@@ -123,6 +123,7 @@ pub struct Preferences {
     pub animations: bool,
     pub shorts: Shorts,
     pub update_check: bool,
+    pub fullscreen_in_window: bool,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -153,6 +154,8 @@ pub struct Settings {
     pub graphics_acceleration: bool,
     /// Off lets other windows cover the floaty view; click-through keeps it on top anyway.
     pub always_on_top: bool,
+    /// On keeps a page's fullscreen inside the window, in both modes; off fills the screen.
+    pub fullscreen_in_window: bool,
 }
 
 impl Default for Settings {
@@ -177,6 +180,7 @@ impl Default for Settings {
             zoom: false,
             graphics_acceleration: true,
             always_on_top: true,
+            fullscreen_in_window: true,
         }
     }
 }
@@ -201,6 +205,7 @@ pub fn apply_preferences(settings: &mut Settings, preferences: Preferences) {
         ..preferences.shorts
     };
     settings.update_check = preferences.update_check;
+    settings.fullscreen_in_window = preferences.fullscreen_in_window;
 }
 
 pub fn to_json(settings: &Settings) -> String {
@@ -378,6 +383,25 @@ mod tests {
     }
 
     #[test]
+    fn page_fullscreen_stays_in_the_window_unless_switched_off() {
+        assert!(parse(r#"{ "version": 1, "opacity": 0.5 }"#).fullscreen_in_window);
+        let off = to_json(&parse(r#"{ "fullscreenInWindow": false }"#));
+        assert!(off.contains(r#""fullscreenInWindow": false"#), "{off}");
+    }
+
+    #[test]
+    fn the_preferences_switch_page_fullscreen_to_the_whole_screen() {
+        let preferences = serde_json::from_str(
+            r#"{ "language": "en", "theme": "system", "animations": true, "updateCheck": false,
+                 "fullscreenInWindow": false, "shorts": { "auto": false } }"#,
+        )
+        .expect("the panel's preferences");
+        let mut settings = Settings::default();
+        apply_preferences(&mut settings, preferences);
+        assert!(!settings.fullscreen_in_window);
+    }
+
+    #[test]
     fn animations_are_on_unless_switched_off() {
         let on = to_json(&parse(r#"{ "version": 1, "opacity": 0.5 }"#));
         assert!(on.contains(r#""animations": true"#), "{on}");
@@ -390,7 +414,7 @@ mod tests {
     fn the_preferences_switch_animations_off() {
         let preferences = serde_json::from_str(
             r#"{ "language": "en", "theme": "system", "animations": false, "updateCheck": false,
-                 "shorts": { "auto": false } }"#,
+                 "fullscreenInWindow": true, "shorts": { "auto": false } }"#,
         )
         .expect("the panel's preferences");
         let mut settings = Settings::default();
@@ -415,6 +439,7 @@ mod tests {
                     portrait_size: PortraitSize::Separate,
                 },
                 update_check: true,
+                fullscreen_in_window: false,
             },
         );
         let text = to_json(&settings);
@@ -440,6 +465,7 @@ mod tests {
                     animations: true,
                     shorts,
                     update_check: false,
+                    fullscreen_in_window: true,
                 },
             );
             settings.shorts.pause_seconds

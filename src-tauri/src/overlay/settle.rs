@@ -54,6 +54,10 @@ fn mouse_button_down() -> bool {
 
 fn settle(app: &AppHandle) -> tauri::Result<()> {
     let window = main_window(app);
+    // A page's fullscreen on the whole screen is not a geometry to keep or snap.
+    if window.is_fullscreen()? {
+        return Ok(());
+    }
     let current = visible_rect(&window)?;
     if overlay(app).settings().mode == Mode::Window {
         overlay(app).update(app, |s| mode::remember(s, current));

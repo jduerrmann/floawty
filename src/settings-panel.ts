@@ -19,6 +19,8 @@ const TEXTS: [string, MessageKey][] = [
   ['theme-dark', 'themeDark'],
   ['animations-label', 'animations'],
   ['animations-note', 'animationsNote'],
+  ['fullscreen-in-window-label', 'fullscreenInWindow'],
+  ['fullscreen-in-window-note', 'fullscreenInWindowNote'],
   ['hotkeys-title', 'hotkeysTitle'],
   ['shorts-title', 'shortsTitle'],
   ['shorts-pause-label', 'shortsPause'],
@@ -105,6 +107,10 @@ function wirePreferences(current: () => OverlayState): void {
   updateCheck.addEventListener('change', () =>
     change((p) => ({ ...p, updateCheck: updateCheck.checked })),
   );
+  const inWindow = element<HTMLInputElement>('fullscreen-in-window');
+  inWindow.addEventListener('change', () =>
+    change((p) => ({ ...p, fullscreenInWindow: inWindow.checked })),
+  );
 }
 
 type Change = (patch: (preferences: Preferences) => Preferences) => void;
@@ -144,6 +150,7 @@ function showValues(state: OverlayState): void {
   element<HTMLInputElement>('shorts-hold').checked = state.shorts.holdOnHover;
   element<HTMLSelectElement>('portrait-size').value = state.shorts.portraitSize;
   element<HTMLInputElement>('update-check').checked = state.updateCheck;
+  element<HTMLInputElement>('fullscreen-in-window').checked = state.fullscreenInWindow;
   // An open restart question keeps the box as the user just set it.
   if (element('restart-confirm').hidden) {
     element<HTMLInputElement>('graphics-acceleration').checked = state.graphicsAcceleration;

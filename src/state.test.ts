@@ -40,6 +40,7 @@ const preferences: Preferences = {
   theme: 'dark',
   animations: false,
   updateCheck: true,
+  fullscreenInWindow: false,
   shorts: { auto: false, pauseSeconds: 2, holdOnHover: false, portraitSize: 'separate' },
 };
 
@@ -57,6 +58,7 @@ describe('withShortsAuto', () => {
       theme: 'dark',
       animations: false,
       updateCheck: true,
+      fullscreenInWindow: false,
       shorts: { auto: true, pauseSeconds: 2, holdOnHover: false, portraitSize: 'separate' },
     });
   });

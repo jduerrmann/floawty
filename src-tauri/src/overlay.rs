@@ -56,6 +56,7 @@ pub struct OverlayState {
     pub video_only: bool,
     pub zoom: bool,
     pub always_on_top: bool,
+    pub fullscreen_in_window: bool,
     pub page_problems: Vec<Problem>,
     pub opening: Option<String>,
 }
@@ -138,6 +139,7 @@ impl Overlay {
             video_only: settings.video_only,
             zoom: settings.zoom,
             always_on_top: settings.always_on_top,
+            fullscreen_in_window: settings.fullscreen_in_window,
             page_problems: self.page_problems.lock().unwrap().clone(),
             opening: self.opening(),
         }
@@ -239,6 +241,10 @@ pub fn place_and_show(app: &AppHandle) -> tauri::Result<()> {
 /// Switches between floaty view and window mode; each keeps its own geometry.
 pub fn toggle_mode(app: &AppHandle) -> tauri::Result<()> {
     let window = main_window(app);
+    // A page on the whole screen would be stored as the mode's geometry.
+    if window.is_fullscreen()? {
+        return Ok(());
+    }
     let current = visible_rect(&window)?;
     let before = overlay(app).settings();
     let turned = before.mode == Mode::Floaty && overlay(app).aspect() == Aspect::Portrait;
@@ -328,6 +334,10 @@ pub fn set_aspect(app: &AppHandle, aspect: Aspect) {
 }
 
 fn change_aspect(app: &AppHandle, aspect: Aspect) -> tauri::Result<()> {
+    // Turning would resize a page's whole-screen fullscreen, so it waits for the next report.
+    if main_window(app).is_fullscreen()? {
+        return Ok(());
+    }
     let previous = std::mem::replace(&mut *overlay(app).aspect.lock().unwrap(), aspect);
     let settings = overlay(app).settings();
     if previous == aspect || settings.mode == Mode::Window {

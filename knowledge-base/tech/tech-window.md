@@ -4,7 +4,7 @@ area: window
 tags: [overlay, settings, hotkeys, logging]
 status: active
 created: 2026-11-17
-updated: 2026-11-22
+updated: 2026-11-26
 source: mvp-02 implementation, mvp-05
 ---
 
@@ -48,6 +48,18 @@ wiring talks to Tauri and Win32.
   otherwise it hides (pausing the video) or shows. Switching always on top off takes
   effect when another window is activated (`HWND_NOTOPMOST`); a covered floawty stays
   in the taskbar and Alt+Tab ([[always-on-top-switch]]).
+- **Page fullscreen** ([[page-fullscreen-stays-in-window]], `fullscreen.rs`): Tauri hangs a
+  `ContainsFullScreenElementChanged` handler on every webview that always fills the screen.
+  `service::open` registers floawty's own on the service webview (`webview2-com`) and
+  removes the 64 tokens below its own, among them Tauri's (it keeps its token; WebView2
+  counts tokens up across webviews). With `fullscreenInWindow` on (default) the window
+  never changes and WebView2 lays the element over the service webview, in both modes;
+  off, floawty sets the window fullscreen itself, as a main-thread task that reads the
+  current wish (never inside WebView2's callback). Switching or closing the service
+  while a page is fullscreen puts the window right. Should Tauri's handler survive, a
+  `Resized` into fullscreen the switch does not want is undone at once and logged
+  ("window went fullscreen against the switch"). A fullscreen window is never settled
+  or saved; the mode switch and turning for a Short do nothing meanwhile.
 - Logs stay local ([[core-principles]] #4).
 
 ## Structure
@@ -55,7 +67,7 @@ wiring talks to Tauri and Win32.
 | File | Role | Tests |
 |---|---|---|
 | `geometry.rs` | first placement (floaty: flush bottom right, 480 × 270; window: centred 1280 × 720 or smaller to fit with 16 px room; scaled), per-axis snapping flush within 32 px ([[overlay-snaps-flush]]), landscape shape free with magnets at 16:9 and 12:5 within 4 % (`fit_landscape`, never below the minimum height), 9:16 while a Short plays (`fit_resized`); a height-only drag keeps its height, anything else the width ([[overlay-shape-free-with-zoom]]), restore on the monitor with the largest overlap | unit |
-| `settings.rs` | `Settings` v1 (opacity, geometry, hotkeys, tiles, language, animations, Shorts, update check, graphics acceleration, video only, zoom, always on top), tolerant `parse` (unknown language → system), Shorts pause 0–10 s | unit |
+| `settings.rs` | `Settings` v1 (opacity, geometry, hotkeys, tiles, language, animations, Shorts, update check, graphics acceleration, video only, zoom, always on top, page fullscreen in the window), tolerant `parse` (unknown language → system), Shorts pause 0–10 s | unit |
 | `opacity.rs` | opacity clamp 10–100 %, 10 % steps | unit |
 | `persistence.rs` | `%APPDATA%\floawty\settings.json`, atomic write (temp + rename), keeps broken files | unit (temp dir) |
 | `mode.rs` | `Mode` (floaty / window), switch and remember geometry per mode | unit |
@@ -96,7 +108,8 @@ Settings file (v1):
   "videoOnly": false,
   "zoom": false,
   "graphicsAcceleration": true,
-  "alwaysOnTop": true
+  "alwaysOnTop": true,
+  "fullscreenInWindow": true
 }
 ```
 

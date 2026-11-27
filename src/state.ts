@@ -19,6 +19,7 @@ export interface Preferences {
   animations: boolean;
   shorts: Shorts;
   updateCheck: boolean;
+  fullscreenInWindow: boolean;
 }
 
 export interface OverlayState extends Preferences {
@@ -47,8 +48,8 @@ export function withShortsAuto(preferences: Preferences): Preferences {
 export type StateView = (state: OverlayState) => void;
 
 export function preferencesOf(state: OverlayState): Preferences {
-  const { language, theme, animations, shorts, updateCheck } = state;
-  return { language, theme, animations, shorts, updateCheck };
+  const { language, theme, animations, shorts, updateCheck, fullscreenInWindow } = state;
+  return { language, theme, animations, shorts, updateCheck, fullscreenInWindow };
 }
 
 // tokens.css pins the scheme from this; the session copy is for reloads, which the startup script reads.

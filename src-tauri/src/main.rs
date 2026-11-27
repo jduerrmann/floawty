@@ -4,6 +4,7 @@
 mod bar;
 mod commands;
 mod distribution;
+mod fullscreen;
 mod geometry;
 mod hotkeys;
 mod hover;
@@ -25,6 +26,7 @@ mod theme;
 use tauri::{AppHandle, Manager, WebviewWindowBuilder, WindowEvent};
 
 use bar::Bar;
+use fullscreen::PageFullscreen;
 use overlay::Overlay;
 use page::Page;
 
@@ -91,6 +93,7 @@ fn setup(app: &AppHandle, webview: &str) -> tauri::Result<()> {
     }
     app.manage(Bar::default());
     app.manage(Page::default());
+    app.manage(PageFullscreen::default());
     theme::apply(app, app.state::<Overlay>().settings().theme);
     overlay::place_and_show(app)?;
     let settings = app.state::<Overlay>().settings();
@@ -99,6 +102,9 @@ fn setup(app: &AppHandle, webview: &str) -> tauri::Result<()> {
 
     let handle = app.clone();
     overlay::main_window(app).on_window_event(move |event| {
+        if matches!(event, WindowEvent::Resized(_)) && fullscreen::undo_unwanted(&handle) {
+            return;
+        }
         if matches!(event, WindowEvent::Moved(_) | WindowEvent::Resized(_)) {
             overlay::settle_later(&handle);
         }

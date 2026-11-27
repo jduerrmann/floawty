@@ -8,6 +8,7 @@ use tauri::{
 };
 
 use crate::bar;
+use crate::fullscreen;
 use crate::logbook;
 use crate::navigation::{self, Decision};
 use crate::overlay::{self, Overlay};
@@ -88,7 +89,8 @@ fn add_webview(app: &AppHandle, service: &OpenService) -> tauri::Result<()> {
         .inner_size()?
         .to_logical::<f64>(window.scale_factor()?);
     let (position, size) = place(0.0, size, true);
-    window.add_child(builder, position, size)?;
+    let webview = window.add_child(builder, position, size)?;
+    fullscreen::take_over(app, &webview);
     bar::raise(app);
     Ok(())
 }
@@ -172,10 +174,12 @@ pub fn close(app: &AppHandle) -> tauri::Result<()> {
 fn close_webview(app: &AppHandle) -> tauri::Result<()> {
     sign_in_window::wait_for_build();
     sign_in_window::close(app);
-    match current(app) {
+    let closed = match current(app) {
         Some(webview) => webview.close(),
         None => Ok(()),
-    }
+    };
+    fullscreen::page_closed(app);
+    closed
 }
 
 fn navigation_guard(app: AppHandle, allowed: Vec<String>) -> impl Fn(&Url) -> bool + Send {
