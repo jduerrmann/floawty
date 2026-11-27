@@ -3,7 +3,7 @@ type: research
 tags: [mvp, performance, network, services]
 status: active
 created: 2026-11-18
-updated: 2026-11-26
+updated: 2026-11-27
 source: npm run measure and maintainer checks, 2026-11-18
 ---
 
@@ -62,6 +62,12 @@ medians of 3, ms from the click (page clock); probe `tests/measure/open-compare.
 - The maintainer's ~3 s on a logged-in profile come from the page itself (not measured).
 - After of-01 (A/B, three runs): paints unchanged against `d0bfdd7` (first paint 555 vs
   556 ms, largest 1188 vs 1154 ms); cold load events spread 1.2–1.7 s in every build.
+
+## Services kept awake (2026-11-27)
+
+Hidden, fresh profile, "Up to 3", 60 s medians on the tiles (`tests/measure/keep-awake.spec.ts`):
+YouTube awake 526.7 MB / 0 % CPU; YouTube, Twitch and TikTok awake 1149.5 MB / 0.05 %.
+Against 218.9 MB with Off: about 310 MB per awake service.
 
 ## Network while idle
 

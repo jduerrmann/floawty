@@ -6,6 +6,9 @@ User-facing changes, in plain language. Format based on
 
 ## [Unreleased]
 
+- A new setting keeps services awake: off by default, or the last service, or up to
+  three. A service you leave then stays loaded, quiet and paused, and comes back at once
+  where you left it; each one kept uses extra memory.
 - A page's fullscreen button now fills only the floawty window, in the small overlay
   and in window mode, so you can keep working next to the video. A new switch in the
   settings (General) brings back the whole screen.

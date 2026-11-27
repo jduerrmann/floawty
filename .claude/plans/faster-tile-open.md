@@ -9,8 +9,8 @@ Fertig, wenn:
 - [x] Der Klick zeigt sofort, dass der Dienst öffnet (of-01)
 - [x] Kein weißes Aufblitzen zwischen Kachel und Seite (of-01)
 - [x] Die Seite zeichnet nicht später als vorher (A/B-Probe, of-01)
-- [ ] Mit „Wachhalten: Aus“ bleibt RAM auf den Kacheln im Budget (of-02)
-- [ ] Mit Wachhalten ist der Rückweg zu einem wachen Dienst unter 0,1 s (of-02)
+- [x] Mit „Wachhalten: Aus“ bleibt RAM auf den Kacheln im Budget (of-02)
+- [x] Mit Wachhalten ist der Rückweg zu einem wachen Dienst unter 0,1 s (of-02)
 
 ```mermaid
 stateDiagram-v2
@@ -35,4 +35,4 @@ stateDiagram-v2
 ## Plan
 1. of-01 „Öffnen sichtbar“ – fertig ([[of-01-opening-shown]])
 2. Design-Prüfung of-02 durch `advisor` – fertig, Ergebnisse in [[of-02-keep-awake]]
-3. of-02 „Wachhalten“ – nach dem Fullscreen-Branch; offen: `webview2-com` fürs Stummschalten
+3. of-02 „Wachhalten“ – fertig ([[of-02-keep-awake]])

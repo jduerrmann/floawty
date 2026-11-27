@@ -87,6 +87,33 @@
         </div>
         <div class="setting">
           <div class="setting-text">
+            <span id="keep-awake-label"></span>
+            <p id="keep-awake-note" class="setting-note"></p>
+          </div>
+          <div
+            id="keep-awake"
+            class="segments"
+            role="radiogroup"
+            aria-labelledby="keep-awake-label"
+            aria-describedby="keep-awake-note"
+          >
+            <label
+              ><input type="radio" name="keep-awake" value="off" /><span id="keep-awake-off"></span
+            ></label>
+            <label
+              ><input type="radio" name="keep-awake" value="last" /><span
+                id="keep-awake-last"
+              ></span
+            ></label>
+            <label
+              ><input type="radio" name="keep-awake" value="three" /><span
+                id="keep-awake-three"
+              ></span
+            ></label>
+          </div>
+        </div>
+        <div class="setting">
+          <div class="setting-text">
             <label id="update-check-label" for="update-check"></label>
             <p id="update-check-note" class="setting-note"></p>
           </div>

@@ -1,6 +1,7 @@
 //! The settings file: human-readable JSON, versioned, never fatal when broken.
 use serde::{Deserialize, Serialize};
 
+use crate::awake::KeepAwake;
 use crate::geometry::Rect;
 use crate::mode::Mode;
 use crate::opacity;
@@ -156,6 +157,7 @@ pub struct Settings {
     pub always_on_top: bool,
     /// On keeps a page's fullscreen inside the window, in both modes; off fills the screen.
     pub fullscreen_in_window: bool,
+    pub keep_awake: KeepAwake,
 }
 
 impl Default for Settings {
@@ -181,6 +183,7 @@ impl Default for Settings {
             graphics_acceleration: true,
             always_on_top: true,
             fullscreen_in_window: true,
+            keep_awake: KeepAwake::Off,
         }
     }
 }

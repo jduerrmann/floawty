@@ -1,12 +1,14 @@
-//! The service webview: one at a time, in floawty's shared WebView2 profile, on its domains.
+//! Service webviews: one shown at a time, others awake if asked, in floawty's shared profile.
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Mutex, PoisonError};
 
-use tauri::webview::PageLoadEvent;
+use tauri::webview::{NewWindowResponse, PageLoadEvent};
 use tauri::window::Color;
 use tauri::{
     AppHandle, LogicalPosition, LogicalSize, Manager, Url, Webview, WebviewBuilder, WebviewUrl, Wry,
 };
 
+use crate::awake::{self, KeepAwake};
 use crate::bar;
 use crate::fullscreen;
 use crate::logbook;
@@ -17,7 +19,12 @@ use crate::settings::OpenService;
 use crate::sign_in_window;
 use crate::theme;
 
-pub const LABEL: &str = "service";
+mod keep;
+pub use keep::Views;
+
+// The shown or opening webview's number (0: none); callbacks of hidden webviews check it.
+static SHOWN: AtomicU64 = AtomicU64::new(0);
+static NEXT: AtomicU64 = AtomicU64::new(1);
 // Only worker threads take it (add_child waits for the main thread), so a close never slips into an open.
 static SWITCHING: Mutex<()> = Mutex::new(());
 const BROWSER_ARGS: &str =
@@ -40,8 +47,20 @@ pub fn current_browser_args(app: &AppHandle) -> String {
     browser_args(app.state::<Overlay>().settings().graphics_acceleration)
 }
 
-fn current(app: &AppHandle) -> Option<Webview> {
-    app.get_webview(LABEL)
+fn label(number: u64) -> String {
+    format!("service-{number}")
+}
+
+fn is_shown(number: u64) -> bool {
+    SHOWN.load(Ordering::SeqCst) == number
+}
+
+/// The shown (or opening) service webview.
+pub fn current(app: &AppHandle) -> Option<Webview> {
+    match SHOWN.load(Ordering::SeqCst) {
+        0 => None,
+        number => app.get_webview(&label(number)),
+    }
 }
 
 /// Opens a service over floawty's own page; an open service is closed first.
@@ -53,9 +72,15 @@ pub fn open(app: &AppHandle, service: OpenService) -> tauri::Result<()> {
         return Ok(());
     }
     overlay::emit_state(app);
-    let added = close_webview(app).and_then(|()| add_webview(app, &service));
+    let added = close_webview(app).and_then(|()| {
+        if keep::wake(app, &service) {
+            return Ok(());
+        }
+        add_webview(app, &service)
+    });
     if added.is_err() {
         app.state::<Overlay>().end_opening();
+        keep::shown_closed(app);
         overlay::emit_state(app);
     }
     added
@@ -66,24 +91,34 @@ fn add_webview(app: &AppHandle, service: &OpenService) -> tauri::Result<()> {
         .url
         .parse()
         .map_err(|_| tauri::Error::InvalidWebviewUrl("service url"))?;
-    let mut builder = WebviewBuilder::new(LABEL, WebviewUrl::External(url))
+    let number = NEXT.fetch_add(1, Ordering::SeqCst);
+    let sign_in = sign_in_window::handler(app.clone(), service);
+    let mut builder = WebviewBuilder::new(label(number), WebviewUrl::External(url))
         .additional_browser_args(&current_browser_args(app))
         .background_color(theme::ground(app))
         .on_navigation(navigation_guard(
             app.clone(),
             service.allowed_domains.clone(),
+            number,
         ))
-        .on_new_window(sign_in_window::handler(app.clone(), service));
+        .on_new_window(move |url, features| {
+            if is_shown(number) {
+                sign_in(url, features)
+            } else {
+                NewWindowResponse::Deny
+            }
+        });
     let script = page::script(app, &service.id);
     let scripted = script.is_some();
     page::reset(app, scripted);
+    keep::shown_new(app, service, number, scripted);
     if let Some(script) = script {
-        builder = with_page_script(app, builder, script);
+        builder = with_page_script(app, builder, script, number);
     }
     if let Some(zoom) = page::zoom_script(app) {
         builder = builder.initialization_script(zoom);
     }
-    builder = with_load_hook(app, builder, scripted);
+    builder = with_load_hook(app, builder, scripted, number);
     let window = overlay::main_window(app);
     let size = window
         .inner_size()?
@@ -132,11 +167,16 @@ fn with_page_script(
     app: &AppHandle,
     builder: WebviewBuilder<Wry>,
     script: String,
+    number: u64,
 ) -> WebviewBuilder<Wry> {
     let on_title = app.clone();
     builder
         .initialization_script(script)
-        .on_document_title_changed(move |_, _| page::wake(&on_title))
+        .on_document_title_changed(move |_, _| {
+            if is_shown(number) {
+                page::wake(&on_title);
+            }
+        })
 }
 
 /// The first document to start or end shows the service; every loaded page learns the zoom.
@@ -144,13 +184,23 @@ fn with_load_hook(
     app: &AppHandle,
     builder: WebviewBuilder<Wry>,
     scripted: bool,
+    number: u64,
 ) -> WebviewBuilder<Wry> {
     let on_load = app.clone();
     builder.on_page_load(move |webview, payload| {
-        reveal(&on_load);
-        if payload.event() == PageLoadEvent::Finished {
+        let finished = payload.event() == PageLoadEvent::Finished;
+        if finished {
             // The ground only bridges the wait: a page without a background of its own gets white.
             let _ = webview.set_background_color(Some(Color(0xff, 0xff, 0xff, 0xff)));
+        }
+        if !is_shown(number) {
+            if finished {
+                keep::quiet(&webview);
+            }
+            return;
+        }
+        reveal(&on_load);
+        if finished {
             if scripted {
                 page::wake(&on_load);
             }
@@ -159,11 +209,18 @@ fn with_load_hook(
     })
 }
 
-/// Back to the tiles; the next start opens the tiles too.
+/// Back to the tiles, the service kept awake if the user wants it; the next start opens the tiles.
 pub fn close(app: &AppHandle) -> tauri::Result<()> {
     let _switching = SWITCHING.lock().unwrap_or_else(PoisonError::into_inner);
-    close_webview(app)?;
-    app.state::<Overlay>().end_opening();
+    // A service closed while it opens is never kept: its page has not even started.
+    let opening = app.state::<Overlay>().end_opening().is_some();
+    let slept = match current(app) {
+        Some(webview) if !opening => keep::put_to_sleep(app, &webview)?,
+        _ => false,
+    };
+    if !slept {
+        close_webview(app)?;
+    }
     page::reset(app, false);
     app.state::<Overlay>()
         .update(app, |s| s.last_service = None);
@@ -178,16 +235,25 @@ fn close_webview(app: &AppHandle) -> tauri::Result<()> {
         Some(webview) => webview.close(),
         None => Ok(()),
     };
+    keep::shown_closed(app);
     fullscreen::page_closed(app);
     closed
 }
 
-fn navigation_guard(app: AppHandle, allowed: Vec<String>) -> impl Fn(&Url) -> bool + Send {
+fn navigation_guard(
+    app: AppHandle,
+    allowed: Vec<String>,
+    number: u64,
+) -> impl Fn(&Url) -> bool + Send {
     move |url| match navigation::decide(url, &allowed) {
         Decision::Stay => true,
         Decision::OpenInBrowser => {
             // Only the host is logged: watched URLs never go into the log.
             let host = url.host_str().unwrap_or(url.scheme());
+            if !is_shown(number) {
+                logbook::write(&app, &format!("kept a hidden service from leaving: {host}"));
+                return false;
+            }
             logbook::write(&app, &format!("opened outside floawty: {host}"));
             open_in_browser(url);
             false
@@ -240,6 +306,20 @@ pub fn cover(app: &AppHandle, covered: bool) -> tauri::Result<()> {
     } else {
         webview.show()
     }
+}
+
+/// The setting changed: what it has no more room for closes at once.
+pub fn set_keep_awake(app: &AppHandle, keep: KeepAwake) {
+    let _switching = SWITCHING.lock().unwrap_or_else(PoisonError::into_inner);
+    app.state::<Overlay>().update(app, |s| s.keep_awake = keep);
+    keep::trim(app, keep::showing(app));
+    overlay::emit_state(app);
+}
+
+/// Own tiles were removed: their awake webviews close.
+pub fn forget_tiles(app: &AppHandle, before: &[String], after: &[String]) {
+    let _switching = SWITCHING.lock().unwrap_or_else(PoisonError::into_inner);
+    keep::forget(app, &awake::removed(before, after));
 }
 
 pub fn focus(app: &AppHandle) {

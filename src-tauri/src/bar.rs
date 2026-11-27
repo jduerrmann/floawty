@@ -316,6 +316,7 @@ mod tests {
             fullscreen_in_window: settings.fullscreen_in_window,
             page_problems: Vec::new(),
             opening: None,
+            keep_awake: settings.keep_awake,
         }
     }
 

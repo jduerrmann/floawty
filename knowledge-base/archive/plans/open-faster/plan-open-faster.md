@@ -1,9 +1,9 @@
 ---
 type: plan
 tags: [plan-map, services, tiles, resources]
-status: active
+status: done
 created: 2026-11-26
-updated: 2026-11-26
+updated: 2026-11-27
 source: visual plan "Kacheln öffnen schneller", rounds 1–3, answered 2026-11-26
 ---
 

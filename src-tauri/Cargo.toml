@@ -20,6 +20,8 @@ url = "2"
 tauri-plugin-global-shortcut = "~2.4"
 # Tauri's own WebView2 bindings, same version; floawty handles a page's fullscreen itself.
 webview2-com = "~0.39.1"
+# Its `cast` reaches newer WebView2 interfaces: muting a service kept awake out of sight.
+windows-core = "~0.62.2"
 windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Globalization", "Win32_Graphics_Dwm", "Win32_UI_Input_KeyboardAndMouse", "Win32_UI_Shell", "Win32_UI_WindowsAndMessaging"] }
 
 [profile.release]

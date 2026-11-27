@@ -126,7 +126,7 @@ fn zoom_script_call(on: bool) -> String {
 
 /// Tells the open service page whether to zoom; a page without the script ignores it.
 pub fn push_zoom(app: &AppHandle) {
-    let Some(webview) = app.get_webview(service::LABEL) else {
+    let Some(webview) = service::current(app) else {
         return;
     };
     let on = zoom_wanted(&app.state::<Overlay>().settings());
@@ -168,7 +168,7 @@ pub fn sync(app: &AppHandle) {
     if !state.scripted.load(Ordering::SeqCst) {
         return;
     }
-    let Some(webview) = app.get_webview(service::LABEL) else {
+    let Some(webview) = service::current(app) else {
         return;
     };
     let generation = state.generation.load(Ordering::SeqCst);
@@ -182,6 +182,12 @@ pub fn sync(app: &AppHandle) {
     if let Err(error) = asked {
         logbook::write(app, &format!("could not ask the page script: {error}"));
     }
+}
+
+/// A service goes out of sight awake: its page script rests as if floawty were hidden.
+pub fn rest(app: &AppHandle, webview: &tauri::Webview) {
+    let input = sync_input(&app.state::<Overlay>().settings(), false, false);
+    let _ = webview.eval(sync_script(&input));
 }
 
 fn input(app: &AppHandle, hover: bool) -> String {
