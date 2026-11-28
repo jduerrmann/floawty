@@ -6,6 +6,7 @@ export type UpdateState =
   | { kind: 'checking' }
   | { kind: 'current' }
   | { kind: 'available'; version: string; installed: boolean }
+  | { kind: 'onQuit'; version: string }
   | { kind: 'installing' }
   | { kind: 'problem'; code: string };
 
@@ -47,9 +48,29 @@ export function updateView(state: UpdateState): UpdateView {
         showInstall: state.installed,
         showReleasePage: !state.installed,
       };
+    case 'onQuit':
+      return { ...quiet, status: 'updateOnQuit', vars: { version: state.version } };
     case 'installing':
       return { ...quiet, status: 'updateInstalling', checkDisabled: true };
     case 'problem':
       return { ...quiet, status: PROBLEMS[state.code] ?? 'updateFailed' };
   }
+}
+
+interface AutomaticUpdate {
+  updateFound: string | null;
+  updateReady: boolean;
+  portable: boolean;
+}
+
+/** What the update row shows for an update the automatic check found; null if it found none to show. */
+export function automaticUpdate(state: AutomaticUpdate): UpdateState | null {
+  if (state.updateFound === null) return null;
+  if (state.portable) return { kind: 'available', version: state.updateFound, installed: false };
+  return state.updateReady ? { kind: 'onQuit', version: state.updateFound } : null;
+}
+
+/** The portable build cannot install by itself, so the settings button points out the found update. */
+export function updateDot(state: Pick<AutomaticUpdate, 'updateFound' | 'portable'>): boolean {
+  return state.updateFound !== null && state.portable;
 }

@@ -317,6 +317,9 @@ mod tests {
             page_problems: Vec::new(),
             opening: None,
             keep_awake: settings.keep_awake,
+            update_found: None,
+            update_ready: false,
+            portable: false,
         }
     }
 

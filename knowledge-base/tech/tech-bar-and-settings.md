@@ -4,7 +4,7 @@ area: ui
 tags: [bar, settings, i18n, hotkeys, reset]
 status: active
 created: 2026-11-17
-updated: 2026-11-27
+updated: 2026-11-28
 source: mvp-05 implementation
 ---
 
@@ -84,8 +84,20 @@ page (`src/index.html`) under the bar. Both pages follow one state from the shel
   the version, passive setup, floawty exits and the setup restarts it) or "Open
   release page" (portable, `open_release_page`, fixed URL). Hints: offline,
   unavailable (no valid manifest), signature, failed (text only in the log).
-  Timeouts: connect 10 s, read 30 s, check 30 s. The `updateCheck` switch is stored
-  only (off by default) until rel-04.
+  Timeouts: connect 10 s, read 30 s, check 30 s.
+- **Update automatically** (`updateCheck`, off by default; `auto_update.rs`): one
+  thread checks at start and every 24 h while on, and at once when switched on
+  (`set_preferences` wakes it). Installed: a found version downloads once per run
+  and `OverlayState.updateReady` shows "{version} installs when you quit floawty.";
+  `updates::quit` (bar ✕ and the main window's close request) installs it with the
+  passive setup without `/R`, so floawty stays closed. Portable: `updateFound` puts
+  an amber dot (`update-found`) on the settings button and "{version} is available."
+  with the release-page button in the row. Switching off drops a downloaded update.
+  Restarts (reset, graphics) and Windows' shutdown never install.
+- **Only one floawty** per data folder (`single_instance.rs`, [[one-running-floawty]]):
+  `Local\floawty-<FNV-1a of the folder>` mutex claimed first in `main`; a second start
+  signals the `-show` event and exits 0; the first shows, restores and focuses its
+  window. Restarts release the mutex before `app.restart()`.
 - **Export and import** ([[settings-export-without-logins]]): Windows' own save and open
   dialogs (`GetSaveFileNameW` / `GetOpenFileNameW`, on a worker, owner the main
   window) write or read `floawty-settings.json`: `"kind": "floawty-settings"`,

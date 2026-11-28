@@ -24,6 +24,7 @@ pub const ENV_NAME: &str = "FLOAWTY_TEST_INPUT";
 pub const MAX_CHILDREN: usize = 64;
 pub const HANDSHAKE_SLOTS: usize = 64;
 const ERROR_TEXT: usize = 192;
+const SHELL_TEXT: usize = 512;
 const COUNTERS: usize = 3;
 const LOCK_TIMEOUT_MS: u32 = 5000;
 
@@ -39,6 +40,7 @@ pub struct Locked {
     pub table: HotkeyTable,
     child_error: [u8; ERROR_TEXT],
     pub input: Input,
+    last_shell: [u8; SHELL_TEXT],
 }
 
 #[repr(C)]
@@ -230,26 +232,39 @@ impl Shared {
     }
 
     pub fn report_child_error(&self, text: &str) -> Result<(), String> {
-        let mut guard = self.lock()?;
-        let mut end = text.len().min(ERROR_TEXT - 1);
-        while !text.is_char_boundary(end) {
-            end -= 1;
-        }
-        guard.child_error = [0; ERROR_TEXT];
-        guard.child_error[..end].copy_from_slice(&text.as_bytes()[..end]);
+        write_text(&mut self.lock()?.child_error, text);
         Ok(())
     }
 
     /// The newest cause of a child that failed to start; it stays until a newer one replaces it.
     pub fn child_error(&self) -> Option<String> {
-        let guard = self.lock().ok()?;
-        let bytes = &guard.child_error;
-        let length = bytes
-            .iter()
-            .position(|byte| *byte == 0)
-            .unwrap_or(ERROR_TEXT);
-        (length > 0).then(|| String::from_utf8_lossy(&bytes[..length]).into_owned())
+        read_text(&self.lock().ok()?.child_error)
     }
+
+    /// What floawty last asked `ShellExecuteW` to open, file and parameters, for the tests.
+    pub fn record_shell(&self, text: &str) -> Result<(), String> {
+        write_text(&mut self.lock()?.last_shell, text);
+        Ok(())
+    }
+
+    pub fn last_shell(&self) -> Option<String> {
+        read_text(&self.lock().ok()?.last_shell)
+    }
+}
+
+/// Keeps the text NUL-terminated; a longer one is cut at a character boundary.
+fn write_text<const N: usize>(slot: &mut [u8; N], text: &str) {
+    let mut end = text.len().min(N - 1);
+    while !text.is_char_boundary(end) {
+        end -= 1;
+    }
+    *slot = [0; N];
+    slot[..end].copy_from_slice(&text.as_bytes()[..end]);
+}
+
+fn read_text<const N: usize>(slot: &[u8; N]) -> Option<String> {
+    let length = slot.iter().position(|byte| *byte == 0).unwrap_or(N);
+    (length > 0).then(|| String::from_utf8_lossy(&slot[..length]).into_owned())
 }
 
 fn lock_name(name: &str) -> String {
@@ -388,6 +403,16 @@ mod tests {
         assert_eq!(second.child_error().as_deref(), Some("shim did not load"));
         first.report_child_error("second").unwrap();
         assert_eq!(second.child_error().as_deref(), Some("second"));
+    }
+
+    #[test]
+    fn the_last_shell_call_is_kept_until_the_next_one() {
+        let (created, opened) = pair();
+        assert_eq!(opened.last_shell(), None);
+        created.record_shell("setup.exe /P /UPDATE").unwrap();
+        assert_eq!(opened.last_shell().as_deref(), Some("setup.exe /P /UPDATE"));
+        created.record_shell("https://example.org/").unwrap();
+        assert_eq!(opened.last_shell().as_deref(), Some("https://example.org/"));
     }
 
     #[test]

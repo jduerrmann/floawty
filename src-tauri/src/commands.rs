@@ -13,7 +13,9 @@ use crate::paths;
 use crate::reset;
 use crate::service;
 use crate::settings::{self, CustomTile, OpenService, Preferences};
+use crate::single_instance;
 use crate::theme;
+use crate::{auto_update, updates};
 
 type CommandResult = Result<(), String>;
 
@@ -129,7 +131,11 @@ pub fn set_settings_open(app: AppHandle, open: bool) -> CommandResult {
 #[tauri::command]
 pub fn set_preferences(app: AppHandle, preferences: Preferences) {
     let before = app.state::<Overlay>().settings();
-    let (chosen_theme, in_window) = (preferences.theme, preferences.fullscreen_in_window);
+    let (chosen_theme, in_window, automatic) = (
+        preferences.theme,
+        preferences.fullscreen_in_window,
+        preferences.update_check,
+    );
     app.state::<Overlay>()
         .update(&app, |s| settings::apply_preferences(s, preferences));
     if chosen_theme != before.theme {
@@ -137,6 +143,9 @@ pub fn set_preferences(app: AppHandle, preferences: Preferences) {
     }
     if in_window != before.fullscreen_in_window {
         fullscreen::sync(&app);
+    }
+    if automatic != before.update_check {
+        auto_update::set_switch(&app, automatic);
     }
     overlay::emit_state(&app);
     page::sync(&app);
@@ -154,6 +163,12 @@ pub fn set_graphics_acceleration(app: AppHandle, enabled: bool) {
             if enabled { "on" } else { "off" }
         ),
     );
+    restart(&app)
+}
+
+/// The next floawty must be the first one again, and it never installs an update on the way.
+fn restart(app: &AppHandle) -> ! {
+    single_instance::release(app);
     app.restart()
 }
 
@@ -194,10 +209,10 @@ pub fn reset_all_data(app: AppHandle) -> CommandResult {
     let dir = paths::floawty_dir(&app).map_err(|e| e.to_string())?;
     reset::request(&dir).map_err(|e| e.to_string())?;
     logbook::write(&app, "reset of all data requested, restarting");
-    app.restart()
+    restart(&app)
 }
 
 #[tauri::command]
 pub fn quit(app: AppHandle) {
-    app.exit(0);
+    updates::quit(&app);
 }

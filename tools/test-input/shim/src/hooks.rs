@@ -77,13 +77,16 @@ pub extern "system" fn post_message(
 pub extern "system" fn shell_execute(
     _hwnd: HWND,
     _operation: PCWSTR,
-    _file: PCWSTR,
-    _parameters: PCWSTR,
+    file: PCWSTR,
+    parameters: PCWSTR,
     _directory: PCWSTR,
     _show: i32,
 ) -> HINSTANCE {
     if let Some(context) = context() {
         context.shared.add(Counter::ShellExecute);
+        // SAFETY: both are null or NUL-terminated strings floawty passed.
+        let call = unsafe { [wide_text(file), wide_text(parameters)] };
+        let _ = context.shared.record_shell(call.join(" ").trim());
     }
     SHELL_EXECUTE_OK as HINSTANCE
 }
@@ -233,6 +236,23 @@ fn current_process() -> u32 {
 fn current_thread() -> u32 {
     // SAFETY: a plain query without arguments.
     unsafe { GetCurrentThreadId() }
+}
+
+/// The text of a NUL-terminated UTF-16 string, empty for null.
+///
+/// # Safety
+/// `text` is null or points to a NUL-terminated UTF-16 string.
+unsafe fn wide_text(text: PCWSTR) -> String {
+    if text.is_null() {
+        return String::new();
+    }
+    let mut length = 0;
+    // SAFETY: the caller promises a terminating NUL.
+    while unsafe { *text.add(length) } != 0 {
+        length += 1;
+    }
+    // SAFETY: `length` units before the NUL are readable.
+    String::from_utf16_lossy(unsafe { std::slice::from_raw_parts(text, length) })
 }
 
 #[cfg(test)]

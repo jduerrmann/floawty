@@ -4,7 +4,7 @@ area: dist
 tags: [single-instance, dependency, updates]
 status: active
 created: 2026-11-27
-updated: 2026-11-27
+updated: 2026-11-28
 source: visual plan "Release 0.1.0 – der Rest", round 1
 ---
 
@@ -35,3 +35,9 @@ without asking (open question 6).
   run while the maintainer's own floawty is running (the mutex name follows the data
   folder, or tests use their own).
 - Open question 6 is answered.
+- Amended in rel-04 (2026-11-28): built with own code (`single_instance.rs`, named
+  mutex and event per data folder, `windows-sys`), not with the plugin. The plugin
+  names its mutex after the app identifier only, so the maintainer's own floawty
+  would end every app-test floawty; the consequence above needs the data folder in
+  the name. No new dependency. floawty's own restarts (reset, graphics acceleration)
+  release the mutex first.

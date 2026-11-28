@@ -60,6 +60,8 @@ export interface Floawty {
   hotkey: (text: string) => Promise<void>;
   /** What the launcher swallowed from floawty; `null` when no launcher is in between. */
   counts: () => Promise<Counts | null>;
+  /** File and parameters of the last swallowed `ShellExecuteW`; `null` without a launcher. */
+  lastShell: () => Promise<string | null>;
   /** The floawtys this one started by restarting itself; `stop` ends them too. */
   children: () => Promise<number[]>;
   /** The launcher's cursor, button and foreground; `null` when no launcher is in between. */
@@ -76,6 +78,7 @@ export interface RunningApp extends Omit<AppInput, 'stop'> {
   children: () => Promise<number[]>;
   /** What the launcher swallowed from floawty; `null` in a visible run. */
   counts: () => Promise<Counts | null>;
+  lastShell: () => Promise<string | null>;
   stop: () => Promise<void>;
 }
 
@@ -125,6 +128,7 @@ function startVisible(env: NodeJS.ProcessEnv, args: string[], exe: string): Floa
     },
     hotkey: async (text) => pressKeys(sendKeysFor(text)),
     counts: async () => null,
+    lastShell: async () => null,
     children: async () => {
       const pids = childrenOf(pid, exe);
       pids.forEach((child) => seen.add(child));
@@ -190,6 +194,7 @@ async function startHidden(
     stop,
     hotkey: async (text) => void (await ask(`hotkey ${text}`)),
     counts,
+    lastShell: async () => (await ask('last-shell')).trim() || null,
     children: async () => parseChildren((await ask('children')).trim()),
     input: {
       cursor: async (point) => void (await ask(cursorCommand(point))),
@@ -280,5 +285,6 @@ export async function launch(
     release,
     foreground,
     counts: floawty.counts,
+    lastShell: floawty.lastShell,
   };
 }

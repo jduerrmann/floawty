@@ -2,7 +2,8 @@
 import { getVersion } from '@tauri-apps/api/app';
 import { invoke } from '@tauri-apps/api/core';
 import { t, type Language } from './i18n';
-import { updateView, type UpdateState } from './update-view';
+import type { StateView } from './state';
+import { automaticUpdate, updateView, type UpdateState } from './update-view';
 
 interface UpdateCheck {
   current: string;
@@ -14,8 +15,10 @@ function element<T extends HTMLElement>(id: string): T {
   return document.getElementById(id) as T;
 }
 
-export function startUpdates(language: Language): void {
+export function startUpdates(language: Language): StateView {
+  let shown: UpdateState = { kind: 'idle' };
   const show = (state: UpdateState) => {
+    shown = state;
     const view = updateView(state);
     element('update-status').textContent = view.status ? t(language, view.status, view.vars) : '';
     element<HTMLButtonElement>('update-check-now').disabled = view.checkDisabled;
@@ -51,4 +54,13 @@ export function startUpdates(language: Language): void {
   element('update-release-page').addEventListener('click', () => {
     void invoke('open_release_page');
   });
+
+  let automatic: UpdateState | null = null;
+  // Only a change of what the automatic check found shows; a manual check in progress stays.
+  return (state) => {
+    const next = automaticUpdate(state);
+    if (JSON.stringify(next) === JSON.stringify(automatic)) return;
+    automatic = next;
+    if (shown.kind !== 'checking' && shown.kind !== 'installing') show(next ?? { kind: 'idle' });
+  };
 }

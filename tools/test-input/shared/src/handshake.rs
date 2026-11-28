@@ -1,6 +1,6 @@
 //! What the shim reports about itself, and whether the launcher accepts it.
 
-pub const STATE_VERSION: u32 = 3;
+pub const STATE_VERSION: u32 = 4;
 
 /// The functions the shim replaces in floawty's import table, one bit each.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

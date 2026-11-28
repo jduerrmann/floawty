@@ -8,6 +8,7 @@ use tauri::{AppHandle, Emitter, Manager, PhysicalPosition, PhysicalSize, Window}
 
 use crate::awake::KeepAwake;
 use crate::bar;
+use crate::distribution::Build;
 use crate::geometry::{self, Aspect, Rect};
 use crate::logbook;
 use crate::mode::{self, Mode, ShowHide};
@@ -37,6 +38,8 @@ pub struct Overlay {
     page_problems: Mutex<Vec<Problem>>,
     /// The service whose webview waits, out of sight, for its first document.
     opening: Mutex<Option<OpenService>>,
+    /// The version the automatic check found, and whether it is downloaded.
+    update: Mutex<(Option<String>, bool)>,
 }
 
 #[derive(Clone, serde::Serialize)]
@@ -61,6 +64,9 @@ pub struct OverlayState {
     pub page_problems: Vec<Problem>,
     pub opening: Option<String>,
     pub keep_awake: KeepAwake,
+    pub update_found: Option<String>,
+    pub update_ready: bool,
+    pub portable: bool,
 }
 
 impl Overlay {
@@ -77,6 +83,7 @@ impl Overlay {
             settled: Mutex::new(None),
             page_problems: Mutex::new(Vec::new()),
             opening: Mutex::new(None),
+            update: Mutex::new((None, false)),
         }
     }
 
@@ -119,12 +126,19 @@ impl Overlay {
         std::mem::replace(&mut *self.page_problems.lock().unwrap(), problems.clone()) != problems
     }
 
+    /// Takes what the automatic check found; returns whether it changed.
+    pub fn set_update(&self, found: Option<String>, ready: bool) -> bool {
+        let next = (found, ready);
+        std::mem::replace(&mut *self.update.lock().unwrap(), next.clone()) != next
+    }
+
     fn aspect(&self) -> Aspect {
         *self.aspect.lock().unwrap()
     }
 
     pub fn state(&self) -> OverlayState {
         let settings = self.settings.lock().unwrap();
+        let update = self.update.lock().unwrap().clone();
         OverlayState {
             mode: settings.mode,
             opacity: settings.opacity,
@@ -145,6 +159,9 @@ impl Overlay {
             page_problems: self.page_problems.lock().unwrap().clone(),
             opening: self.opening(),
             keep_awake: settings.keep_awake,
+            update_found: update.0,
+            update_ready: update.1,
+            portable: Build::current() == Build::Portable,
         }
     }
 }

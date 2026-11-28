@@ -114,6 +114,7 @@ $h = $global:found
 if ($h -eq [IntPtr]::Zero) { 'missing'; return }
 # WM_SYSCOMMAND with SC_MINIMIZE, as the taskbar button sends it.
 if ($Action -eq 'minimize') { [Flags]::PostMessageW($h, 0x112, [IntPtr]0xF020, [IntPtr]::Zero) | Out-Null }
+if ($Action -eq 'close') { [Flags]::PostMessageW($h, 0x10, [IntPtr]::Zero, [IntPtr]::Zero) | Out-Null }
 $topmost = ([Flags]::GetWindowLongPtrW($h, -20).ToInt64() -band 8) -ne 0
 $key = 0; $alpha = 255; $mode = 0
 if (-not [Flags]::GetLayeredWindowAttributes($h, [ref]$key, [ref]$alpha, [ref]$mode)) { $alpha = 255 }
@@ -153,4 +154,9 @@ export function windowFlags(pid: number, title = 'floawty'): WindowFlags {
 /** Minimizes floawty's window the way its taskbar button does. */
 export function minimize(pid: number): void {
   flagsCall(pid, 'floawty', 'minimize');
+}
+
+/** Closes floawty's window the way its title bar button or Alt+F4 does (`WM_CLOSE`). */
+export function closeWindow(pid: number): void {
+  flagsCall(pid, 'floawty', 'close');
 }
