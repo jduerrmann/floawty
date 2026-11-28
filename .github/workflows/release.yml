@@ -1,0 +1,155 @@
+# A tag vX.Y.Z or vX.Y.Z-rc.N on main builds, checks, signs the updater files and publishes the
+# release. Run by hand (workflow_dispatch) it builds and smoke-tests only: nothing is signed or
+# published. Steps: knowledge-base/decisions/release-pipeline.md, CONTRIBUTING.md "Releases".
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      # The whole history, so the tag can be checked against main.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Tag is on main and matches the versions, the CHANGELOG and the updater key
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main || {
+            echo "::error::$GITHUB_REF_NAME does not point at a commit on main"
+            exit 1
+          }
+          node scripts/release-check.mjs "$GITHUB_REF_NAME"
+
+      - name: Rust toolchain
+        run: rustup toolchain install
+
+      # No build cache: the published files are built from the tag's sources alone.
+      - run: npm ci
+      - run: npm run check
+
+      - name: Cargo lockfiles unchanged
+        run: git diff --exit-code -- src-tauri/Cargo.lock tools/test-input/Cargo.lock
+
+      - run: npm run build:release
+
+      - name: Files in portable and setup
+        shell: bash
+        run: |
+          ls -l release
+          7z l release/*-setup.exe | tee setup-files.txt
+          # An empty or non-NSIS listing would pass the test below unseen.
+          grep -q '^Type = Nsis' setup-files.txt && grep -q 'floawty.exe' setup-files.txt || {
+            echo "::error::7z did not list the setup as NSIS with floawty.exe inside"
+            exit 1
+          }
+          if grep -Eiq 'test-input|test_shim' setup-files.txt || ls release | grep -Eiq 'test-input|test_shim'; then
+            echo "::error::the test launcher or shim from tools/test-input is in the release"
+            exit 1
+          fi
+
+      - name: Install the setup silently
+        shell: pwsh
+        run: |
+          $setup = Get-Item release/*-setup.exe
+          $install = Start-Process $setup.FullName -ArgumentList '/S' -Wait -PassThru
+          if ($install.ExitCode -ne 0) { throw "setup ended with $($install.ExitCode)" }
+          $exe = Join-Path $env:LOCALAPPDATA 'floawty\floawty.exe'
+          if (-not (Test-Path $exe)) { throw "setup did not install $exe" }
+          "FLOAWTY_TEST_EXE=$exe" >> $env:GITHUB_ENV
+
+      # Visible on the runner's desktop: WebView2 gets no window on a hidden one (rel-01).
+      - run: npm run build:test-input
+      - name: Smoke test on the installed floawty
+        run: npm run smoke -- tests/smoke.spec.ts
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release
+          path: release/
+          if-no-files-found: error
+          retention-days: 7
+
+  # Holds the updater key; only GitHub's own actions and tools run here.
+  publish:
+    needs: build
+    if: github.event_name == 'push'
+    runs-on: windows-latest
+    timeout-minutes: 15
+    environment: release
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release
+          path: release
+
+      # Only the Tauri CLI is needed; no install scripts run. The sign step calls it by path, so
+      # nothing from the registry runs next to the key.
+      - run: npm ci --ignore-scripts
+
+      - name: Sign the setup for the updater, bound to the version
+        shell: bash
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          node node_modules/@tauri-apps/cli/tauri.js signer sign --app-version "$version" "release/floawty-$version-setup.exe"
+
+      - name: latest.json, release notes and checksums
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          setup="floawty-$version-setup.exe"
+          url="https://github.com/$GITHUB_REPOSITORY/releases/download/$GITHUB_REF_NAME/$setup"
+          node scripts/changelog-section.mjs "$version" notes.md
+          node scripts/latest-json.mjs "$version" "$url" "release/$setup.sig" release/latest.json notes.md
+          cd release
+          sha256sum "$setup" "floawty-$version-portable.exe" "$setup.sig" latest.json > SHA256SUMS.txt
+          sha256sum -c SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      # gh uploads every file first and publishes the release after the last one.
+      - name: Publish the release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          case "$version" in
+            *-rc.*) kind=--prerelease ;;
+            *) kind=--latest ;;
+          esac
+          gh release create "$GITHUB_REF_NAME" release/* --verify-tag "$kind" \
+            --title "floawty $version" --notes-file notes.md
