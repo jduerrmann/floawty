@@ -88,5 +88,5 @@ update as a hint.
   work is a mutex, an event and two threads; the 49 ms were not traced further.
 
 ## Resume here
-Done and measured on `feat/rel-04-automatic-updates`. Next: the `overlay.rs` split, then
-rel-06.
+Done, measured and merged (74900af). `overlay.rs` is split into `overlay.rs` and
+`overlay/state.rs` (293 and 135 counted lines). Next: rel-06.
