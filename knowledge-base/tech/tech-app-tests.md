@@ -4,7 +4,7 @@ area: process
 tags: [tests, playwright, test-input, measurement]
 status: active
 created: 2026-11-24
-updated: 2026-11-27
+updated: 2026-11-28
 source: plan [[plan-quiet-tests]]
 ---
 
@@ -41,7 +41,8 @@ take neither the maintainer's mouse, keyboard nor screen. Rules: AGENTS.md rule 
   line `pid N` (with `--report-start` then `started MS`), commands `hotkey`, `hold`,
   `release`, `cursor X Y|none`, `button left|right down|up`,
   `foreground main|sign-in|other|none`, `counts` (`send_input`, `shell_execute`,
-  `drag`), `children`, `quit`; every command gets one `ok …` or `error …`.
+  `drag`), `last-shell` (file and parameters of the last swallowed `ShellExecuteW`),
+  `children`, `quit`; every command gets one `ok …` or `error …`.
 - **Shim** patches floawty.exe's import table (11 hooks): `RegisterHotKey`,
   `UnregisterHotKey` (a run-wide table, refused like Windows refuses duplicates),
   `SendInput`, `ShellExecuteW` (swallowed, counted), `CreateProcessW` (restarts get
@@ -51,7 +52,7 @@ take neither the maintainer's mouse, keyboard nor screen. Rules: AGENTS.md rule 
   (`WM_NCLBUTTONDOWN`/`HTCAPTION` swallowed and counted as a drag request).
 - **Tests side**: every start goes through `startFloawty` / `launch()` in
   `tests/app.ts`; `RunningApp` offers `hotkey`, `point`, `pointAway`, `click`,
-  `press`, `release`, `foreground`, `children`, `counts` – hidden through the launcher
+  `press`, `release`, `foreground`, `children`, `counts`, `lastShell` – hidden through the launcher
   (`tests/app-input.ts`), visible through real input (`visibleInput` in
   `tests/real-input.ts`). A spec that imports `tests/real-input.ts` itself carries
   `@real`; the tag scan (`tests/tag-scan.ts`, in Vitest) fails a mismatch. The `@real`
@@ -63,7 +64,8 @@ take neither the maintainer's mouse, keyboard nor screen. Rules: AGENTS.md rule 
   portable copy, an installed copy (bundle-type marker patched to NSIS, as the bundler
   does) and a signed payload plus a signature over other bytes. `tests/update.spec.ts`
   serves them (hidden only: the shim swallows the setup start and the release page)
-  and checks the saved setup in its own `TEMP`; `launch()` takes `exe`, `env` and
+  and checks the saved setup in its own `TEMP` (helpers in `tests/update-server.ts`,
+  also for `tests/auto-update.spec.ts`); `launch()` takes `exe`, `env` and
   `allowedOpens` for it. `FLOAWTY_TEST_EXE` does not reach these tests; a hidden run
   refuses an update-test build older than `target/release/floawty.exe`.
 - **Measurements** (`tests/measure/budgets.spec.ts`): hidden, medians over 60 s with

@@ -32,6 +32,7 @@ pub fn handle(shared: &Shared, outside: &Outside, line: &str) -> Handled {
             quit: true,
         },
         Command::Counts => replied(protocol::counts_reply(&shared.counts())),
+        Command::LastShell => replied(protocol::ok(&shared.last_shell().unwrap_or_default())),
         Command::Children => {
             let failure = shared.child_error();
             replied(protocol::children_reply(

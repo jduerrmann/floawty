@@ -34,7 +34,7 @@ const TEXTS: [string, MessageKey][] = [
   ['shorts-hold-label', 'shortsHoldOnHover'],
   ['portrait-size-label', 'portraitSize'],
   ['update-check-label', 'updateCheck'],
-  ['update-check-note', 'updateCheckLater'],
+  ['update-check-note', 'updateCheckNote'],
   ['graphics-acceleration-label', 'graphicsAcceleration'],
   ['graphics-acceleration-note', 'graphicsAccelerationNote'],
   ['restart-question', 'restartQuestion'],
@@ -195,7 +195,7 @@ export function startSettingsPanel(state: OverlayState, language: Language): Sta
     language,
     wireGraphicsAcceleration(() => latest),
   );
-  startUpdates(language);
+  const showUpdates = startUpdates(language);
   element('settings-done').addEventListener('click', close);
   panel.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && !event.defaultPrevented) close();
@@ -221,5 +221,6 @@ export function startSettingsPanel(state: OverlayState, language: Language): Sta
     showValues(next);
     showHotkeys(next.hotkeys);
     showImported();
+    showUpdates(next);
   };
 }

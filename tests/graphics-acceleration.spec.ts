@@ -73,23 +73,3 @@ for (const on of [true, false]) {
     }
   });
 }
-
-test('a second floawty with other arguments logs why it cannot start', async () => {
-  const profile = freshProfile();
-  const page = await servePage();
-  writeSettings(profile, true, page.url);
-  const first = await start(profile);
-  let second: Floawty | undefined;
-  try {
-    await expect.poll(page.requests, { timeout: 15_000 }).toBeGreaterThan(0);
-    writeSettings(profile, false, page.url);
-    second = await start(profile);
-    await expect
-      .poll(() => logOf(profile), { timeout: 15_000 })
-      .toContain('could not create the main window');
-  } finally {
-    await second?.stop();
-    await first.stop();
-    page.server.close();
-  }
-});

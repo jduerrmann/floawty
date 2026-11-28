@@ -4,7 +4,7 @@ area: dist
 tags: [updates, dependency, privacy]
 status: active
 created: 2026-11-20
-updated: 2026-11-27
+updated: 2026-11-28
 source: visual plan "Phase 3 – Release-Pipeline", rounds 1–2
 ---
 
@@ -28,7 +28,9 @@ automatic if wished, and by hand.
   a check at start and every 24 h, download in the background, install in passive
   mode when the user quits floawty (not on its own restarts, not at shutdown); never
   during playback. After an install on quit floawty stays closed; the next start runs
-  the new version (maintainer, 2026-11-27: `restart_after_install(false)`).
+  the new version (maintainer, 2026-11-27: `restart_after_install(false)`). Turning
+  "Update automatically" off drops a downloaded update (rel-04). Windows' shutdown
+  never installs: tao ends the process on `WM_ENDSESSION` without a close request.
 - The portable build cannot update itself: the same check shows the new version and
   opens the release page.
 - Updates are signed with an updater key; the private key and its password live in

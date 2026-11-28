@@ -1,6 +1,7 @@
 //! floawty: streaming services in a small always-on-top overlay.
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod auto_update;
 mod awake;
 mod bar;
 mod commands;
@@ -24,6 +25,7 @@ mod service;
 mod settings;
 mod sign_in;
 mod sign_in_window;
+mod single_instance;
 mod theme;
 mod transfer;
 mod updates;
@@ -108,8 +110,21 @@ fn setup(app: &AppHandle, webview: &str) -> tauri::Result<()> {
     hotkeys::register(app, &settings.hotkeys);
     add_bar_and_last_service(app, settings.last_service);
 
+    watch_main_window(app);
+    single_instance::listen(app);
+    auto_update::start(app);
+    Ok(())
+}
+
+// Closing the window is the user's quit; Windows' shutdown never sends it (tao ends the process).
+fn watch_main_window(app: &AppHandle) {
     let handle = app.clone();
     overlay::main_window(app).on_window_event(move |event| {
+        if let WindowEvent::CloseRequested { api, .. } = event {
+            api.prevent_close();
+            updates::quit(&handle);
+            return;
+        }
         if matches!(event, WindowEvent::Resized(_)) && fullscreen::undo_unwanted(&handle) {
             return;
         }
@@ -120,10 +135,11 @@ fn setup(app: &AppHandle, webview: &str) -> tauri::Result<()> {
             let _ = bar::fit(&handle);
         }
     });
-    Ok(())
 }
 
 fn main() {
+    // First, before any window or WebView2: a second floawty ends here.
+    let guard = single_instance::claim();
     let Some(webview) = distribution::installed_webview(tauri::webview_version().ok()) else {
         distribution::explain_missing_webview();
         return;
@@ -166,7 +182,10 @@ fn main() {
             updates::install_update,
             updates::open_release_page
         ])
-        .setup(move |app| Ok(setup(app.handle(), &webview)?))
+        .setup(move |app| {
+            app.manage(guard);
+            Ok(setup(app.handle(), &webview)?)
+        })
         .run(tauri::generate_context!())
         .expect("error while running floawty");
 }

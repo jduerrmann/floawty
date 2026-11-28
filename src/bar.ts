@@ -6,6 +6,7 @@ import { createClickThroughIndicator } from './click-through';
 import { t, type Language, type MessageKey } from './i18n';
 import { services } from './services';
 import { preferencesOf, startWithState, type OverlayState, type StateView } from './state';
+import { updateDot } from './update-view';
 
 const controls = document.getElementById('controls') as HTMLElement;
 
@@ -107,6 +108,7 @@ function showControls(language: Language, state: OverlayState): void {
   button('zoom').setAttribute('aria-pressed', String(state.zoom));
   label(button('mode'), language, floaty ? 'toWindowMode' : 'toFloatyView');
   button('settings').setAttribute('aria-pressed', String(state.settingsOpen));
+  button('settings').classList.toggle('update-found', updateDot(state));
 }
 
 let reportedWidth = 0;

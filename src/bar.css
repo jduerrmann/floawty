@@ -183,11 +183,13 @@ body {
   background: color-mix(in srgb, var(--accent) 26%, transparent);
 }
 
-.controls button.problem {
+.controls button.problem,
+.controls button.update-found {
   position: relative;
 }
 
-.controls button.problem::after {
+.controls button.problem::after,
+.controls button.update-found::after {
   position: absolute;
   top: 3px;
   right: 3px;

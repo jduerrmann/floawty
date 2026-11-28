@@ -13,6 +13,8 @@ pub enum Command {
     Foreground(Foreground),
     Counts,
     Children,
+    /// What floawty last asked `ShellExecuteW` to open.
+    LastShell,
     Quit,
 }
 
@@ -24,6 +26,7 @@ pub fn parse_command(line: &str) -> Result<Command, String> {
         "" => Err("empty command".into()),
         "counts" => Ok(Command::Counts),
         "children" => Ok(Command::Children),
+        "last-shell" => Ok(Command::LastShell),
         "quit" => Ok(Command::Quit),
         "hotkey" => with_hotkey(name, argument, Command::Hotkey),
         "hold" => with_hotkey(name, argument, Command::Hold),
@@ -138,6 +141,7 @@ mod tests {
         );
         assert_eq!(parse_command("counts"), Ok(Command::Counts));
         assert_eq!(parse_command("children"), Ok(Command::Children));
+        assert_eq!(parse_command("last-shell"), Ok(Command::LastShell));
         assert_eq!(parse_command("quit"), Ok(Command::Quit));
     }
 

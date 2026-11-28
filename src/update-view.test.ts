@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { updateView } from './update-view';
+import { automaticUpdate, updateDot, updateView } from './update-view';
 
 describe('updateView', () => {
   it('shows nothing special before the first click', () => {
@@ -79,5 +79,48 @@ describe('updateView', () => {
 
   it('treats an unknown problem code as a failure', () => {
     expect(updateView({ kind: 'problem', code: 'busy' }).status).toBe('updateFailed');
+  });
+});
+
+describe('the automatic update', () => {
+  it('says an update installs when floawty quits', () => {
+    expect(updateView({ kind: 'onQuit', version: '0.1.1' })).toEqual({
+      status: 'updateOnQuit',
+      vars: { version: '0.1.1' },
+      showInstall: false,
+      showReleasePage: false,
+      checkDisabled: false,
+    });
+  });
+
+  it('shows nothing automatic while no update was found', () => {
+    expect(automaticUpdate({ updateFound: null, updateReady: false, portable: false })).toBeNull();
+  });
+
+  it('shows the release page for a found update in the portable build', () => {
+    expect(automaticUpdate({ updateFound: '0.1.1', updateReady: false, portable: true })).toEqual({
+      kind: 'available',
+      version: '0.1.1',
+      installed: false,
+    });
+  });
+
+  it('says it installs on quit once the installed build has downloaded the update', () => {
+    expect(automaticUpdate({ updateFound: '0.1.1', updateReady: true, portable: false })).toEqual({
+      kind: 'onQuit',
+      version: '0.1.1',
+    });
+  });
+
+  it('shows nothing while the installed build still downloads', () => {
+    expect(
+      automaticUpdate({ updateFound: '0.1.1', updateReady: false, portable: false }),
+    ).toBeNull();
+  });
+
+  it('puts a dot on the settings button only for a found update in the portable build', () => {
+    expect(updateDot({ updateFound: '0.1.1', portable: true })).toBe(true);
+    expect(updateDot({ updateFound: '0.1.1', portable: false })).toBe(false);
+    expect(updateDot({ updateFound: null, portable: true })).toBe(false);
   });
 });

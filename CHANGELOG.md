@@ -6,6 +6,11 @@ User-facing changes, in plain language. Format based on
 
 ## [Unreleased]
 
+- "Update automatically" (off by default) checks GitHub at start and once a day. The
+  installed floawty downloads a found update in the background and installs it when
+  you quit; the portable build shows it with a dot on the settings button.
+- Starting floawty while it already runs brings the open window to the front instead
+  of a second floawty.
 - Settings → Data can export your settings, own tiles and hotkeys to a file and import
   them on another PC. Sign-ins never go into the file. A file from a newer floawty or
   a damaged one changes nothing and says why.
