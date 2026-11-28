@@ -1,6 +1,8 @@
 # A tag vX.Y.Z or vX.Y.Z-rc.N on main builds, checks, signs the updater files and publishes the
-# release. Run by hand (workflow_dispatch) it builds and smoke-tests only: nothing is signed or
-# published. Steps: knowledge-base/decisions/release-pipeline.md, CONTRIBUTING.md "Releases".
+# release. Run by hand (workflow_dispatch) it builds and installs only: nothing is signed or
+# published. No app test runs here: WebView2 opens no window on the runner, hidden or visible
+# (rel-01, rel-06 dry run), so the CI-built rc setup is smoke-tested locally before a stable tag.
+# Steps: knowledge-base/decisions/release-pipeline.md, CONTRIBUTING.md "Releases".
 name: Release
 
 on:
@@ -18,7 +20,7 @@ concurrency:
 jobs:
   build:
     runs-on: windows-latest
-    timeout-minutes: 45
+    timeout-minutes: 30
     steps:
       # The whole history, so the tag can be checked against main.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -76,12 +78,6 @@ jobs:
           if ($install.ExitCode -ne 0) { throw "setup ended with $($install.ExitCode)" }
           $exe = Join-Path $env:LOCALAPPDATA 'floawty\floawty.exe'
           if (-not (Test-Path $exe)) { throw "setup did not install $exe" }
-          "FLOAWTY_TEST_EXE=$exe" >> $env:GITHUB_ENV
-
-      # Visible on the runner's desktop: WebView2 gets no window on a hidden one (rel-01).
-      - run: npm run build:test-input
-      - name: Smoke test on the installed floawty
-        run: npm run smoke -- tests/smoke.spec.ts
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

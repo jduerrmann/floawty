@@ -19,8 +19,9 @@ the NSIS setup configured in `src-tauri/tauri.conf.json` (`bundle`), and writes
 secrets, no build cache): `scripts/release-check.mjs` (tag on `main`, the versions in
 `package.json`, its lockfile, `Cargo.toml`, `Cargo.lock` and `tauri.conf.json`, a
 CHANGELOG section, a non-empty updater key), `npm run check`, `build:release`, the
-setup's file list (fails on the test launcher or shim), a silent install and
-`tests/smoke.spec.ts` visible against `%LOCALAPPDATA%\floawty\floawty.exe`. Job
+setup's file list (fails on the test launcher or shim) and a silent install into
+`%LOCALAPPDATA%\floawty`. No app test runs there: WebView2 opens no window on the
+runner, hidden or visible, so the rc setup is smoke-tested locally (CONTRIBUTING). Job
 `publish` (environment `release`, `contents: write`, GitHub's own actions only): `tauri
 signer sign --app-version`, `scripts/latest-json.mjs`, `scripts/changelog-section.mjs`,
 `SHA256SUMS.txt`, then `gh release create`, which publishes after the last upload; rc

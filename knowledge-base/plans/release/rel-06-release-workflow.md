@@ -80,15 +80,20 @@ with the CHANGELOG section once every asset is attached.
   number. For rel-07: nothing checks that the secret key matches the pubkey until the
   rc.1 → rc.2 update. Open: the build timeout (45 min) and the smoke fallback follow
   the dry run.
-
 - Maintainer, 2026-11-28: updater key pair made (minisign key id 074781627943610E), the
   public key is in `tauri.conf.json`; environment `release` with a tag rule `v*` and both
   secrets, tag ruleset `release tags` on `v*` (creation, update, deletion, force push;
   admin bypass), all read back with `gh api`. `release-check v0.1.0` now reports only
   the missing `[0.1.0]` section.
+- Dry run 46138104423 on `main` 344a90c (2026-11-28): check, lockfiles, `build:release`,
+  7z listing (`Type = Nsis`; `floawty.exe`, `uninstall.exe`, NSIS plugins only) and the
+  silent install green; the visible smoke test failed, "WebView2 debug port did not
+  open" after 15 s. Maintainer chose the fallback: the smoke step left the workflow,
+  CONTRIBUTING has the local check of the rc setup (download, install, `smoke:hidden`
+  with `FLOAWTY_TEST_EXE`). Build job 13.5 min uncached, timeout now 30 min. CI on the
+  same push green, its bundle job 5 min.
 
 ## Resume here
-Committed on `feat/rel-06-release-workflow`. Next, each needing the maintainer: merge
-and push `main`, a dry run (`gh workflow run release.yml`: does the visible smoke test
-run on the runner, does 7z list the setup, how long?), then tag `v0.1.0-rc.1` with
-versions and a CHANGELOG section bumped to the rc.
+Workflow proven up to the install. Next: tag `v0.1.0-rc.1` (versions and a CHANGELOG
+section bumped to the rc, maintainer's explicit request), which runs `publish` for the
+first time; then the local check of its setup. Package done after that run.
