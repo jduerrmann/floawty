@@ -4,7 +4,7 @@ area: window
 tags: [overlay, settings, hotkeys, logging]
 status: active
 created: 2026-11-17
-updated: 2026-11-27
+updated: 2026-11-28
 source: mvp-02 implementation, mvp-05
 ---
 
@@ -77,6 +77,7 @@ wiring talks to Tauri and Win32.
 | `persistence.rs` | `%APPDATA%\floawty\settings.json`, atomic write (temp + rename), keeps broken (`.broken`, also one wrong type) and newer (`.newer`) files; unknown keys survive a save (`Settings.extra`) | unit (temp dir) |
 | `mode.rs` | `Mode` (floaty / window), switch and remember geometry per mode | unit |
 | `overlay.rs` | place and show in the saved mode, mode style (decorations, on top), layered-window opacity, click-through, hide/show, settle 250 ms after the last move/resize, not before the mouse button is up (floaty: aspect, back onto the work area, snap; both: save) | Win32 check scripts |
+| `overlay/state.rs` | `Overlay`, what the main window knows besides its geometry (settings, click-through, open settings, aspect and turn, page problems, the opening service, the found update) and the `OverlayState` both pages get | via the app tests |
 | `hotkeys.rs` | registers the hotkeys from the settings (default Ctrl+Alt+Shift + O / D / ↑ / ↓ / F / Space / V / Z / T), changes one at once, pauses all while recording | unit, check scripts |
 | `logbook.rs` | `%APPDATA%\floawty\logs\floawty.log`, UTC timestamps | unit |
 | `bar.rs`, `hover.rs`, `reset.rs` | the bar over the service, hover, reset all data | [[tech-bar-and-settings]] |
