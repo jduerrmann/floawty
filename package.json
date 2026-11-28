@@ -1,6 +1,6 @@
 {
   "name": "floawty",
-  "version": "0.1.0",
+  "version": "0.1.0-rc.1",
   "private": true,
   "description": "Watch streaming services in a small always-on-top overlay",
   "license": "GPL-3.0-only",

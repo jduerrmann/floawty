@@ -6,6 +6,8 @@ User-facing changes, in plain language. Format based on
 
 ## [Unreleased]
 
+## [0.1.0-rc.1] - 2026-11-28
+
 - "Update automatically" (off by default) checks GitHub at start and once a day. The
   installed floawty downloads a found update in the background and installs it when
   you quit; the portable build shows it with a dot on the settings button.
