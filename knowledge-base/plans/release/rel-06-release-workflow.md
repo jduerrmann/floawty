@@ -1,9 +1,9 @@
 ---
 type: plan
 tags: [package, release, dist]
-status: planned
+status: in-progress
 created: 2026-11-20
-updated: 2026-11-27
+updated: 2026-11-28
 source: visual plan "Phase 3 – Release-Pipeline", approved 2026-11-20; advisor review
 ---
 
@@ -59,5 +59,36 @@ with the CHANGELOG section once every asset is attached.
 ## Checks
 - `npm run verify`; one full `v0.1.0-rc.1` run.
 
+## Evidence (2026-11-28)
+- `release.yml` (lead): job `build` without secrets or build cache, job `publish` in
+  environment `release` with `contents: write` and only GitHub's own actions;
+  `workflow_dispatch` runs `build` alone as a dry run. `ci.yml` builds portable and
+  setup on pushes to `main`. Exe path for the tests was already `FLOAWTY_TEST_EXE`.
+- `scripts/release-check.mjs` and `scripts/changelog-section.mjs` by `coder` from a
+  brief, tests first (20 Vitest cases); lead read the code. Against the repo today:
+  exactly "no `## [0.1.0]` section" and "pubkey empty".
+- NSIS bundles `0.1.0-rc.1` (local build, 2026-11-28); `tests/smoke.spec.ts` accepts
+  an rc version and passes hidden. `npm run check` green.
+- Independent review by `advisor`. Must-fix resolved: an unquoted `'push'` in
+  `ci.yml` would have rejected the whole CI file. Resolved: the sign step calls the
+  Tauri CLI by path (no registry fetch next to the key); the setup listing must show
+  `Type = Nsis` and `floawty.exe`; `package-manager-cache: false`; a test for a table
+  before `[package]`; CONTRIBUTING names the tag ruleset, the tag-type environment
+  rule, folding rc sections into `[X.Y.Z]` and deleting a draft after a failed publish.
+  Accepted: the dry run skips the tag check and `publish`, so signing, `latest.json`
+  and `gh release create` first run on `v0.1.0-rc.1`, and a failure there costs an rc
+  number. For rel-07: nothing checks that the secret key matches the pubkey until the
+  rc.1 → rc.2 update. Open: the build timeout (45 min) and the smoke fallback follow
+  the dry run.
+
+- Maintainer, 2026-11-28: updater key pair made (minisign key id 074781627943610E), the
+  public key is in `tauri.conf.json`; environment `release` with a tag rule `v*` and both
+  secrets, tag ruleset `release tags` on `v*` (creation, update, deletion, force push;
+  admin bypass), all read back with `gh api`. `release-check v0.1.0` now reports only
+  the missing `[0.1.0]` section.
+
 ## Resume here
-Not started; waits for rel-01 to rel-03.
+Committed on `feat/rel-06-release-workflow`. Next, each needing the maintainer: merge
+and push `main`, a dry run (`gh workflow run release.yml`: does the visible smoke test
+run on the runner, does 7z list the setup, how long?), then tag `v0.1.0-rc.1` with
+versions and a CHANGELOG section bumped to the rc.

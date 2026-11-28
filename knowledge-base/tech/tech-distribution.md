@@ -4,8 +4,8 @@ area: dist
 tags: [release, installer, portable, webview2]
 status: active
 created: 2026-11-26
-updated: 2026-11-26
-source: rel-02 implementation
+updated: 2026-11-28
+source: rel-02 and rel-06 implementation
 ---
 
 # Distribution: setup, portable build, WebView2 check
@@ -14,6 +14,18 @@ source: rel-02 implementation
 the NSIS setup configured in `src-tauri/tauri.conf.json` (`bundle`), and writes
 `release\floawty-X.Y.Z-setup.exe` and `release\floawty-X.Y.Z-portable.exe`.
 `npm run build` stays `--no-bundle` for the app tests. Decision: [[release-pipeline]].
+
+`.github/workflows/release.yml` runs on a tag `vX.Y.Z` or `vX.Y.Z-rc.N`. Job `build` (no
+secrets, no build cache): `scripts/release-check.mjs` (tag on `main`, the versions in
+`package.json`, its lockfile, `Cargo.toml`, `Cargo.lock` and `tauri.conf.json`, a
+CHANGELOG section, a non-empty updater key), `npm run check`, `build:release`, the
+setup's file list (fails on the test launcher or shim), a silent install and
+`tests/smoke.spec.ts` visible against `%LOCALAPPDATA%\floawty\floawty.exe`. Job
+`publish` (environment `release`, `contents: write`, GitHub's own actions only): `tauri
+signer sign --app-version`, `scripts/latest-json.mjs`, `scripts/changelog-section.mjs`,
+`SHA256SUMS.txt`, then `gh release create`, which publishes after the last upload; rc
+tags become pre-releases. `workflow_dispatch` runs `build` only. `ci.yml` builds
+portable and setup on every push to `main`. Steps for the maintainer: CONTRIBUTING.md.
 
 ## Invariants
 - No admin rights: the setup installs per user (`installMode: currentUser`) into the

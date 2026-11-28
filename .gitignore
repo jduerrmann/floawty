@@ -21,6 +21,7 @@ spikes/**/target/
 !.env.example
 *.pfx
 *.p12
+*.key
 
 # Logs
 *.log

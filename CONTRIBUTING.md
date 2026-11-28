@@ -62,3 +62,48 @@ npm run smoke:real  # the few tests that need your real mouse (before a release)
 | `tests/` | Playwright tests, driven over WebView2's debug port |
 
 Logs are written to `%APPDATA%\floawty\logs\floawty.log` and never leave your PC.
+
+## Releases (maintainer)
+
+GitHub Actions builds every release from a tag (`.github/workflows/release.yml`), never
+a laptop ([release-pipeline](knowledge-base/decisions/release-pipeline.md)).
+
+1. On `main`, set the version everywhere: `npm version X.Y.Z --no-git-tag-version`
+   (package.json and its lockfile), `version` in `src-tauri/Cargo.toml` (then
+   `cargo check --manifest-path src-tauri/Cargo.toml` updates `Cargo.lock`) and in
+   `src-tauri/tauri.conf.json`. Move the `[Unreleased]` lines of `CHANGELOG.md` under
+   `## [X.Y.Z] - YYYY-MM-DD`. A release candidate uses `X.Y.Z-rc.N` in all of these and
+   its own section; at the stable tag the rc sections fold into `[X.Y.Z]`, which then
+   lists everything since the last stable release.
+2. Locally: `npm run verify`, `npm run smoke:real` and the live checks on the services.
+3. Commit, push `main`, then push the tag: `git tag vX.Y.Z` and
+   `git push origin vX.Y.Z`.
+
+The workflow stops before building when the tag is not on `main`, a version or the
+CHANGELOG section does not match, or the updater key in `tauri.conf.json` is empty.
+It then runs `npm run check`, builds, lists the setup's files, installs the setup
+silently and runs the smoke test on the installed floawty. Only then does the
+`publish` job sign the setup for the updater (bound to the version), write
+`latest.json` and `SHA256SUMS.txt`, and publish the release with the CHANGELOG
+section. A `-rc.N` tag becomes a pre-release, which the updater never sees (it asks
+for `/releases/latest`). **Actions → Release → Run workflow** on a branch builds and
+smoke-tests without signing or publishing. If `publish` fails after it started, delete
+the draft release it may leave (`gh release delete vX.Y.Z`, keeping the tag) and re-run
+the failed job.
+
+The updater key pair is made once: `npx tauri signer generate -w <path outside the
+repo>` with a password. The public key goes into `plugins.updater.pubkey`; the
+private key file's content and the password go into the secrets
+`TAURI_SIGNING_PRIVATE_KEY` and `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` of the
+environment `release`, whose deployment rule allows tags (not branches) matching
+`v*`. A tag ruleset on `v*` lets only the maintainer create, move or delete such tags,
+as any tag that starts the workflow reaches the key. Keep both in a password manager
+with a backup: without the key, installed floawtys cannot update any more.
+
+### Pulling a bad release
+
+1. Turn it into a pre-release, so the updater offers the previous version again:
+   `gh release edit vX.Y.Z --prerelease`, then `gh release edit vPREVIOUS --latest`.
+2. Put a line at the top of its release text saying what is wrong.
+3. Fix it and release `X.Y.Z+1`. Never reuse a version or move a tag: floawtys that
+   already updated install only a newer version.
