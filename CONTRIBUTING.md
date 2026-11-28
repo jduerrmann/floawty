@@ -76,18 +76,27 @@ a laptop ([release-pipeline](knowledge-base/decisions/release-pipeline.md)).
    its own section; at the stable tag the rc sections fold into `[X.Y.Z]`, which then
    lists everything since the last stable release.
 2. Locally: `npm run verify`, `npm run smoke:real` and the live checks on the services.
+   Before a stable tag, also the app tests on the CI-built setup of the last rc, as
+   GitHub's runner cannot open floawty's window:
+
+   ```powershell
+   gh release download vX.Y.Z-rc.N --pattern '*-setup.exe' --dir "$env:TEMP\floawty-rc"
+   Start-Process (Get-Item "$env:TEMP\floawty-rc\*-setup.exe").FullName -ArgumentList '/S' -Wait
+   $env:FLOAWTY_TEST_EXE = "$env:LOCALAPPDATA\floawty\floawty.exe"; npm run smoke:hidden
+   ```
+
 3. Commit, push `main`, then push the tag: `git tag vX.Y.Z` and
    `git push origin vX.Y.Z`.
 
 The workflow stops before building when the tag is not on `main`, a version or the
 CHANGELOG section does not match, or the updater key in `tauri.conf.json` is empty.
-It then runs `npm run check`, builds, lists the setup's files, installs the setup
-silently and runs the smoke test on the installed floawty. Only then does the
+It then runs `npm run check`, builds, lists the setup's files and installs the setup
+silently. Only then does the
 `publish` job sign the setup for the updater (bound to the version), write
 `latest.json` and `SHA256SUMS.txt`, and publish the release with the CHANGELOG
 section. A `-rc.N` tag becomes a pre-release, which the updater never sees (it asks
 for `/releases/latest`). **Actions → Release → Run workflow** on a branch builds and
-smoke-tests without signing or publishing. If `publish` fails after it started, delete
+installs without signing or publishing. If `publish` fails after it started, delete
 the draft release it may leave (`gh release delete vX.Y.Z`, keeping the tag) and re-run
 the failed job.
 
